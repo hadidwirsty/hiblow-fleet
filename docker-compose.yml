@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: hiblow-fleet-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-hiblow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hiblow_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-hiblow_db}
+    ports:
+      - "5433:5432"
+    volumes:
+      - hiblow_pgdata:/var/lib/postgresql/data
+
+volumes:
+  hiblow_pgdata:
+    driver: local
