@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { RiAddLine, RiTruckLine } from "@remixicon/react"
+import { RiAddLine } from "@remixicon/react"
 
 import {
   Breadcrumb,
@@ -31,10 +31,13 @@ export function SiteHeader() {
   const segments = pathname.split("/").filter(Boolean)
 
   return (
-    <header className="sticky top-0 z-10 flex h-(--header-height) shrink-0 items-center justify-between border-b border-sidebar-border bg-background/95 px-4 backdrop-blur transition-[width,height] ease-linear">
-      <div className="flex items-center gap-2">
+    <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
+      <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
         <SidebarTrigger className="-ml-1" />
-        <Separator orientation="vertical" className="mr-2 h-4" />
+        <Separator
+          orientation="vertical"
+          className="mx-2 data-[orientation=vertical]:h-4"
+        />
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem className="hidden md:block">
@@ -67,23 +70,22 @@ export function SiteHeader() {
             })}
           </BreadcrumbList>
         </Breadcrumb>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <div className="hidden items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600 sm:flex dark:text-emerald-400">
-          <span className="size-2 animate-pulse rounded-full bg-emerald-500" />
-          <span>2 Armada Aktif</span>
+        <div className="ml-auto flex items-center gap-2">
+          <div className="hidden items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600 sm:flex dark:text-emerald-400">
+            <span className="size-2 animate-pulse rounded-full bg-emerald-500" />
+            <span>2 Armada Aktif</span>
+          </div>
+          <Link
+            href="/trips"
+            className={buttonVariants({
+              size: "sm",
+              className: "h-8 gap-1 text-xs shadow-xs",
+            })}
+          >
+            <RiAddLine className="size-3.5" />
+            <span className="hidden sm:inline">Order Ritase</span>
+          </Link>
         </div>
-        <Link
-          href="/trips"
-          className={buttonVariants({
-            size: "sm",
-            className: "h-8 gap-1 text-xs shadow-xs",
-          })}
-        >
-          <RiAddLine className="size-3.5" />
-          <span className="hidden sm:inline">Order Ritase</span>
-        </Link>
       </div>
     </header>
   )

@@ -42,7 +42,7 @@ export default async function TripsPage({ searchParams }: TripsPageProps) {
   ])
 
   return (
-    <div className="flex flex-col gap-6 py-6 md:gap-8 md:py-8">
+    <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
       {/* Page Title & Action Controls Bar */}
       <div className="flex flex-col gap-4 px-4 sm:flex-row sm:items-center sm:justify-between lg:px-6">
         <div className="space-y-1">
