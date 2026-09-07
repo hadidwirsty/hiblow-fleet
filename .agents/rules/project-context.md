@@ -155,55 +155,18 @@ hiblow-fleet/
 │   ├── hiblow-project-summary.md       # Human-readable project overview
 │   └── references/
 │       └── PERHITUNGAN HIBLOW HW Trans.xlsx # Canonical source spreadsheet
-├── src/
-│   ├── app/                            # Next.js App Router
-│   │   ├── (auth)/
-│   │   │   ├── login/
-│   │   │   └── layout.tsx
-│   │   ├── (dashboard)/
-│   │   │   ├── layout.tsx              # Shell with navigation sidebar
-│   │   │   ├── page.tsx                # Dashboard analytics
-│   │   │   ├── trips/                  # Trip management page & actions
-│   │   │   ├── expenses/               # Expense management page & actions
-│   │   │   ├── rates/                  # Rate reference lookup & management
-│   │   │   └── profit-sharing/         # Profit sharing periods & shares
-│   │   ├── api/
-│   │   │   └── auth/[...all]/route.ts  # Better Auth route handler
-│   │   ├── layout.tsx
-│   │   └── globals.css
-│   ├── components/
-│   │   └── ui/                         # shadcn/ui primitives
-│   ├── db/                             # Database & ORM
-│   │   ├── schema/                     # Drizzle table schemas
-│   │   │   ├── trucks.ts
-│   │   │   ├── rates.ts
-│   │   │   ├── trips.ts
-│   │   │   ├── expenses.ts
-│   │   │   ├── profit-sharing.ts
-│   │   │   └── auth.ts
-│   │   ├── migrations/                 # Drizzle generated SQL migrations
-│   │   └── index.ts                    # Drizzle client instance
-│   ├── domain/                         # Pure Business Logic (Testability-First)
-│   │   ├── calculators/                # 100% unit-tested mathematical formulas
-│   │   │   ├── omset.ts
-│   │   │   ├── sangu.ts
-│   │   │   ├── trip-profit.ts
-│   │   │   ├── profit-sharing.ts
-│   │   │   └── index.ts
-│   │   └── __tests__/                  # Unit tests for Excel formula parity
-│   │       ├── sangu.test.ts
-│   │       ├── trip-profit.test.ts
-│   │       └── profit-sharing.test.ts
-│   ├── features/                       # Feature-sliced components & actions
-│   │   ├── trips/
-│   │   ├── expenses/
-│   │   ├── rates/
-│   │   └── profit-sharing/
-│   └── lib/                            # Shared utilities & configs
-├── docker-compose.yml                  # PostgreSQL container definition
-├── drizzle.config.ts                   # Drizzle Kit configuration
+├── app/                            # Next.js 16 App Router (dashboard, trips, api)
+├── components/                     # UI components (ui/), AppSidebar, SiteHeader, Charts
+├── db/                             # Drizzle ORM schema, migrations, seed, & db client
+├── domain/                         # Pure domain logic: calculators & formula parity tests
+├── features/                       # Feature modules (trips actions, queries, dialog, table)
+├── hooks/                          # Custom React hooks (use-mobile.ts)
+├── lib/                            # Shared utilities (utils.ts, auth.ts, rbac.ts, session.ts)
+├── types/                          # TypeScript definitions
+├── docker-compose.yml              # PostgreSQL container definition
+├── drizzle.config.ts               # Drizzle Kit configuration (target: ./db/schema)
 ├── package.json
-├── tsconfig.json
+├── tsconfig.json                   # Path alias tunggal "@/*": ["./*"]
 └── README.md
 ```
 

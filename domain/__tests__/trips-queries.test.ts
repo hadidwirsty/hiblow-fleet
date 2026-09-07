@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 // Mock the db module
-vi.mock("@/src/db", () => {
+vi.mock("@/db", () => {
   const dummyRows = [
     { totalTrips: 5, totalOmset: 10000000, totalProfit: 5000000 },
   ]

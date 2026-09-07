@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest"
 
-import { calculateOmset } from "@/src/domain/calculators/omset"
-import { calculateSangu } from "@/src/domain/calculators/sangu"
-import { calculateTripProfit } from "@/src/domain/calculators/trip-profit"
+import { calculateOmset } from "@/domain/calculators/omset"
+import { calculateSangu } from "@/domain/calculators/sangu"
+import { calculateTripProfit } from "@/domain/calculators/trip-profit"
 
 describe("Trip form live calculation integration", () => {
   it("calculates omset, sangu, and profit for standard SI Tuban route", () => {

@@ -18,7 +18,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { cn, formatCurrency } from "@/lib/utils"
-import type { rateReferences } from "@/src/db/schema"
+import type { rateReferences } from "@/db/schema"
 
 export type RateReferenceRecord = typeof rateReferences.$inferSelect
 

@@ -2,10 +2,10 @@
 
 import { revalidatePath } from "next/cache"
 
-import { db } from "@/src/db"
-import { trips } from "@/src/db/schema"
-import { assertAdmin } from "@/src/lib/rbac"
-import { getCurrentSession } from "@/src/lib/session"
+import { db } from "@/db"
+import { trips } from "@/db/schema"
+import { assertAdmin } from "@/lib/rbac"
+import { getCurrentSession } from "@/lib/session"
 
 import { createTripSchema } from "./trips.schema"
 import type { CreateTripInput } from "./trips.schema"

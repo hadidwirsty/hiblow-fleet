@@ -5,7 +5,7 @@ import {
   assertPartnerOrAdmin,
   isAdmin,
   isPartner,
-} from "@/src/lib/rbac"
+} from "@/lib/rbac"
 
 describe("RBAC helpers", () => {
   it("recognizes admin role correctly", () => {

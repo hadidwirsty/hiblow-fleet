@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { calculateSangu } from "@/src/domain/calculators/sangu"
+import { calculateSangu } from "@/domain/calculators/sangu"
 
 describe("calculateSangu", () => {
   it("calculates sangu within standard tonnage (< 31 tons)", () => {

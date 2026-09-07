@@ -1,7 +1,7 @@
 import { and, desc, eq, sql } from "drizzle-orm"
 
-import { db } from "@/src/db"
-import { rateReferences, trips } from "@/src/db/schema"
+import { db } from "@/db"
+import { rateReferences, trips } from "@/db/schema"
 
 export interface ListTripsFilter {
   truckId?: string
@@ -42,6 +42,7 @@ export interface TripsSummary {
   totalTrips: number
   totalOmset: number
   totalProfit: number
+  totalSangu: number
 }
 
 export async function getTripsSummary(
@@ -65,9 +66,12 @@ export async function getTripsSummary(
       totalTrips: sql<number>`count(*)::int`,
       totalOmset: sql<number>`coalesce(sum(${trips.omset}::numeric), 0)::float`,
       totalProfit: sql<number>`coalesce(sum(${trips.profit}::numeric), 0)::float`,
+      totalSangu: sql<number>`coalesce(sum(${trips.sangu}::numeric), 0)::float`,
     })
     .from(trips)
     .where(conditions.length > 0 ? and(...conditions) : undefined)
 
-  return result ?? { totalTrips: 0, totalOmset: 0, totalProfit: 0 }
+  return (
+    result ?? { totalTrips: 0, totalOmset: 0, totalProfit: 0, totalSangu: 0 }
+  )
 }

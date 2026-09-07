@@ -1,9 +1,4 @@
-import {
-  RiCoinsLine,
-  RiGasStationLine,
-  RiLineChartLine,
-  RiTruckLine,
-} from "@remixicon/react"
+"use client"
 
 import { Badge } from "@/components/ui/badge"
 import {
@@ -14,93 +9,83 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { formatCurrency } from "@/lib/utils"
+import {
+  RiArrowUpLine,
+  RiCheckLine,
+  RiGasStationLine,
+  RiMoneyDollarCircleLine,
+} from "@remixicon/react"
 
-import type { TripsSummary as TripsSummaryType } from "./trips.queries"
-
-interface TripsSummaryProps {
-  summary: TripsSummaryType
-}
-
-export function TripsSummary({ summary }: TripsSummaryProps) {
-  const profitMargin =
-    summary.totalOmset > 0
-      ? ((summary.totalProfit / summary.totalOmset) * 100).toFixed(1)
-      : "0.0"
-
-  const sanguRatio =
-    summary.totalOmset > 0
-      ? ((summary.totalSangu / summary.totalOmset) * 100).toFixed(1)
-      : "0.0"
-
+export function SectionCards() {
   return (
     <div className="grid grid-cols-1 gap-4 px-4 sm:grid-cols-2 lg:grid-cols-4 lg:px-6">
-      {/* 1. Total Ritase */}
+      {/* Card 1: Omset Ritase */}
       <Card className="flex h-full flex-col justify-between border-border bg-card/60 shadow-xs backdrop-blur-xs transition-all hover:border-primary/50">
         <CardHeader className="pb-2">
           <CardDescription className="text-xs font-medium text-muted-foreground">
-            Total Ritase Jalan
+            Omset Ritase Berjalan
           </CardDescription>
           <CardTitle className="text-2xl font-bold tracking-tight text-foreground tabular-nums">
-            {summary.totalTrips.toLocaleString("id-ID")} Rit
+            Rp 148.500.000
           </CardTitle>
           <CardAction>
             <Badge
               variant="outline"
-              className="gap-1 border-primary/30 bg-primary/10 text-xs font-medium text-primary"
+              className="gap-1 border-emerald-500/30 bg-emerald-500/10 text-xs font-medium text-emerald-600 dark:text-emerald-400"
             >
-              <RiTruckLine className="size-3" />
-              Surat Jalan
+              <RiArrowUpLine className="size-3" />
+              +14.2%
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1 pt-2 text-xs">
-          <div className="flex items-center gap-1.5 font-medium text-primary">
-            <span>Ritase tercatat di database</span>
+          <div className="flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400">
+            <span>Tren naik dibanding Mei</span>
+            <RiArrowUpLine className="size-3.5" />
           </div>
           <div className="text-muted-foreground">
-            Unit armada W 8187 UA & H 8133 OF
+            Akumulasi ritase PT Semen Indonesia & SBI
           </div>
         </CardFooter>
       </Card>
 
-      {/* 2. Total Omset */}
+      {/* Card 2: Ritase Selesai */}
       <Card className="flex h-full flex-col justify-between border-border bg-card/60 shadow-xs backdrop-blur-xs transition-all hover:border-primary/50">
         <CardHeader className="pb-2">
           <CardDescription className="text-xs font-medium text-muted-foreground">
-            Total Omset Bruto
+            Ritase Selesai
           </CardDescription>
           <CardTitle className="text-2xl font-bold tracking-tight text-foreground tabular-nums">
-            {formatCurrency(summary.totalOmset)}
+            42 Rit
           </CardTitle>
           <CardAction>
             <Badge
               variant="outline"
               className="gap-1 border-blue-500/30 bg-blue-500/10 text-xs font-medium text-blue-600 dark:text-blue-400"
             >
-              <RiCoinsLine className="size-3" />
-              Tagihan Pabrik
+              <RiCheckLine className="size-3" />
+              +8 rit
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1 pt-2 text-xs">
           <div className="flex items-center gap-1.5 font-medium text-blue-600 dark:text-blue-400">
-            <span>Pendapatan kotor sebelum potongan</span>
+            <span>Target 50 rit/bulan tercapai 84%</span>
           </div>
           <div className="text-muted-foreground">
-            Berdasarkan tonase & tarif master rute
+            W 8187 UA (24 rit) & H 8133 OF (18 rit)
           </div>
         </CardFooter>
       </Card>
 
-      {/* 3. Total Sangu Supir */}
+      {/* Card 3: Sangu Supir & Solar */}
       <Card className="flex h-full flex-col justify-between border-border bg-card/60 shadow-xs backdrop-blur-xs transition-all hover:border-primary/50">
         <CardHeader className="pb-2">
           <CardDescription className="text-xs font-medium text-muted-foreground">
-            Sangu Supir & Solar
+            Sangu Supir & Solar Jatah
           </CardDescription>
           <CardTitle className="text-2xl font-bold tracking-tight text-foreground tabular-nums">
-            {formatCurrency(summary.totalSangu)}
+            Rp 64.200.000
           </CardTitle>
           <CardAction>
             <Badge
@@ -108,45 +93,45 @@ export function TripsSummary({ summary }: TripsSummaryProps) {
               className="gap-1 border-amber-500/30 bg-amber-500/10 text-xs font-medium text-amber-600 dark:text-amber-400"
             >
               <RiGasStationLine className="size-3" />
-              {sanguRatio}% rasio
+              43.2%
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1 pt-2 text-xs">
           <div className="flex items-center gap-1.5 font-medium text-amber-600 dark:text-amber-400">
-            <span>Pengeluaran operasional langsung supir</span>
+            <span>Rasio pengeluaran operasional aman</span>
           </div>
           <div className="text-muted-foreground">
-            Termasuk solar jatah & sangu jalan
+            Total biaya jalan langsung supir & solar
           </div>
         </CardFooter>
       </Card>
 
-      {/* 4. Total Laba Bersih */}
+      {/* Card 4: Estimasi Laba Bersih */}
       <Card className="flex h-full flex-col justify-between border-border bg-card/60 shadow-xs backdrop-blur-xs transition-all hover:border-primary/50">
         <CardHeader className="pb-2">
           <CardDescription className="text-xs font-medium text-muted-foreground">
-            Laba Ritase Bersih
+            Estimasi Laba Berjalan
           </CardDescription>
-          <CardTitle className="text-2xl font-bold tracking-tight text-emerald-600 tabular-nums dark:text-emerald-400">
-            {formatCurrency(summary.totalProfit)}
+          <CardTitle className="text-2xl font-bold tracking-tight text-foreground tabular-nums">
+            Rp 84.300.000
           </CardTitle>
           <CardAction>
             <Badge
               variant="outline"
               className="gap-1 border-emerald-500/30 bg-emerald-500/10 text-xs font-medium text-emerald-600 dark:text-emerald-400"
             >
-              <RiLineChartLine className="size-3" />
-              {profitMargin}% margin
+              <RiMoneyDollarCircleLine className="size-3" />
+              56.8%
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1 pt-2 text-xs">
           <div className="flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400">
-            <span>Laba kotor operasional armada</span>
+            <span>Margin sebelum biaya servis bengkel</span>
           </div>
           <div className="text-muted-foreground">
-            Sebelum beban servis bengkel bulanan
+            Siap rekonsiliasi saat tutup buku bulanan
           </div>
         </CardFooter>
       </Card>

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { calculateOmset } from "@/src/domain/calculators/omset"
+import { calculateOmset } from "@/domain/calculators/omset"
 
 describe("calculateOmset", () => {
   it("calculates omset correctly with integer tonnages", () => {

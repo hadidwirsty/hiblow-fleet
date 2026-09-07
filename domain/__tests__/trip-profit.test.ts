@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { calculateTripProfit } from "@/src/domain/calculators/trip-profit"
+import { calculateTripProfit } from "@/domain/calculators/trip-profit"
 
 describe("calculateTripProfit", () => {
   it("calculates normal trip profit without special deductions", () => {

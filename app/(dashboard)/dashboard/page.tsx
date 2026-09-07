@@ -1,12 +1,17 @@
 import Link from "next/link"
 import {
+  RiAddLine,
   RiArrowRightLine,
+  RiCalendarLine,
   RiHandCoinLine,
   RiReceiptLine,
   RiTable2,
   RiTruckLine,
 } from "@remixicon/react"
 
+import { ChartAreaInteractive } from "@/components/chart-area-interactive"
+import { DataTable } from "@/components/data-table"
+import { SectionCards } from "@/components/section-cards"
 import { buttonVariants } from "@/components/ui/button"
 import {
   Card,
@@ -18,112 +23,169 @@ import {
 
 export default function DashboardPage() {
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-6 p-4 md:p-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
-          Dashboard Operasional
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Sistem Informasi Manajemen Armada & Keuangan Hi-Blow HW Trans
-        </p>
+    <div className="flex flex-col gap-6 py-6 md:gap-8 md:py-8">
+      {/* Page Title & Controls Bar */}
+      <div className="flex flex-col gap-4 px-4 sm:flex-row sm:items-center sm:justify-between lg:px-6">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
+              Dashboard Operasional
+            </h1>
+            <span className="hidden items-center gap-1 rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground sm:inline-flex">
+              <RiCalendarLine className="size-3" />
+              Juni 2026
+            </span>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Ikhtisar ritase semen curah hi-blow, performa unit armada, dan
+            efisiensi keuangan HW Trans
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2.5">
+          <Link
+            href="/trips"
+            className={buttonVariants({
+              size: "sm",
+              className: "h-9 gap-1.5 px-4 font-medium shadow-sm",
+            })}
+          >
+            <RiAddLine className="size-4" />
+            <span>Order Ritase Baru</span>
+          </Link>
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="transition-colors hover:border-primary/50">
-          <CardHeader className="pb-3">
-            <div className="mb-2 flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <RiTruckLine className="size-5" />
-            </div>
-            <CardTitle className="text-base">Pencatatan Ritase</CardTitle>
-            <CardDescription className="text-xs">
-              Input order jalan, auto-fill tarif & hitung sangu supir
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link
-              href="/trips"
-              className={buttonVariants({
-                variant: "outline",
-                size: "sm",
-                className: "w-full",
-              })}
-            >
-              Buka Ritase <RiArrowRightLine className="ml-1 size-4" />
-            </Link>
-          </CardContent>
-        </Card>
+      {/* 4 Metric Cards */}
+      <SectionCards />
 
-        <Card className="transition-colors hover:border-primary/50">
-          <CardHeader className="pb-3">
-            <div className="mb-2 flex size-10 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
-              <RiReceiptLine className="size-5" />
-            </div>
-            <CardTitle className="text-base">Pengeluaran Truk</CardTitle>
-            <CardDescription className="text-xs">
-              Catat nota servis bengkel, onderdil, BBM & administrasi
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link
-              href="/expenses"
-              className={buttonVariants({
-                variant: "outline",
-                size: "sm",
-                className: "w-full",
-              })}
-            >
-              Buka Pengeluaran <RiArrowRightLine className="ml-1 size-4" />
-            </Link>
-          </CardContent>
-        </Card>
+      {/* Interactive Performance Chart */}
+      <div className="px-4 lg:px-6">
+        <ChartAreaInteractive />
+      </div>
 
-        <Card className="transition-colors hover:border-primary/50">
-          <CardHeader className="pb-3">
-            <div className="mb-2 flex size-10 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-              <RiHandCoinLine className="size-5" />
-            </div>
-            <CardTitle className="text-base">Bagi Hasil Pemodal</CardTitle>
-            <CardDescription className="text-xs">
-              Rekapitulasi laba tutup buku & pembagian dividen investor
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link
-              href="/profit-sharing"
-              className={buttonVariants({
-                variant: "outline",
-                size: "sm",
-                className: "w-full",
-              })}
-            >
-              Buka Bagi Hasil <RiArrowRightLine className="ml-1 size-4" />
-            </Link>
-          </CardContent>
-        </Card>
+      {/* Recent Trips Data Table */}
+      <div className="px-4 lg:px-6">
+        <DataTable />
+      </div>
 
-        <Card className="transition-colors hover:border-primary/50">
-          <CardHeader className="pb-3">
-            <div className="mb-2 flex size-10 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
-              <RiTable2 className="size-5" />
-            </div>
-            <CardTitle className="text-base">Referensi Tarif</CardTitle>
-            <CardDescription className="text-xs">
-              289 master tarif rute pabrik Semen Indonesia, SBI & Grobogan
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link
-              href="/rates"
-              className={buttonVariants({
-                variant: "outline",
-                size: "sm",
-                className: "w-full",
-              })}
-            >
-              Lihat Tarif <RiArrowRightLine className="ml-1 size-4" />
-            </Link>
-          </CardContent>
-        </Card>
+      {/* Modul Navigasi Operasional */}
+      <div className="px-4 lg:px-6">
+        <div className="mb-4">
+          <h2 className="text-base font-semibold tracking-tight">
+            Akses Cepat Modul Operasional
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            Pilih modul untuk mengelola pencatatan armada dan keuangan secara
+            mendalam
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Card className="flex flex-col justify-between transition-all hover:border-primary/50 hover:shadow-xs">
+            <CardHeader className="pb-3">
+              <div className="mb-2 flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <RiTruckLine className="size-5" />
+              </div>
+              <CardTitle className="text-base">Pencatatan Ritase</CardTitle>
+              <CardDescription className="text-xs leading-relaxed">
+                Input order surat jalan, auto-fill tarif master rute, dan
+                perhitungan otomatis sangu supir.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <Link
+                href="/trips"
+                className={buttonVariants({
+                  variant: "outline",
+                  size: "sm",
+                  className: "w-full justify-between",
+                })}
+              >
+                <span>Buka Ritase</span>
+                <RiArrowRightLine className="size-4" />
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card className="flex flex-col justify-between transition-all hover:border-amber-500/50 hover:shadow-xs">
+            <CardHeader className="pb-3">
+              <div className="mb-2 flex size-10 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                <RiReceiptLine className="size-5" />
+              </div>
+              <CardTitle className="text-base">Pengeluaran Truk</CardTitle>
+              <CardDescription className="text-xs leading-relaxed">
+                Pencatatan nota servis bengkel, ban, sparepart onderdil, solar,
+                dan biaya tak terduga.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <Link
+                href="/expenses"
+                className={buttonVariants({
+                  variant: "outline",
+                  size: "sm",
+                  className: "w-full justify-between",
+                })}
+              >
+                <span>Buka Pengeluaran</span>
+                <RiArrowRightLine className="size-4" />
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card className="flex flex-col justify-between transition-all hover:border-emerald-500/50 hover:shadow-xs">
+            <CardHeader className="pb-3">
+              <div className="mb-2 flex size-10 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                <RiHandCoinLine className="size-5" />
+              </div>
+              <CardTitle className="text-base">Bagi Hasil Pemodal</CardTitle>
+              <CardDescription className="text-xs leading-relaxed">
+                Rekapitulasi laba bersih tutup buku bulanan dan laporan dividen
+                investor armada.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <Link
+                href="/profit-sharing"
+                className={buttonVariants({
+                  variant: "outline",
+                  size: "sm",
+                  className: "w-full justify-between",
+                })}
+              >
+                <span>Buka Bagi Hasil</span>
+                <RiArrowRightLine className="size-4" />
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card className="flex flex-col justify-between transition-all hover:border-blue-500/50 hover:shadow-xs">
+            <CardHeader className="pb-3">
+              <div className="mb-2 flex size-10 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                <RiTable2 className="size-5" />
+              </div>
+              <CardTitle className="text-base">Referensi Tarif</CardTitle>
+              <CardDescription className="text-xs leading-relaxed">
+                Katalog master 289 tarif rute pabrik Semen Indonesia Tuban, SBI
+                Rembang, dan Grobogan.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <Link
+                href="/rates"
+                className={buttonVariants({
+                  variant: "outline",
+                  size: "sm",
+                  className: "w-full justify-between",
+                })}
+              >
+                <span>Lihat Tarif</span>
+                <RiArrowRightLine className="size-4" />
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   )

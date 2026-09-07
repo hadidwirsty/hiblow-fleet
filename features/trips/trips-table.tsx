@@ -12,6 +12,14 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -27,7 +35,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { formatCurrency, formatDateIndonesian } from "@/lib/utils"
-import type { trips } from "@/src/db/schema"
+import type { trips } from "@/db/schema"
 
 export type TripRecord = typeof trips.$inferSelect
 
@@ -54,6 +62,12 @@ const MONTH_NAMES = [
   { value: "11", label: "November" },
   { value: "12", label: "Desember" },
 ]
+
+function formatPlateNumber(truckId: string): string {
+  if (truckId === "W8187UA") return "W 8187 UA"
+  if (truckId === "H8133OF") return "H 8133 OF"
+  return truckId
+}
 
 export function TripsTable({ trips, initialFilter }: TripsTableProps) {
   const router = useRouter()
@@ -104,32 +118,42 @@ export function TripsTable({ trips, initialFilter }: TripsTableProps) {
   const paginatedTrips = trips.slice(startIndex, endIndex)
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* Filter Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-3 shadow-xs">
+    <Card className="border-border bg-card/60 shadow-xs backdrop-blur-xs">
+      {/* Integrated Header & Filter Toolbar */}
+      <CardHeader className="flex flex-col gap-4 px-6 pt-6 pb-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <CardTitle className="text-base font-semibold">
+            Daftar Surat Jalan & Ritase
+          </CardTitle>
+          <CardDescription className="text-xs">
+            Data operasional pengangkutan semen curah hi-blow real-time
+          </CardDescription>
+        </div>
+
+        {/* Filters and Counters */}
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Truck Filter */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <span className="text-xs font-medium text-muted-foreground">
-              Truk:
+              Armada:
             </span>
             <Select
               value={currentTruckId}
               onValueChange={(val) => val && updateQuery("truckId", val)}
             >
-              <SelectTrigger className="h-8 w-35 text-xs">
-                <SelectValue placeholder="Semua Truk" />
+              <SelectTrigger className="h-8 w-34 text-xs">
+                <SelectValue placeholder="Semua Armada" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL">Semua Truk</SelectItem>
-                <SelectItem value="W8187UA">W 8187 UA</SelectItem>
-                <SelectItem value="H8133OF">H 8133 OF</SelectItem>
+                <SelectItem value="ALL">Semua Armada</SelectItem>
+                <SelectItem value="W8187UA">W 8187 UA (Dutro)</SelectItem>
+                <SelectItem value="H8133OF">H 8133 OF (Hino 500)</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {/* Month Filter */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <span className="text-xs font-medium text-muted-foreground">
               Bulan:
             </span>
@@ -137,7 +161,7 @@ export function TripsTable({ trips, initialFilter }: TripsTableProps) {
               value={currentMonth}
               onValueChange={(val) => val && updateQuery("month", val)}
             >
-              <SelectTrigger className="h-8 w-32.5 text-xs">
+              <SelectTrigger className="h-8 w-30 text-xs">
                 <SelectValue placeholder="Semua Bulan" />
               </SelectTrigger>
               <SelectContent>
@@ -152,7 +176,7 @@ export function TripsTable({ trips, initialFilter }: TripsTableProps) {
           </div>
 
           {/* Year Filter */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <span className="text-xs font-medium text-muted-foreground">
               Tahun:
             </span>
@@ -160,8 +184,8 @@ export function TripsTable({ trips, initialFilter }: TripsTableProps) {
               value={currentYear}
               onValueChange={(val) => val && updateQuery("year", val)}
             >
-              <SelectTrigger className="h-8 w-27.5 text-xs">
-                <SelectValue placeholder="Semua Tahun" />
+              <SelectTrigger className="h-8 w-24 text-xs">
+                <SelectValue placeholder="Semua" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ALL">Semua</SelectItem>
@@ -177,193 +201,195 @@ export function TripsTable({ trips, initialFilter }: TripsTableProps) {
               variant="ghost"
               size="sm"
               onClick={handleResetFilters}
-              className="h-8 gap-1 text-xs text-muted-foreground hover:text-foreground"
+              className="h-8 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground"
             >
               <RiFilterOffLine className="size-3.5" />
               <span>Reset</span>
             </Button>
           )}
-        </div>
 
-        {/* Status Loading indicator */}
-        <div className="text-xs text-muted-foreground">
-          {isPending ? (
-            <span className="animate-pulse font-medium text-primary">
-              Memuat data...
-            </span>
-          ) : (
-            <span>
-              Total: <strong>{trips.length}</strong> ritase
-            </span>
-          )}
+          {/* Status Loading indicator */}
+          <div className="hidden pl-2 text-xs text-muted-foreground md:block">
+            {isPending ? (
+              <span className="animate-pulse font-medium text-primary">
+                Memuat data...
+              </span>
+            ) : (
+              <span>
+                Total: <strong>{trips.length}</strong> ritase
+              </span>
+            )}
+          </div>
         </div>
-      </div>
+      </CardHeader>
 
       {/* Table Section */}
-      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
-        <Table>
-          <TableHeader className="bg-muted/50">
-            <TableRow className="hover:bg-transparent">
-              <TableHead className="w-15 text-[11px] font-semibold tracking-wider uppercase">
-                No
-              </TableHead>
-              <TableHead className="w-27.5 text-[11px] font-semibold tracking-wider uppercase">
-                Truk
-              </TableHead>
-              <TableHead className="text-[11px] font-semibold tracking-wider uppercase">
-                Tgl Order
-              </TableHead>
-              <TableHead className="text-[11px] font-semibold tracking-wider uppercase">
-                Tgl Bongkar
-              </TableHead>
-              <TableHead className="text-[11px] font-semibold tracking-wider uppercase">
-                Kota & Pabrik Tujuan
-              </TableHead>
-              <TableHead className="text-right text-[11px] font-semibold tracking-wider uppercase">
-                Tarif / Ton
-              </TableHead>
-              <TableHead className="text-right text-[11px] font-semibold tracking-wider uppercase">
-                Tonase
-              </TableHead>
-              <TableHead className="text-right text-[11px] font-semibold tracking-wider uppercase">
-                Omset
-              </TableHead>
-              <TableHead className="text-right text-[11px] font-semibold tracking-wider uppercase">
-                Sangu
-              </TableHead>
-              <TableHead className="text-right text-[11px] font-semibold tracking-wider uppercase">
-                Laba Ritase
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paginatedTrips.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={10} className="h-40 text-center">
-                  <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
-                    <RiTruckLine className="size-8 stroke-[1.5]" />
-                    <p className="text-sm font-medium">Tidak ada data ritase</p>
-                    <p className="text-xs">
-                      Tidak ditemukan ritase yang cocok dengan filter yang
-                      dipilih.
-                    </p>
-                    {hasActiveFilter && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleResetFilters}
-                        className="mt-2 text-xs"
-                      >
-                        Reset Filter
-                      </Button>
-                    )}
-                  </div>
-                </TableCell>
+      <CardContent className="px-6 pb-4">
+        <div className="overflow-hidden rounded-lg border border-border">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50 text-xs hover:bg-muted/50">
+                <TableHead className="w-28 py-3 font-semibold text-foreground">
+                  No. Surat Jalan
+                </TableHead>
+                <TableHead className="w-30 py-3 font-semibold text-foreground">
+                  Armada
+                </TableHead>
+                <TableHead className="w-28 py-3 font-semibold text-foreground">
+                  Tgl Order
+                </TableHead>
+                <TableHead className="w-28 py-3 font-semibold text-foreground">
+                  Tgl Bongkar
+                </TableHead>
+                <TableHead className="py-3 font-semibold text-foreground">
+                  Kota & Pabrik Tujuan
+                </TableHead>
+                <TableHead className="py-3 text-right font-semibold text-foreground">
+                  Tarif / Ton
+                </TableHead>
+                <TableHead className="py-3 text-right font-semibold text-foreground">
+                  Muatan
+                </TableHead>
+                <TableHead className="py-3 text-right font-semibold text-foreground">
+                  Omset Bruto
+                </TableHead>
+                <TableHead className="py-3 text-right font-semibold text-foreground">
+                  Sangu Supir
+                </TableHead>
+                <TableHead className="py-3 text-right font-semibold text-foreground">
+                  Laba Ritase
+                </TableHead>
               </TableRow>
-            ) : (
-              paginatedTrips.map((trip) => {
-                const omsetNum = parseFloat(trip.omset)
-                const sanguNum = parseFloat(trip.sangu)
-                const profitNum = parseFloat(trip.profit)
-                const rateNum = parseFloat(trip.ratePerTon)
-                const tonnageNum = parseFloat(trip.unloadedTonnage)
+            </TableHeader>
+            <TableBody>
+              {paginatedTrips.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={10} className="h-36 text-center">
+                    <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                      <RiTruckLine className="size-8 stroke-[1.5]" />
+                      <p className="text-sm font-medium">
+                        Tidak ada data ritase
+                      </p>
+                      <p className="text-xs">
+                        Tidak ditemukan ritase yang cocok dengan filter yang
+                        dipilih.
+                      </p>
+                      {hasActiveFilter && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleResetFilters}
+                          className="mt-1 h-8 text-xs"
+                        >
+                          Reset Filter
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paginatedTrips.map((trip) => {
+                  const omsetNum = parseFloat(trip.omset)
+                  const sanguNum = parseFloat(trip.sangu)
+                  const profitNum = parseFloat(trip.profit)
+                  const rateNum = parseFloat(trip.ratePerTon)
+                  const tonnageNum = parseFloat(trip.unloadedTonnage)
 
-                return (
-                  <TableRow
-                    key={trip.id}
-                    className="transition-colors hover:bg-muted/40"
-                  >
-                    <TableCell className="py-3 font-mono text-xs text-muted-foreground">
-                      #{trip.orderNumber}
-                    </TableCell>
-                    <TableCell className="py-3">
-                      <Badge
-                        variant="outline"
-                        className={
-                          trip.truckId === "W8187UA"
-                            ? "border-primary/40 bg-primary/5 font-mono text-[11px] text-primary"
-                            : "border-amber-500/40 bg-amber-500/5 font-mono text-[11px] text-amber-600 dark:text-amber-400"
-                        }
-                      >
-                        {trip.truckId}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="py-3 text-xs whitespace-nowrap text-muted-foreground">
-                      {formatDateIndonesian(trip.orderDate, true)}
-                    </TableCell>
-                    <TableCell className="py-3 text-xs whitespace-nowrap text-muted-foreground">
-                      {trip.unloadingDate
-                        ? formatDateIndonesian(trip.unloadingDate, true)
-                        : "-"}
-                    </TableCell>
-                    <TableCell className="max-w-55 py-3">
-                      <div className="truncate text-xs font-medium text-foreground">
-                        {trip.destinationCity}
-                      </div>
-                      <div className="truncate text-[11px] text-muted-foreground">
-                        {trip.destinationName}
-                      </div>
-                    </TableCell>
-                    <TableCell className="py-3 text-right font-mono text-xs text-muted-foreground">
-                      {formatCurrency(rateNum)}
-                    </TableCell>
-                    <TableCell className="py-3 text-right font-mono text-xs font-semibold">
-                      {tonnageNum.toFixed(2)} ton
-                    </TableCell>
-                    <TableCell className="py-3 text-right font-mono text-xs text-foreground">
-                      {formatCurrency(omsetNum)}
-                    </TableCell>
-                    <TableCell className="py-3 text-right font-mono text-xs text-muted-foreground">
-                      {formatCurrency(sanguNum)}
-                    </TableCell>
-                    <TableCell className="py-3 text-right font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                      {formatCurrency(profitNum)}
-                    </TableCell>
-                  </TableRow>
-                )
-              })
-            )}
-          </TableBody>
-        </Table>
+                  return (
+                    <TableRow
+                      key={trip.id}
+                      className="text-xs transition-colors hover:bg-muted/40"
+                    >
+                      <TableCell className="font-mono font-medium">
+                        #{trip.orderNumber}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={
+                            trip.truckId === "W8187UA"
+                              ? "border-primary/40 bg-primary/10 font-mono text-[11px] font-semibold text-primary"
+                              : "border-amber-500/40 bg-amber-500/10 font-mono text-[11px] font-semibold text-amber-600 dark:text-amber-400"
+                          }
+                        >
+                          {formatPlateNumber(trip.truckId)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap text-muted-foreground">
+                        {formatDateIndonesian(trip.orderDate, true)}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap text-muted-foreground">
+                        {trip.unloadingDate
+                          ? formatDateIndonesian(trip.unloadingDate, true)
+                          : "-"}
+                      </TableCell>
+                      <TableCell className="max-w-56">
+                        <div className="truncate font-medium text-foreground">
+                          {trip.destinationCity}
+                        </div>
+                        <div className="truncate text-[11px] text-muted-foreground">
+                          {trip.destinationName}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-muted-foreground tabular-nums">
+                        {formatCurrency(rateNum)}
+                      </TableCell>
+                      <TableCell className="text-right font-mono font-medium whitespace-nowrap tabular-nums">
+                        {tonnageNum.toFixed(2)} ton
+                      </TableCell>
+                      <TableCell className="text-right font-mono font-bold text-emerald-600 tabular-nums dark:text-emerald-400">
+                        {formatCurrency(omsetNum)}
+                      </TableCell>
+                      <TableCell className="text-right font-mono font-medium text-foreground tabular-nums">
+                        {formatCurrency(sanguNum)}
+                      </TableCell>
+                      <TableCell className="text-right font-mono font-bold text-foreground tabular-nums">
+                        {formatCurrency(profitNum)}
+                      </TableCell>
+                    </TableRow>
+                  )
+                })
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
 
-        {/* Pagination Controls */}
-        {trips.length > 0 && (
-          <div className="flex flex-col items-center justify-between gap-3 border-t border-border px-4 py-3 text-xs text-muted-foreground sm:flex-row">
-            <div>
-              Menampilkan <strong>{startIndex + 1}</strong> s/d{" "}
-              <strong>{endIndex}</strong> dari <strong>{trips.length}</strong>{" "}
-              ritase
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 gap-1 px-2.5 text-xs"
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-              >
-                <RiArrowLeftSLine className="size-4" />
-                <span>Sebelumnya</span>
-              </Button>
-              <span className="px-2 font-medium">
-                {currentPage} / {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 gap-1 px-2.5 text-xs"
-                onClick={() =>
-                  setCurrentPage((p) => Math.min(totalPages, p + 1))
-                }
-                disabled={currentPage === totalPages}
-              >
-                <span>Berikutnya</span>
-                <RiArrowRightSLine className="size-4" />
-              </Button>
-            </div>
+      {/* Pagination Controls in CardFooter */}
+      {trips.length > 0 && (
+        <CardFooter className="flex flex-col items-center justify-between gap-3 border-t border-border px-6 py-4 text-xs text-muted-foreground sm:flex-row">
+          <div>
+            Menampilkan <strong>{startIndex + 1}</strong> s/d{" "}
+            <strong>{endIndex}</strong> dari <strong>{trips.length}</strong>{" "}
+            ritase
           </div>
-        )}
-      </div>
-    </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 gap-1 px-2.5 text-xs shadow-none"
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+            >
+              <RiArrowLeftSLine className="size-4" />
+              <span>Sebelumnya</span>
+            </Button>
+            <span className="px-2 font-medium">
+              {currentPage} / {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 gap-1 px-2.5 text-xs shadow-none"
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+            >
+              <span>Berikutnya</span>
+              <RiArrowRightSLine className="size-4" />
+            </Button>
+          </div>
+        </CardFooter>
+      )}
+    </Card>
   )
 }

@@ -37,9 +37,9 @@ import { Textarea } from "@/components/ui/textarea"
 import { createTrip } from "@/features/trips/trips.actions"
 import { createTripSchema } from "@/features/trips/trips.schema"
 import { formatCurrency } from "@/lib/utils"
-import { calculateOmset } from "@/src/domain/calculators/omset"
-import { calculateSangu } from "@/src/domain/calculators/sangu"
-import { calculateTripProfit } from "@/src/domain/calculators/trip-profit"
+import { calculateOmset } from "@/domain/calculators/omset"
+import { calculateSangu } from "@/domain/calculators/sangu"
+import { calculateTripProfit } from "@/domain/calculators/trip-profit"
 
 import {
   TripDestinationCombobox,

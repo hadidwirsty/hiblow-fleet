@@ -1,6 +1,6 @@
 import { headers } from "next/headers"
 
-import { auth } from "@/src/lib/auth"
+import { auth } from "@/lib/auth"
 
 /**
  * Retrieves the current session from incoming request headers.

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { calculateProfitSharing } from "@/src/domain/calculators/profit-sharing"
+import { calculateProfitSharing } from "@/domain/calculators/profit-sharing"
 
 describe("calculateProfitSharing", () => {
   it("calculates profit distribution accurately for normal profitable month", () => {
