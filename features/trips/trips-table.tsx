@@ -5,12 +5,14 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import {
   RiArrowLeftSLine,
   RiArrowRightSLine,
+  RiEditLine,
   RiFilterOffLine,
   RiTruckLine,
 } from "@remixicon/react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { TripFeeStatusDialog } from "@/features/trips/trip-fee-status-dialog"
 import { TripsExportButton } from "@/features/trips/trips-export-button"
 import {
   Card,
@@ -79,6 +81,10 @@ export function TripsTable({ trips, initialFilter }: TripsTableProps) {
   const [currentPage, setCurrentPage] = useState(1)
   const pageSize = 25
 
+  // Quick edit modal state for third party fee
+  const [editingFeeTrip, setEditingFeeTrip] = useState<TripRecord | null>(null)
+  const [feeFilter, setFeeFilter] = useState<"ALL" | "PENDING" | "PAID">("ALL")
+
   // Read current filters
   const currentTruckId =
     searchParams.get("truckId") ?? initialFilter?.truckId ?? "ALL"
@@ -90,7 +96,30 @@ export function TripsTable({ trips, initialFilter }: TripsTableProps) {
     (initialFilter?.year ? String(initialFilter.year) : "ALL")
 
   const hasActiveFilter =
-    currentTruckId !== "ALL" || currentMonth !== "ALL" || currentYear !== "ALL"
+    currentTruckId !== "ALL" ||
+    currentMonth !== "ALL" ||
+    currentYear !== "ALL" ||
+    feeFilter !== "ALL"
+
+  // Filter trips based on DO fee status in addition to server filters
+  const filteredTrips = trips.filter((t) => {
+    if (feeFilter === "ALL") return true
+    const fee = parseFloat(t.thirdPartyFee || "0")
+    const hasFee = fee > 0 || Boolean(t.thirdPartyName)
+    const status = t.thirdPartyStatus?.toLowerCase() || ""
+    const isPaid =
+      status.includes("lunas") ||
+      status.includes("sudah dibayar") ||
+      status.includes("sdh dibayar")
+
+    if (feeFilter === "PENDING") {
+      return hasFee && !isPaid
+    }
+    if (feeFilter === "PAID") {
+      return hasFee && isPaid
+    }
+    return true
+  })
 
   function updateQuery(key: string, value: string) {
     const params = new URLSearchParams(searchParams.toString())
@@ -106,6 +135,7 @@ export function TripsTable({ trips, initialFilter }: TripsTableProps) {
   }
 
   function handleResetFilters() {
+    setFeeFilter("ALL")
     setCurrentPage(1)
     startTransition(() => {
       router.push(pathname)
@@ -113,10 +143,10 @@ export function TripsTable({ trips, initialFilter }: TripsTableProps) {
   }
 
   // Pagination calculations
-  const totalPages = Math.ceil(trips.length / pageSize) || 1
+  const totalPages = Math.ceil(filteredTrips.length / pageSize) || 1
   const startIndex = (currentPage - 1) * pageSize
-  const endIndex = Math.min(startIndex + pageSize, trips.length)
-  const paginatedTrips = trips.slice(startIndex, endIndex)
+  const endIndex = Math.min(startIndex + pageSize, filteredTrips.length)
+  const paginatedTrips = filteredTrips.slice(startIndex, endIndex)
 
   return (
     <Card className="border-border bg-card/60 shadow-xs backdrop-blur-xs">
@@ -196,6 +226,29 @@ export function TripsTable({ trips, initialFilter }: TripsTableProps) {
             </Select>
           </div>
 
+          {/* Fee DO Status Filter */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs font-medium text-muted-foreground">
+              Status DO:
+            </span>
+            <Select
+              value={feeFilter}
+              onValueChange={(val) => {
+                setFeeFilter(val as "ALL" | "PENDING" | "PAID")
+                setCurrentPage(1)
+              }}
+            >
+              <SelectTrigger className="h-8 w-34 text-xs">
+                <SelectValue placeholder="Semua Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">Semua Status DO</SelectItem>
+                <SelectItem value="PENDING">Perlu Bayar (Pending)</SelectItem>
+                <SelectItem value="PAID">Sudah Lunas</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Reset Filter Button */}
           {hasActiveFilter && (
             <Button
@@ -270,12 +323,15 @@ export function TripsTable({ trips, initialFilter }: TripsTableProps) {
                 <TableHead className="py-3 text-right font-semibold text-foreground">
                   Laba Ritase
                 </TableHead>
+                <TableHead className="py-3 font-semibold text-foreground">
+                  Fee DO & Status
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedTrips.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="h-36 text-center">
+                  <TableCell colSpan={11} className="h-36 text-center">
                     <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                       <RiTruckLine className="size-8 stroke-[1.5]" />
                       <p className="text-sm font-medium">
@@ -357,6 +413,53 @@ export function TripsTable({ trips, initialFilter }: TripsTableProps) {
                       <TableCell className="text-right font-mono font-bold text-foreground tabular-nums">
                         {formatCurrency(profitNum)}
                       </TableCell>
+                      <TableCell className="max-w-44">
+                        {parseFloat(trip.thirdPartyFee || "0") > 0 ||
+                        trip.thirdPartyName ? (
+                          <div className="flex flex-col items-start gap-1">
+                            <div className="flex items-center gap-1 font-mono text-[11px] font-semibold text-foreground">
+                              <span>
+                                {formatCurrency(
+                                  parseFloat(trip.thirdPartyFee || "0")
+                                )}
+                              </span>
+                              {trip.thirdPartyName && (
+                                <span className="max-w-24 truncate text-[10px] text-muted-foreground">
+                                  ({trip.thirdPartyName})
+                                </span>
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setEditingFeeTrip(trip)}
+                              className="group flex cursor-pointer items-center gap-1 text-left transition-opacity hover:opacity-80"
+                              title="Klik untuk ubah status pembayaran"
+                            >
+                              <Badge
+                                variant="outline"
+                                className={`px-1.5 py-0 text-[10px] font-normal ${
+                                  trip.thirdPartyStatus
+                                    ?.toLowerCase()
+                                    .includes("lunas") ||
+                                  trip.thirdPartyStatus
+                                    ?.toLowerCase()
+                                    .includes("sudah dibayar") ||
+                                  trip.thirdPartyStatus
+                                    ?.toLowerCase()
+                                    .includes("sdh dibayar")
+                                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                                    : "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                                }`}
+                              >
+                                {trip.thirdPartyStatus || "Belum Dibayar"}
+                              </Badge>
+                              <RiEditLine className="size-3 text-muted-foreground opacity-60 group-hover:opacity-100" />
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
                     </TableRow>
                   )
                 })
@@ -401,6 +504,15 @@ export function TripsTable({ trips, initialFilter }: TripsTableProps) {
           </div>
         </CardFooter>
       )}
+
+      {/* Quick Edit Fee Modal */}
+      <TripFeeStatusDialog
+        trip={editingFeeTrip}
+        open={Boolean(editingFeeTrip)}
+        onOpenChange={(open) => {
+          if (!open) setEditingFeeTrip(null)
+        }}
+      />
     </Card>
   )
 }

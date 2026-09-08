@@ -37,3 +37,14 @@ export const createTripSchema = z.object({
 })
 
 export type CreateTripInput = z.infer<typeof createTripSchema>
+
+export const updateTripFeeStatusSchema = z.object({
+  tripId: z.string().uuid("Trip ID harus berupa UUID yang valid"),
+  thirdPartyStatus: z.string().optional().nullable(),
+  incentiveStatus: z.string().optional().nullable(),
+  thirdPartyFee: z.string().optional().nullable(),
+  thirdPartyName: z.string().optional().nullable(),
+  incentivePaid: z.string().optional().nullable(),
+})
+
+export type UpdateTripFeeStatusInput = z.infer<typeof updateTripFeeStatusSchema>

@@ -490,6 +490,32 @@ export function TripFormDialog({ rateReferences }: TripFormDialogProps) {
               </div>
             </div>
 
+            {/* Status Pelunasan DO & Insentif */}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">
+                  Status Pembayaran Fee DO
+                </Label>
+                <Input
+                  type="text"
+                  {...register("thirdPartyStatus")}
+                  className="h-8 text-xs"
+                  placeholder="Belum Dibayar / Lunas / Tgl Bayar"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">
+                  Status Insentif Supir
+                </Label>
+                <Input
+                  type="text"
+                  {...register("incentiveStatus")}
+                  className="h-8 text-xs"
+                  placeholder="Belum Dibayar / Lunas"
+                />
+              </div>
+            </div>
+
             {/* Notes */}
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-muted-foreground">
