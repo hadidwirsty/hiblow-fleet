@@ -7,9 +7,7 @@ export function formatTruckPlate(truckId: string): string {
   return truckId
 }
 
-export function formatExpensesForExport(
-  expenses: Expense[]
-): ExcelSheetData {
+export function formatExpensesForExport(expenses: Expense[]): ExcelSheetData {
   const headers = [
     "No.",
     "Tanggal",
