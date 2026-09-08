@@ -17,6 +17,7 @@ import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { ExpensesExportButton } from "@/features/expenses/expenses-export-button"
 import {
   Card,
   CardContent,
@@ -54,6 +55,8 @@ import { deleteExpense } from "./expenses.actions"
 import { EXPENSE_CATEGORIES } from "./expenses.schema"
 
 import type { Expense } from "@/db/schema"
+
+export type ExpenseRecord = Expense
 
 interface ExpensesTableProps {
   expenses: Expense[]
@@ -351,6 +354,17 @@ export function ExpensesTable({ expenses, initialFilter }: ExpensesTableProps) {
                 <span>Reset</span>
               </Button>
             )}
+
+            {/* Export Kas Button */}
+            <ExpensesExportButton
+              expenses={expenses}
+              filter={{
+                truckId: currentTruckId,
+                category: currentCategory,
+                month: currentMonth,
+                year: currentYear,
+              }}
+            />
           </div>
         </CardHeader>
 

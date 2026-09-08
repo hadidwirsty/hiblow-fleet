@@ -11,6 +11,7 @@ import {
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { TripsExportButton } from "@/features/trips/trips-export-button"
 import {
   Card,
   CardContent,
@@ -207,6 +208,16 @@ export function TripsTable({ trips, initialFilter }: TripsTableProps) {
               <span>Reset</span>
             </Button>
           )}
+
+          {/* Export Data Button */}
+          <TripsExportButton
+            trips={trips}
+            filter={{
+              truckId: currentTruckId,
+              month: currentMonth,
+              year: currentYear,
+            }}
+          />
 
           {/* Status Loading indicator */}
           <div className="hidden pl-2 text-xs text-muted-foreground md:block">

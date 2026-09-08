@@ -3,6 +3,9 @@
 import * as React from "react"
 import {
   RiCalendarLine,
+  RiDownloadLine,
+  RiFileExcelLine,
+  RiFileLine,
   RiLockLine,
   RiLockUnlockLine,
   RiPrinterLine,
@@ -12,11 +15,25 @@ import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetTitle,
 } from "@/components/ui/sheet"
+import {
+  formatProfitSharingForCsv,
+  formatProfitSharingForExcel,
+  getProfitSharingExportFilename,
+} from "@/features/profit-sharing/profit-sharing.export"
+import { buildCsvString } from "@/lib/export/csv-builder"
+import { triggerBlobDownload, triggerTextDownload } from "@/lib/export/download"
+import { buildExcelWorkbookBlob } from "@/lib/export/excel-builder"
 import { formatCurrency, formatDateIndonesian } from "@/lib/utils"
 
 import { updateProfitSharingStatus } from "./profit-sharing.actions"
@@ -72,6 +89,33 @@ export function PeriodDetailSheet({
     window.print()
   }
 
+  const handleExportExcel = () => {
+    try {
+      const sheets = formatProfitSharingForExcel(period)
+      const blob = buildExcelWorkbookBlob({ sheets })
+      const filename = getProfitSharingExportFilename(period, "xlsx")
+      triggerBlobDownload(blob, filename)
+      toast.success(`Laporan bagi hasil berhasil diunduh (${filename})`)
+    } catch {
+      toast.error("Gagal mengekspor laporan bagi hasil ke Excel")
+    }
+  }
+
+  const handleExportCsv = () => {
+    try {
+      const sheetData = formatProfitSharingForCsv(period)
+      const csv = buildCsvString({
+        headers: sheetData.headers,
+        rows: sheetData.rows,
+      })
+      const filename = getProfitSharingExportFilename(period, "csv")
+      triggerTextDownload(csv, filename)
+      toast.success(`Laporan bagi hasil berhasil diunduh (${filename})`)
+    } catch {
+      toast.error("Gagal mengekspor laporan bagi hasil ke CSV")
+    }
+  }
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
@@ -117,8 +161,39 @@ export function PeriodDetailSheet({
               </SheetDescription>
             </div>
 
-            {/* Print & Action Controls (Hidden on Print) */}
+            {/* Print & Export Controls (Hidden on Print) */}
             <div className="flex items-center gap-2 print:hidden">
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5 text-xs shadow-xs"
+                    >
+                      <RiDownloadLine className="size-3.5 text-muted-foreground" />
+                      <span>Export</span>
+                    </Button>
+                  }
+                />
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem
+                    onClick={handleExportExcel}
+                    className="flex cursor-pointer items-center gap-2 text-xs"
+                  >
+                    <RiFileExcelLine className="size-4 text-emerald-600 dark:text-emerald-400" />
+                    <span>Download Excel (.xlsx)</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={handleExportCsv}
+                    className="flex cursor-pointer items-center gap-2 text-xs"
+                  >
+                    <RiFileLine className="size-4 text-sky-600 dark:text-sky-400" />
+                    <span>Download CSV (.csv)</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               <Button
                 variant="outline"
                 size="sm"
