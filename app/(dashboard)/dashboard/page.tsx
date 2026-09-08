@@ -20,8 +20,46 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  getDailyTripChart,
+  getDashboardKPIs,
+  getRecentTrips,
+  getTruckBreakdown,
+} from "@/features/dashboard/dashboard.queries"
 
-export default function DashboardPage() {
+export const dynamic = "force-dynamic"
+
+interface DashboardPageProps {
+  searchParams: Promise<{
+    month?: string
+    year?: string
+  }>
+}
+
+export default async function DashboardPage({
+  searchParams,
+}: DashboardPageProps) {
+  const resolvedParams = await searchParams
+  const now = new Date()
+  const month = resolvedParams.month
+    ? parseInt(resolvedParams.month, 10)
+    : now.getMonth() + 1
+  const year = resolvedParams.year
+    ? parseInt(resolvedParams.year, 10)
+    : now.getFullYear()
+
+  const [kpis, truckBreakdown, chartData, recentTrips] = await Promise.all([
+    getDashboardKPIs(month, year),
+    getTruckBreakdown(month, year),
+    getDailyTripChart(month, year),
+    getRecentTrips(10),
+  ])
+
+  const monthLabel = new Intl.DateTimeFormat("id-ID", {
+    month: "long",
+    year: "numeric",
+  }).format(new Date(year, month - 1, 1))
+
   return (
     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
       {/* Page Title & Controls Bar */}
@@ -33,7 +71,7 @@ export default function DashboardPage() {
             </h1>
             <span className="hidden items-center gap-1 rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground sm:inline-flex">
               <RiCalendarLine className="size-3" />
-              Juni 2026
+              {monthLabel}
             </span>
           </div>
           <p className="text-sm text-muted-foreground">
@@ -57,16 +95,16 @@ export default function DashboardPage() {
       </div>
 
       {/* 4 Metric Cards */}
-      <SectionCards />
+      <SectionCards kpis={kpis} truckBreakdown={truckBreakdown} />
 
       {/* Interactive Performance Chart */}
       <div className="px-4 lg:px-6">
-        <ChartAreaInteractive />
+        <ChartAreaInteractive data={chartData} />
       </div>
 
       {/* Recent Trips Data Table */}
       <div className="px-4 lg:px-6">
-        <DataTable />
+        <DataTable trips={recentTrips} />
       </div>
 
       {/* Modul Navigasi Operasional */}

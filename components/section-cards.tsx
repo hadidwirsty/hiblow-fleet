@@ -1,4 +1,10 @@
-"use client"
+import {
+  RiArrowDownLine,
+  RiArrowUpLine,
+  RiCheckLine,
+  RiGasStationLine,
+  RiMoneyDollarCircleLine,
+} from "@remixicon/react"
 
 import { Badge } from "@/components/ui/badge"
 import {
@@ -9,14 +15,38 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  RiArrowUpLine,
-  RiCheckLine,
-  RiGasStationLine,
-  RiMoneyDollarCircleLine,
-} from "@remixicon/react"
+import { formatCurrency } from "@/lib/utils"
+import type {
+  DashboardKPIs,
+  TruckBreakdown,
+} from "@/features/dashboard/dashboard.queries"
 
-export function SectionCards() {
+export interface SectionCardsProps {
+  kpis: DashboardKPIs
+  truckBreakdown: TruckBreakdown[]
+}
+
+export function SectionCards({ kpis, truckBreakdown }: SectionCardsProps) {
+  // Omset calculation
+  const omsetDiff = kpis.totalOmset - kpis.previousOmset
+  const omsetPct =
+    kpis.previousOmset > 0 ? (omsetDiff / kpis.previousOmset) * 100 : 0
+  const isOmsetUp = omsetPct >= 0
+
+  // Trips calculation
+  const tripDiff = kpis.totalTrips - kpis.previousTrips
+  const wRit =
+    truckBreakdown.find((t) => t.truckId === "W8187UA")?.totalTrips ?? 0
+  const hRit =
+    truckBreakdown.find((t) => t.truckId === "H8133OF")?.totalTrips ?? 0
+  const targetPct = Math.round((kpis.totalTrips / 50) * 100)
+
+  // Sangu & Margin ratios
+  const sanguRatio =
+    kpis.totalOmset > 0 ? (kpis.totalSangu / kpis.totalOmset) * 100 : 0
+  const marginRatio =
+    kpis.totalOmset > 0 ? (kpis.estimasiLaba / kpis.totalOmset) * 100 : 0
+
   return (
     <div className="grid grid-cols-1 gap-4 px-4 sm:grid-cols-2 lg:grid-cols-4 lg:px-6">
       {/* Card 1: Omset Ritase */}
@@ -26,22 +56,58 @@ export function SectionCards() {
             Omset Ritase Berjalan
           </CardDescription>
           <CardTitle className="text-2xl font-bold tracking-tight text-foreground tabular-nums">
-            Rp 148.500.000
+            {formatCurrency(kpis.totalOmset)}
           </CardTitle>
           <CardAction>
-            <Badge
-              variant="outline"
-              className="gap-1 border-emerald-500/30 bg-emerald-500/10 text-xs font-medium text-emerald-600 dark:text-emerald-400"
-            >
-              <RiArrowUpLine className="size-3" />
-              +14.2%
-            </Badge>
+            {kpis.previousOmset > 0 ? (
+              <Badge
+                variant="outline"
+                className={`gap-1 text-xs font-medium ${
+                  isOmsetUp
+                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                    : "border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                }`}
+              >
+                {isOmsetUp ? (
+                  <RiArrowUpLine className="size-3" />
+                ) : (
+                  <RiArrowDownLine className="size-3" />
+                )}
+                {isOmsetUp
+                  ? `+${omsetPct.toFixed(1)}%`
+                  : `${omsetPct.toFixed(1)}%`}
+              </Badge>
+            ) : (
+              <Badge
+                variant="outline"
+                className="border-muted bg-muted/50 text-xs font-medium text-muted-foreground"
+              >
+                Bulan baru
+              </Badge>
+            )}
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1 pt-2 text-xs">
-          <div className="flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400">
-            <span>Tren naik dibanding Mei</span>
-            <RiArrowUpLine className="size-3.5" />
+          <div
+            className={`flex items-center gap-1.5 font-medium ${
+              kpis.previousOmset === 0
+                ? "text-muted-foreground"
+                : isOmsetUp
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : "text-rose-600 dark:text-rose-400"
+            }`}
+          >
+            <span>
+              {kpis.previousOmset === 0
+                ? "Periode bulan pertama tercatat"
+                : `Tren ${isOmsetUp ? "naik" : "turun"} dibanding bulan lalu`}
+            </span>
+            {kpis.previousOmset > 0 &&
+              (isOmsetUp ? (
+                <RiArrowUpLine className="size-3.5" />
+              ) : (
+                <RiArrowDownLine className="size-3.5" />
+              ))}
           </div>
           <div className="text-muted-foreground">
             Akumulasi ritase PT Semen Indonesia & SBI
@@ -56,24 +122,33 @@ export function SectionCards() {
             Ritase Selesai
           </CardDescription>
           <CardTitle className="text-2xl font-bold tracking-tight text-foreground tabular-nums">
-            42 Rit
+            {kpis.totalTrips} Rit
           </CardTitle>
           <CardAction>
-            <Badge
-              variant="outline"
-              className="gap-1 border-blue-500/30 bg-blue-500/10 text-xs font-medium text-blue-600 dark:text-blue-400"
-            >
-              <RiCheckLine className="size-3" />
-              +8 rit
-            </Badge>
+            {kpis.previousTrips > 0 ? (
+              <Badge
+                variant="outline"
+                className="gap-1 border-blue-500/30 bg-blue-500/10 text-xs font-medium text-blue-600 dark:text-blue-400"
+              >
+                <RiCheckLine className="size-3" />
+                {tripDiff >= 0 ? `+${tripDiff} rit` : `${tripDiff} rit`}
+              </Badge>
+            ) : (
+              <Badge
+                variant="outline"
+                className="border-muted bg-muted/50 text-xs font-medium text-muted-foreground"
+              >
+                Bulan baru
+              </Badge>
+            )}
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1 pt-2 text-xs">
           <div className="flex items-center gap-1.5 font-medium text-blue-600 dark:text-blue-400">
-            <span>Target 50 rit/bulan tercapai 84%</span>
+            <span>Target 50 rit/bulan tercapai {targetPct}%</span>
           </div>
           <div className="text-muted-foreground">
-            W 8187 UA (24 rit) & H 8133 OF (18 rit)
+            W 8187 UA ({wRit} rit) & H 8133 OF ({hRit} rit)
           </div>
         </CardFooter>
       </Card>
@@ -85,7 +160,7 @@ export function SectionCards() {
             Sangu Supir & Solar Jatah
           </CardDescription>
           <CardTitle className="text-2xl font-bold tracking-tight text-foreground tabular-nums">
-            Rp 64.200.000
+            {formatCurrency(kpis.totalSangu)}
           </CardTitle>
           <CardAction>
             <Badge
@@ -93,7 +168,7 @@ export function SectionCards() {
               className="gap-1 border-amber-500/30 bg-amber-500/10 text-xs font-medium text-amber-600 dark:text-amber-400"
             >
               <RiGasStationLine className="size-3" />
-              43.2%
+              {sanguRatio.toFixed(1)}%
             </Badge>
           </CardAction>
         </CardHeader>
@@ -114,7 +189,7 @@ export function SectionCards() {
             Estimasi Laba Berjalan
           </CardDescription>
           <CardTitle className="text-2xl font-bold tracking-tight text-foreground tabular-nums">
-            Rp 84.300.000
+            {formatCurrency(kpis.estimasiLaba)}
           </CardTitle>
           <CardAction>
             <Badge
@@ -122,13 +197,13 @@ export function SectionCards() {
               className="gap-1 border-emerald-500/30 bg-emerald-500/10 text-xs font-medium text-emerald-600 dark:text-emerald-400"
             >
               <RiMoneyDollarCircleLine className="size-3" />
-              56.8%
+              {marginRatio.toFixed(1)}%
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1 pt-2 text-xs">
           <div className="flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400">
-            <span>Margin sebelum biaya servis bengkel</span>
+            <span>Margin operasional setelah sangu & biaya</span>
           </div>
           <div className="text-muted-foreground">
             Siap rekonsiliasi saat tutup buku bulanan

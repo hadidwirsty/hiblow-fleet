@@ -27,106 +27,32 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { formatCurrency, formatDateIndonesian } from "@/lib/utils"
+import type { RecentTripRow } from "@/features/dashboard/dashboard.queries"
 
-export interface TripRow {
-  id: string
-  tripNumber: string
-  date: string
-  truck: string
-  driver: string
-  origin: string
-  destination: string
-  tonnage: number
-  sangu: number
-  omset: number
-  status: "completed" | "in_transit" | "loading"
+export interface DataTableProps {
+  trips: RecentTripRow[]
 }
 
-const DEFAULT_DATA: TripRow[] = [
-  {
-    id: "trip-1",
-    tripNumber: "HW-2026-0601",
-    date: "30 Jun 2026",
-    truck: "W 8187 UA",
-    driver: "Pak Tris",
-    origin: "SBI Tuban",
-    destination: "Batching Plant Gresik",
-    tonnage: 28.5,
-    sangu: 1650000,
-    omset: 3705000,
-    status: "completed",
-  },
-  {
-    id: "trip-2",
-    tripNumber: "HW-2026-0602",
-    date: "29 Jun 2026",
-    truck: "H 8133 OF",
-    driver: "Mas Didik",
-    origin: "Semen Indonesia Tuban",
-    destination: "Proyek Tol Solo-Yogya",
-    tonnage: 31.2,
-    sangu: 2100000,
-    omset: 4680000,
-    status: "completed",
-  },
-  {
-    id: "trip-3",
-    tripNumber: "HW-2026-0603",
-    date: "28 Jun 2026",
-    truck: "W 8187 UA",
-    driver: "Pak Tris",
-    origin: "SBI Tuban",
-    destination: "Precast Mojokerto",
-    tonnage: 29.0,
-    sangu: 1800000,
-    omset: 3915000,
-    status: "completed",
-  },
-  {
-    id: "trip-4",
-    tripNumber: "HW-2026-0604",
-    date: "27 Jun 2026",
-    truck: "H 8133 OF",
-    driver: "Mas Didik",
-    origin: "Semen Grobogan",
-    destination: "Waskita Semarang",
-    tonnage: 30.5,
-    sangu: 1500000,
-    omset: 3660000,
-    status: "completed",
-  },
-  {
-    id: "trip-5",
-    tripNumber: "HW-2026-0605",
-    date: "26 Jun 2026",
-    truck: "W 8187 UA",
-    driver: "Pak Tris",
-    origin: "SBI Tuban",
-    destination: "Varia Usaha Sidoarjo",
-    tonnage: 27.8,
-    sangu: 1750000,
-    omset: 3614000,
-    status: "completed",
-  },
-]
+const DRIVER_MAP: Record<string, string> = {
+  W8187UA: "Pak Tris (Sutrisno)",
+  H8133OF: "Mas Didik (Nurhadi)",
+}
 
-export function DataTable({ data = DEFAULT_DATA }: { data?: TripRow[] }) {
+export function DataTable({ trips = [] }: DataTableProps) {
   const [filter, setFilter] = React.useState("")
 
-  const filtered = data.filter(
-    (item) =>
-      item.tripNumber.toLowerCase().includes(filter.toLowerCase()) ||
-      item.truck.toLowerCase().includes(filter.toLowerCase()) ||
-      item.driver.toLowerCase().includes(filter.toLowerCase()) ||
-      item.destination.toLowerCase().includes(filter.toLowerCase())
-  )
-
-  const formatRupiah = (value: number) =>
-    new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      maximumFractionDigits: 0,
-    }).format(value)
+  const filtered = trips.filter((item) => {
+    const q = filter.toLowerCase()
+    const driver = DRIVER_MAP[item.truckId] ?? ""
+    return (
+      String(item.orderNumber).toLowerCase().includes(q) ||
+      item.truckId.toLowerCase().includes(q) ||
+      item.destinationCity.toLowerCase().includes(q) ||
+      item.destinationName.toLowerCase().includes(q) ||
+      driver.toLowerCase().includes(q)
+    )
+  })
 
   return (
     <Card className="border-border bg-card/60 shadow-xs backdrop-blur-xs">
@@ -144,7 +70,7 @@ export function DataTable({ data = DEFAULT_DATA }: { data?: TripRow[] }) {
           <div className="relative w-48 sm:w-64">
             <RiSearchLine className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Cari truk, supir, rute..."
+              placeholder="Cari truk, rute, tujuan..."
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
               className="h-9 pl-8 text-xs shadow-none"
@@ -199,8 +125,14 @@ export function DataTable({ data = DEFAULT_DATA }: { data?: TripRow[] }) {
                     colSpan={7}
                     className="h-24 text-center text-xs text-muted-foreground"
                   >
-                    Tidak ada ritase yang cocok dengan kata kunci &quot;{filter}
-                    &quot;.
+                    {filter ? (
+                      <>
+                        Tidak ada ritase yang cocok dengan kata kunci &quot;
+                        {filter}&quot;.
+                      </>
+                    ) : (
+                      "Belum ada aktivitas ritase tercatat."
+                    )}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -210,38 +142,38 @@ export function DataTable({ data = DEFAULT_DATA }: { data?: TripRow[] }) {
                     className="text-xs transition-colors hover:bg-muted/40"
                   >
                     <TableCell className="font-mono font-medium">
-                      <span>{row.tripNumber}</span>
+                      <span>DO #{row.orderNumber}</span>
                       <span className="block text-[11px] font-normal text-muted-foreground">
-                        {row.date}
+                        {formatDateIndonesian(row.orderDate, true)}
                       </span>
                     </TableCell>
                     <TableCell>
                       <span className="font-mono font-bold text-foreground">
-                        {row.truck}
+                        {row.truckId}
                       </span>
                       <span className="block text-[11px] text-muted-foreground">
-                        {row.driver}
+                        {DRIVER_MAP[row.truckId] ?? "Supir"}
                       </span>
                     </TableCell>
                     <TableCell>
                       <span className="font-medium text-foreground">
-                        {row.destination}
+                        {row.destinationName}
                       </span>
                       <span className="block text-[11px] text-muted-foreground">
-                        Asal: {row.origin}
+                        Kota: {row.destinationCity}
                       </span>
                     </TableCell>
                     <TableCell className="text-right font-mono font-medium tabular-nums">
-                      {row.tonnage.toFixed(1)} Ton
+                      {Number(row.unloadedTonnage).toFixed(1)} Ton
                     </TableCell>
                     <TableCell className="text-right font-mono font-medium text-foreground tabular-nums">
-                      {formatRupiah(row.sangu)}
+                      {formatCurrency(Number(row.sangu))}
                     </TableCell>
                     <TableCell className="text-right font-mono font-bold text-emerald-600 tabular-nums dark:text-emerald-400">
-                      {formatRupiah(row.omset)}
+                      {formatCurrency(Number(row.omset))}
                     </TableCell>
                     <TableCell className="text-center">
-                      {row.status === "completed" ? (
+                      {row.unloadingDate ? (
                         <Badge
                           variant="outline"
                           className="gap-1 border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400"

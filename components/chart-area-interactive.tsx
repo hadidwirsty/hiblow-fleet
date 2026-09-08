@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 "use client"
 
 import * as React from "react"
@@ -27,41 +26,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import type { ChartDataPoint } from "@/features/dashboard/dashboard.queries"
 
-export const description = "Grafik aktivitas ritase armada HW Trans"
-
-const chartData = [
-  { date: "2026-06-01", w8187ua: 2, h8133of: 1 },
-  { date: "2026-06-02", w8187ua: 3, h8133of: 2 },
-  { date: "2026-06-03", w8187ua: 1, h8133of: 2 },
-  { date: "2026-06-04", w8187ua: 2, h8133of: 2 },
-  { date: "2026-06-05", w8187ua: 3, h8133of: 1 },
-  { date: "2026-06-06", w8187ua: 2, h8133of: 2 },
-  { date: "2026-06-07", w8187ua: 1, h8133of: 1 },
-  { date: "2026-06-08", w8187ua: 2, h8133of: 3 },
-  { date: "2026-06-09", w8187ua: 3, h8133of: 2 },
-  { date: "2026-06-10", w8187ua: 2, h8133of: 2 },
-  { date: "2026-06-11", w8187ua: 2, h8133of: 1 },
-  { date: "2026-06-12", w8187ua: 3, h8133of: 2 },
-  { date: "2026-06-13", w8187ua: 1, h8133of: 2 },
-  { date: "2026-06-14", w8187ua: 2, h8133of: 1 },
-  { date: "2026-06-15", w8187ua: 3, h8133of: 3 },
-  { date: "2026-06-16", w8187ua: 2, h8133of: 2 },
-  { date: "2026-06-17", w8187ua: 3, h8133of: 1 },
-  { date: "2026-06-18", w8187ua: 2, h8133of: 2 },
-  { date: "2026-06-19", w8187ua: 1, h8133of: 2 },
-  { date: "2026-06-20", w8187ua: 2, h8133of: 2 },
-  { date: "2026-06-21", w8187ua: 3, h8133of: 1 },
-  { date: "2026-06-22", w8187ua: 2, h8133of: 2 },
-  { date: "2026-06-23", w8187ua: 1, h8133of: 3 },
-  { date: "2026-06-24", w8187ua: 3, h8133of: 2 },
-  { date: "2026-06-25", w8187ua: 2, h8133of: 2 },
-  { date: "2026-06-26", w8187ua: 3, h8133of: 1 },
-  { date: "2026-06-27", w8187ua: 2, h8133of: 2 },
-  { date: "2026-06-28", w8187ua: 1, h8133of: 2 },
-  { date: "2026-06-29", w8187ua: 2, h8133of: 1 },
-  { date: "2026-06-30", w8187ua: 3, h8133of: 2 },
-]
+export interface ChartAreaInteractiveProps {
+  data: ChartDataPoint[]
+}
 
 const chartConfig = {
   trips: {
@@ -77,29 +46,25 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function ChartAreaInteractive() {
+export function ChartAreaInteractive({ data = [] }: ChartAreaInteractiveProps) {
   const isMobile = useIsMobile()
-  const [timeRange, setTimeRange] = React.useState("30d")
+  const [selectedRange, setSelectedRange] = React.useState<string | null>(null)
+  const timeRange = selectedRange ?? (isMobile ? "7d" : "30d")
 
-  React.useEffect(() => {
-    if (isMobile) {
-      setTimeRange("7d")
-    }
-  }, [isMobile])
+  const filteredData = React.useMemo(() => {
+    if (!data || data.length === 0) return []
+    if (timeRange === "7d") return data.slice(-7)
+    if (timeRange === "14d") return data.slice(-14)
+    return data
+  }, [data, timeRange])
 
-  const filteredData = chartData.filter((item) => {
-    const date = new Date(item.date)
-    const referenceDate = new Date("2026-06-30")
-    let daysToSubtract = 30
-    if (timeRange === "14d") {
-      daysToSubtract = 14
-    } else if (timeRange === "7d") {
-      daysToSubtract = 7
-    }
-    const startDate = new Date(referenceDate)
-    startDate.setDate(startDate.getDate() - daysToSubtract)
-    return date >= startDate
-  })
+  const maxVal = React.useMemo(() => {
+    if (filteredData.length === 0) return 4
+    const highest = Math.max(
+      ...filteredData.map((d) => (d.w8187ua ?? 0) + (d.h8133of ?? 0))
+    )
+    return Math.max(4, highest + 1)
+  }, [filteredData])
 
   return (
     <Card className="border-border bg-card/60 shadow-xs backdrop-blur-xs">
@@ -131,7 +96,7 @@ export function ChartAreaInteractive() {
             multiple={false}
             value={timeRange ? [timeRange] : []}
             onValueChange={(value) => {
-              setTimeRange(value[0] ?? "30d")
+              setSelectedRange(value[0] ?? (isMobile ? "7d" : "30d"))
             }}
             variant="outline"
             className="hidden rounded-lg p-0.5 *:data-[slot=toggle-group-item]:h-7 *:data-[slot=toggle-group-item]:px-3 *:data-[slot=toggle-group-item]:text-xs @[767px]/card:flex"
@@ -144,7 +109,7 @@ export function ChartAreaInteractive() {
             value={timeRange}
             onValueChange={(value) => {
               if (value !== null) {
-                setTimeRange(value)
+                setSelectedRange(value)
               }
             }}
           >
@@ -230,7 +195,7 @@ export function ChartAreaInteractive() {
               axisLine={false}
               tickMargin={6}
               allowDecimals={false}
-              domain={[0, 6]}
+              domain={[0, maxVal]}
               tickFormatter={(val) => `${val} rit`}
               className="text-xs text-muted-foreground"
             />
