@@ -86,7 +86,36 @@ const data = {
   ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  user?: {
+    name?: string | null
+    email?: string | null
+    role?: string | null
+  }
+  isAdmin?: boolean
+}
+
+export function AppSidebar({
+  user,
+  isAdmin = false,
+  ...props
+}: AppSidebarProps) {
+  const navMainItems = isAdmin
+    ? data.navMain
+    : data.navMain.filter((item) => item.url === "/profit-sharing")
+
+  const navSecondaryItems = isAdmin
+    ? data.navSecondary
+    : data.navSecondary.filter((item) => item.url !== "/rates")
+
+  const currentUser = {
+    name: user?.name ?? (isAdmin ? "Mas Hafidz" : "Investor"),
+    email: user?.email ?? "",
+    role: isAdmin ? "Admin" : "Partner",
+  }
+
+  const brandHref = isAdmin ? "/dashboard" : "/profit-sharing"
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -95,7 +124,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton
               size="lg"
               render={
-                <Link href="/dashboard" className="flex items-center gap-3">
+                <Link href={brandHref} className="flex items-center gap-3">
                   <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
                     <RiTruckLine className="size-4.5" />
                   </div>
@@ -115,13 +144,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
 
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavDocuments items={data.armada} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavMain items={navMainItems} />
+        {isAdmin && <NavDocuments items={data.armada} />}
+        <NavSecondary items={navSecondaryItems} className="mt-auto" />
       </SidebarContent>
 
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={currentUser} />
       </SidebarFooter>
     </Sidebar>
   )

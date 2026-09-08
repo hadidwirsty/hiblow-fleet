@@ -39,3 +39,35 @@ export function assertPartnerOrAdmin(
     throw new Error("FORBIDDEN_ACCESS_DENIED")
   }
 }
+
+export const ADMIN_ONLY_ROUTES = ["/dashboard", "/trips", "/expenses", "/rates"]
+
+/**
+ * Determines redirect destination based on authentication status, role, and current pathname.
+ * Returns null if the user is authorized to view the requested pathname.
+ */
+export function determineRedirectPath(
+  role: string | null | undefined,
+  pathname: string,
+  isAuthenticated: boolean
+): string | null {
+  if (!isAuthenticated) {
+    if (pathname === "/login") return null
+    return "/login"
+  }
+
+  // Authenticated user at login or root page
+  if (pathname === "/login" || pathname === "/") {
+    return role === "admin" ? "/dashboard" : "/profit-sharing"
+  }
+
+  // Admin-only route guard
+  const isAdminOnly = ADMIN_ONLY_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
+  )
+  if (isAdminOnly && role !== "admin") {
+    return "/profit-sharing"
+  }
+
+  return null
+}

@@ -30,9 +30,10 @@ import type { ProfitSharingPeriodDetail } from "./profit-sharing.queries"
 
 interface PeriodCardProps {
   period: ProfitSharingPeriodDetail
+  readOnly?: boolean
 }
 
-export function PeriodCard({ period }: PeriodCardProps) {
+export function PeriodCard({ period, readOnly = false }: PeriodCardProps) {
   const [isDetailOpen, setIsDetailOpen] = React.useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = React.useState(false)
   const [isDeleting, setIsDeleting] = React.useState(false)
@@ -152,15 +153,17 @@ export function PeriodCard({ period }: PeriodCardProps) {
             <RiFileTextLine className="size-3.5" />
             Rincian & Cetak
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8 shrink-0 text-muted-foreground hover:text-destructive"
-            onClick={() => setIsDeleteOpen(true)}
-            title="Hapus periode"
-          >
-            <RiDeleteBinLine className="size-4" />
-          </Button>
+          {!readOnly && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8 shrink-0 text-muted-foreground hover:text-destructive"
+              onClick={() => setIsDeleteOpen(true)}
+              title="Hapus periode"
+            >
+              <RiDeleteBinLine className="size-4" />
+            </Button>
+          )}
         </CardFooter>
       </Card>
 

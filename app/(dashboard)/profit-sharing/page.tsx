@@ -6,15 +6,26 @@ import {
 } from "@remixicon/react"
 
 import { Badge } from "@/components/ui/badge"
+import { PartnerProfitSharingView } from "@/features/profit-sharing/partner-profit-sharing-view"
 import { PeriodCard } from "@/features/profit-sharing/period-card"
 import { PeriodWizardDialog } from "@/features/profit-sharing/period-wizard-dialog"
 import { ProfitSharingEmptyState } from "@/features/profit-sharing/profit-sharing-empty-state"
 import { listProfitSharingPeriodsWithShares } from "@/features/profit-sharing/profit-sharing.queries"
+import { isAdmin } from "@/lib/rbac"
+import { getCurrentSession } from "@/lib/session"
 import { formatCurrency } from "@/lib/utils"
 
 export const dynamic = "force-dynamic"
 
 export default async function ProfitSharingPage() {
+  const session = await getCurrentSession()
+  const userIsAdmin = isAdmin(session?.user)
+
+  // Otorisasi: Tampilan khusus untuk Partner / Investor
+  if (!userIsAdmin) {
+    return <PartnerProfitSharingView user={session?.user} />
+  }
+
   const periods = await listProfitSharingPeriodsWithShares()
 
   const totalDistributedAllTime = periods.reduce(

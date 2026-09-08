@@ -1,10 +1,26 @@
+import { redirect } from "next/navigation"
 import type { CSSProperties, ReactNode } from "react"
 
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import { isAdmin } from "@/lib/rbac"
+import { getCurrentSession } from "@/lib/session"
 
-export default function DashboardLayout({ children }: { children: ReactNode }) {
+export default async function DashboardLayout({
+  children,
+}: {
+  children: ReactNode
+}) {
+  const session = await getCurrentSession()
+
+  if (!session?.user) {
+    redirect("/login")
+  }
+
+  const user = session.user
+  const userIsAdmin = isAdmin(user)
+
   return (
     <SidebarProvider
       style={
@@ -14,7 +30,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         } as CSSProperties
       }
     >
-      <AppSidebar variant="inset" />
+      <AppSidebar variant="inset" user={user} isAdmin={userIsAdmin} />
       <SidebarInset>
         <SiteHeader />
         <div className="flex flex-1 flex-col">

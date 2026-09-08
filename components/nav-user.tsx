@@ -1,5 +1,7 @@
 "use client"
 
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
 import {
   RiArrowUpDownLine,
@@ -26,6 +28,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { signOut } from "@/lib/auth-client"
 
 export interface NavUserProps {
   user: {
@@ -36,9 +39,33 @@ export interface NavUserProps {
   }
 }
 
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/)
+  if (parts.length >= 2 && parts[0] && parts[1]) {
+    return `${parts[0][0]}${parts[1][0]}`.toUpperCase()
+  }
+  return (name.slice(0, 2) || "U").toUpperCase()
+}
+
 export function NavUser({ user }: NavUserProps) {
+  const router = useRouter()
   const { isMobile } = useSidebar()
   const { resolvedTheme, setTheme } = useTheme()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+
+  const initials = getInitials(user.name)
+
+  async function handleSignOut() {
+    setIsLoggingOut(true)
+    try {
+      await signOut()
+      router.replace("/login")
+      router.refresh()
+    } catch (err) {
+      console.error("Gagal keluar:", err)
+      setIsLoggingOut(false)
+    }
+  }
 
   return (
     <SidebarMenu>
@@ -52,7 +79,7 @@ export function NavUser({ user }: NavUserProps) {
               >
                 <Avatar className="size-8 rounded-lg">
                   <AvatarFallback className="rounded-lg bg-primary/10 text-xs font-semibold text-primary">
-                    MH
+                    {initials}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -76,7 +103,7 @@ export function NavUser({ user }: NavUserProps) {
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                   <Avatar className="size-8 rounded-lg">
                     <AvatarFallback className="rounded-lg bg-primary/10 text-xs font-semibold text-primary">
-                      MH
+                      {initials}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
@@ -104,7 +131,7 @@ export function NavUser({ user }: NavUserProps) {
               </DropdownMenuItem>
               <DropdownMenuItem className="cursor-pointer gap-2">
                 <RiShieldUserLine className="size-4" />
-                <span>Hak Akses ({user.role ?? "Admin"})</span>
+                <span>Hak Akses ({user.role ?? "User"})</span>
               </DropdownMenuItem>
               <DropdownMenuItem className="cursor-pointer gap-2">
                 <RiSettings3Line className="size-4" />
@@ -112,9 +139,13 @@ export function NavUser({ user }: NavUserProps) {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer gap-2 text-destructive focus:text-destructive">
+            <DropdownMenuItem
+              className="cursor-pointer gap-2 text-destructive focus:text-destructive"
+              disabled={isLoggingOut}
+              onClick={handleSignOut}
+            >
               <RiLogoutBoxRLine className="size-4" />
-              <span>Keluar</span>
+              <span>{isLoggingOut ? "Keluar..." : "Keluar"}</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
