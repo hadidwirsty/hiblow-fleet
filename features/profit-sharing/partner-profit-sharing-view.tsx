@@ -74,21 +74,21 @@ export function PartnerProfitSharingView({
           <div className="space-y-6">
             {/* Kartu Sorotan Hak Dividen Personal Investor */}
             {myTotalDividend !== undefined && myTotalDividend > 0 && (
-              <div className="rounded-xl border-2 border-emerald-500/40 bg-emerald-500/5 p-4 shadow-xs">
+              <div className="rounded-xl border-2 border-emerald-500/40 bg-emerald-500/5 p-4 shadow-xs sm:p-6">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                    <p className="text-xs font-medium text-emerald-700 sm:text-sm dark:text-emerald-400">
                       Total Hak Dividen Anda (All-Time)
                     </p>
-                    <p className="text-2xl font-bold text-emerald-600 tabular-nums dark:text-emerald-400">
+                    <p className="text-xl font-bold text-emerald-600 tabular-nums sm:text-3xl dark:text-emerald-400">
                       {formatCurrency(myTotalDividend)}
                     </p>
                   </div>
-                  <div className="flex size-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                    <RiHandCoinLine className="size-6" />
+                  <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 sm:size-12 dark:text-emerald-400">
+                    <RiHandCoinLine className="size-5 sm:size-6" />
                   </div>
                 </div>
-                <p className="mt-1.5 text-xs text-muted-foreground">
+                <p className="mt-1.5 text-[11px] text-muted-foreground sm:text-xs">
                   Akumulasi dividen resmi dari seluruh periode bagi hasil yang
                   sudah finalized
                 </p>
@@ -96,33 +96,33 @@ export function PartnerProfitSharingView({
             )}
 
             {/* Top Stat Cards */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="rounded-xl border bg-card p-4 shadow-sm">
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
+              <div className="rounded-xl border bg-card p-3 shadow-xs sm:p-4">
                 <div className="flex items-center justify-between text-muted-foreground">
-                  <span className="text-xs font-medium">
-                    Periode Tutup Buku Resmi
+                  <span className="text-[11px] font-medium sm:text-xs">
+                    Periode Resmi
                   </span>
-                  <RiTimeLine className="size-4" />
+                  <RiTimeLine className="size-3.5 sm:size-4" />
                 </div>
-                <div className="mt-2 flex items-baseline gap-2">
-                  <span className="text-2xl font-bold text-foreground">
+                <div className="mt-1.5 flex items-baseline gap-1.5 sm:mt-2 sm:gap-2">
+                  <span className="text-xl font-bold text-foreground sm:text-2xl">
                     {finalizedPeriods.length}
                   </span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-[10px] text-muted-foreground sm:text-xs">
                     Siklus Final
                   </span>
                 </div>
               </div>
 
-              <div className="rounded-xl border bg-card p-4 shadow-sm">
+              <div className="rounded-xl border bg-card p-3 shadow-xs sm:p-4">
                 <div className="flex items-center justify-between text-muted-foreground">
-                  <span className="text-xs font-medium">
-                    Total Dividen Dibagikan
+                  <span className="text-[11px] font-medium sm:text-xs">
+                    Total Dividen
                   </span>
-                  <RiHandCoinLine className="size-4 text-emerald-500" />
+                  <RiHandCoinLine className="size-3.5 text-emerald-500 sm:size-4" />
                 </div>
-                <div className="mt-2 flex items-baseline gap-2">
-                  <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                <div className="mt-1.5 flex items-baseline gap-1.5 sm:mt-2 sm:gap-2">
+                  <span className="text-lg font-bold text-emerald-600 sm:text-2xl dark:text-emerald-400">
                     {formatCurrency(totalDistributed)}
                   </span>
                 </div>

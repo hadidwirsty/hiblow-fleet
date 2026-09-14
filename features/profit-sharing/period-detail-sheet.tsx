@@ -123,11 +123,11 @@ export function PeriodDetailSheet({
         className="w-full overflow-y-auto p-0 sm:max-w-2xl print:max-w-full print:overflow-visible print:p-0"
       >
         {/* Sheet Top Header */}
-        <div className="border-b bg-muted/40 p-6 print:border-b-2 print:p-4">
-          <div className="flex items-start justify-between gap-4">
+        <div className="border-b bg-muted/40 p-4 sm:p-6 print:border-b-2 print:p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <SheetTitle className="text-xl font-bold tracking-tight">
+                <SheetTitle className="text-lg font-bold tracking-tight sm:text-xl">
                   {period.title}
                 </SheetTitle>
                 <Badge
@@ -178,17 +178,17 @@ export function PeriodDetailSheet({
                 />
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuItem
+                    className="cursor-pointer gap-2 text-xs"
                     onClick={handleExportExcel}
-                    className="flex cursor-pointer items-center gap-2 text-xs"
                   >
                     <RiFileExcelLine className="size-4 text-emerald-600 dark:text-emerald-400" />
                     <span>Download Excel (.xlsx)</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem
+                    className="cursor-pointer gap-2 text-xs"
                     onClick={handleExportCsv}
-                    className="flex cursor-pointer items-center gap-2 text-xs"
                   >
-                    <RiFileLine className="size-4 text-sky-600 dark:text-sky-400" />
+                    <RiFileLine className="size-4 text-muted-foreground" />
                     <span>Download CSV (.csv)</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -208,7 +208,7 @@ export function PeriodDetailSheet({
         </div>
 
         {/* Printable Content Body */}
-        <div className="space-y-6 p-6 print:space-y-4 print:p-6">
+        <div className="space-y-6 p-4 sm:p-6 print:space-y-4 print:p-6">
           {/* Printable Header Letterhead */}
           <div className="mb-4 hidden border-b pb-4 text-center print:block">
             <h2 className="text-lg font-bold tracking-wider uppercase">

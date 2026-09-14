@@ -94,13 +94,13 @@ export function MaintenanceRemindersWidget({
           return (
             <div
               key={reminder.id}
-              className="flex items-center justify-between gap-3 bg-card px-4 py-3"
+              className="flex items-center justify-between gap-2.5 bg-card px-3 py-2.5 sm:gap-3 sm:px-4 sm:py-3"
             >
-              <div className="min-w-0 space-y-0.5">
-                <p className="truncate text-sm font-medium text-foreground">
+              <div className="min-w-0 flex-1 space-y-0.5">
+                <p className="truncate text-xs font-semibold text-foreground sm:text-sm">
                   {reminder.label}
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="truncate text-[10px] text-muted-foreground sm:text-xs">
                   {reminder.truckId} ·{" "}
                   {TYPE_LABELS[reminder.reminderType] ?? reminder.reminderType}{" "}
                   · {formatDateIndonesian(reminder.dueDate, true)}
@@ -109,12 +109,12 @@ export function MaintenanceRemindersWidget({
               <div className="flex shrink-0 flex-col items-end gap-1">
                 <Badge
                   variant="outline"
-                  className={`gap-1 text-[11px] font-medium ${config.className}`}
+                  className={`gap-1 px-1.5 py-0.5 text-[10px] font-medium sm:text-[11px] ${config.className}`}
                 >
                   {config.icon}
                   {config.label}
                 </Badge>
-                <span className="text-xs text-muted-foreground tabular-nums">
+                <span className="text-[10px] text-muted-foreground tabular-nums sm:text-xs">
                   {daysText}
                 </span>
               </div>

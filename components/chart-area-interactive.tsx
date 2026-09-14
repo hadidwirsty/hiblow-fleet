@@ -135,14 +135,14 @@ export function ChartAreaInteractive({ data = [] }: ChartAreaInteractiveProps) {
         </CardAction>
       </CardHeader>
 
-      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-4">
+      <CardContent className="px-1 pt-2 sm:px-6 sm:pt-4">
         <ChartContainer
           config={chartConfig}
-          className="aspect-auto h-72 w-full"
+          className="aspect-auto h-60 w-full sm:h-75 lg:h-87.5"
         >
           <AreaChart
             data={filteredData}
-            margin={{ left: -10, right: 10, top: 10, bottom: 0 }}
+            margin={{ left: -15, right: 10, top: 10, bottom: 0 }}
           >
             <defs>
               <linearGradient id="fillW8187" x1="0" y1="0" x2="0" y2="1">

@@ -53,6 +53,7 @@ import {
   toggleRateReferenceStatus,
 } from "@/features/rates/rates.actions"
 import { RateFormDialog } from "@/features/rates/rate-form-dialog"
+import { RateMobileCard } from "@/features/rates/rate-mobile-card"
 import { formatCurrency } from "@/lib/utils"
 
 interface RatesTableProps {
@@ -129,13 +130,13 @@ export function RatesTable({ rates, distinctClients }: RatesTableProps) {
     try {
       const res = await deleteRateReference(deletingRate.id)
       if (res.success) {
-        toast.success("Rute tarif berhasil dihapus")
+        toast.success(`Rute ${deletingRate.destination} berhasil dihapus`)
         setDeletingRate(null)
       } else {
         toast.error(res.error)
       }
     } catch {
-      toast.error("Terjadi kesalahan saat menghapus rute")
+      toast.error("Gagal menghapus rute")
     } finally {
       setIsDeleting(false)
     }
@@ -144,9 +145,9 @@ export function RatesTable({ rates, distinctClients }: RatesTableProps) {
   return (
     <div className="space-y-4">
       {/* Search & Filter Toolbar */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="relative max-w-sm flex-1">
-          <RiSearchLine className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+          <RiSearchLine className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}
             onChange={(e) => {
@@ -158,7 +159,7 @@ export function RatesTable({ rates, distinctClients }: RatesTableProps) {
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-2.5">
           {/* Filter Klien */}
           <div className="flex items-center gap-1.5">
             <RiFilterLine className="hidden size-4 text-muted-foreground sm:inline" />
@@ -171,7 +172,7 @@ export function RatesTable({ rates, distinctClients }: RatesTableProps) {
                 }
               }}
             >
-              <SelectTrigger className="h-9 w-40 text-xs">
+              <SelectTrigger className="h-9 w-full text-xs sm:w-40">
                 <SelectValue placeholder="Pabrik Klien" />
               </SelectTrigger>
               <SelectContent>
@@ -197,7 +198,7 @@ export function RatesTable({ rates, distinctClients }: RatesTableProps) {
               }
             }}
           >
-            <SelectTrigger className="h-9 w-32.5 text-xs">
+            <SelectTrigger className="h-9 w-full text-xs sm:w-32.5">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -214,35 +215,56 @@ export function RatesTable({ rates, distinctClients }: RatesTableProps) {
           </Select>
 
           {/* Page Size */}
-          <Select
-            value={pageSize.toString()}
-            onValueChange={(val) => {
-              if (val) {
-                setPageSize(Number(val))
-                setCurrentPage(1)
-              }
-            }}
-          >
-            <SelectTrigger className="h-9 w-27.5 text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="10" className="text-xs">
-                10 baris
-              </SelectItem>
-              <SelectItem value="25" className="text-xs">
-                25 baris
-              </SelectItem>
-              <SelectItem value="50" className="text-xs">
-                50 baris
-              </SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="col-span-2 sm:col-auto">
+            <Select
+              value={pageSize.toString()}
+              onValueChange={(val) => {
+                if (val) {
+                  setPageSize(Number(val))
+                  setCurrentPage(1)
+                }
+              }}
+            >
+              <SelectTrigger className="h-9 w-full text-xs sm:w-27.5">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10" className="text-xs">
+                  10 baris
+                </SelectItem>
+                <SelectItem value="25" className="text-xs">
+                  25 baris
+                </SelectItem>
+                <SelectItem value="50" className="text-xs">
+                  50 baris
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
-      {/* Table Container */}
-      <div className="overflow-hidden rounded-xl border bg-card shadow-xs">
+      {/* Mobile Cards View (< md) */}
+      <div className="block space-y-3 md:hidden">
+        {paginatedRates.length === 0 ? (
+          <div className="rounded-xl border bg-card p-6 text-center text-sm text-muted-foreground">
+            Tidak ada referensi tarif yang sesuai dengan pencarian.
+          </div>
+        ) : (
+          paginatedRates.map((rate) => (
+            <RateMobileCard
+              key={rate.id}
+              rate={rate}
+              onEdit={setEditingRate}
+              onToggleStatus={handleToggleStatus}
+              onDelete={setDeletingRate}
+            />
+          ))
+        )}
+      </div>
+
+      {/* Desktop Table Container (>= md) */}
+      <div className="hidden overflow-hidden rounded-xl border bg-card shadow-xs md:block">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader className="bg-muted/40">
@@ -407,46 +429,44 @@ export function RatesTable({ rates, distinctClients }: RatesTableProps) {
             </TableBody>
           </Table>
         </div>
+      </div>
 
-        {/* Pagination Footer */}
-        <div className="flex items-center justify-between border-t bg-muted/20 px-4 py-3 text-xs text-muted-foreground">
-          <div>
-            Menampilkan{" "}
-            <strong>
-              {filteredRates.length === 0
-                ? 0
-                : (currentPage - 1) * pageSize + 1}
-            </strong>{" "}
-            -{" "}
-            <strong>
-              {Math.min(currentPage * pageSize, filteredRates.length)}
-            </strong>{" "}
-            dari <strong>{filteredRates.length}</strong> rute
-          </div>
+      {/* Pagination Footer (Mobile & Desktop) */}
+      <div className="flex flex-col items-center justify-between gap-3 rounded-xl border bg-card p-3 text-xs text-muted-foreground shadow-xs sm:flex-row sm:px-4">
+        <div>
+          Menampilkan{" "}
+          <strong>
+            {filteredRates.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}
+          </strong>{" "}
+          -{" "}
+          <strong>
+            {Math.min(currentPage * pageSize, filteredRates.length)}
+          </strong>{" "}
+          dari <strong>{filteredRates.length}</strong> rute
+        </div>
 
-          <div className="flex items-center gap-1.5">
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7 px-2.5 text-xs"
-              disabled={currentPage <= 1}
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            >
-              Sebelumnya
-            </Button>
-            <span className="px-2 font-medium text-foreground">
-              {currentPage} / {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7 px-2.5 text-xs"
-              disabled={currentPage >= totalPages}
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            >
-              Selanjutnya
-            </Button>
-          </div>
+        <div className="flex items-center gap-1.5">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 px-2.5 text-xs"
+            disabled={currentPage <= 1}
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+          >
+            Sebelumnya
+          </Button>
+          <span className="px-2 font-medium text-foreground">
+            {currentPage} / {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 px-2.5 text-xs"
+            disabled={currentPage >= totalPages}
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+          >
+            Selanjutnya
+          </Button>
         </div>
       </div>
 

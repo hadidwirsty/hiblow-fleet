@@ -286,22 +286,22 @@ export function PeriodWizardDialog({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto p-0">
           {/* Header with Step Tracker */}
-          <div className="border-b bg-muted/40 p-6">
-            <div className="flex items-center justify-between gap-4">
+          <div className="border-b bg-muted/40 p-4 sm:p-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <div className="space-y-1">
-                <DialogTitle className="flex items-center gap-2 text-xl font-bold">
+                <DialogTitle className="flex items-center gap-2 text-lg font-bold sm:text-xl">
                   <RiHandCoinLine className="size-5 text-primary" />
                   {step === 1
                     ? "Pilih Periode Tutup Buku"
                     : "Konfigurasi Pemodal & Laba"}
                 </DialogTitle>
-                <DialogDescription>
+                <DialogDescription className="text-xs">
                   {step === 1
                     ? "Tentukan rentang tanggal cut-off ritase dan biaya operasional armada"
                     : "Sesuaikan daftar investor, modal disetor, dan periksa alokasi laba bersih"}
                 </DialogDescription>
               </div>
-              <div className="flex items-center gap-1.5 rounded-full border bg-background/80 px-3 py-1 text-xs font-semibold">
+              <div className="flex items-center gap-1.5 self-start rounded-full border bg-background/80 px-2.5 py-1 text-[11px] font-semibold sm:self-auto sm:px-3 sm:text-xs">
                 <span
                   className={
                     step === 1
@@ -326,7 +326,7 @@ export function PeriodWizardDialog({
           </div>
 
           {/* Form Body */}
-          <div className="space-y-6 p-6">
+          <div className="space-y-5 p-4 sm:space-y-6 sm:p-6">
             {step === 1 && (
               <div className="animate-in space-y-5 fade-in-50">
                 {/* Presets */}

@@ -76,7 +76,7 @@ export function DashboardRouteChart({ data }: DashboardRouteChartProps) {
       <BarChart
         data={data}
         layout="vertical"
-        margin={{ top: 4, right: 16, left: 4, bottom: 4 }}
+        margin={{ top: 4, right: 12, left: -8, bottom: 4 }}
       >
         <CartesianGrid
           horizontal={false}
@@ -86,7 +86,7 @@ export function DashboardRouteChart({ data }: DashboardRouteChartProps) {
         <XAxis
           type="number"
           dataKey="tripCount"
-          tick={{ fontSize: 11 }}
+          tick={{ fontSize: 10 }}
           tickLine={false}
           axisLine={false}
           tickFormatter={(v) => `${v} rit`}
@@ -95,8 +95,8 @@ export function DashboardRouteChart({ data }: DashboardRouteChartProps) {
         <YAxis
           type="category"
           dataKey="label"
-          width={90}
-          tick={{ fontSize: 11 }}
+          width={80}
+          tick={{ fontSize: 10 }}
           tickLine={false}
           axisLine={false}
           className="text-muted-foreground"

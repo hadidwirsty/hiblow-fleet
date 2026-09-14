@@ -45,47 +45,49 @@ export function ExpensesCategoryChart({
 
   return (
     <div className="space-y-4">
-      <ResponsiveContainer width="100%" height={280}>
-        <PieChart>
-          <Pie
-            data={data}
-            cx="50%"
-            cy="50%"
-            innerRadius={70}
-            outerRadius={110}
-            paddingAngle={2}
-            dataKey="total"
-            nameKey="category"
-          >
-            {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.fill} strokeWidth={0} />
-            ))}
-          </Pie>
-          <Tooltip content={<CustomTooltip />} />
-        </PieChart>
-      </ResponsiveContainer>
+      <div className="h-55 w-full sm:h-65">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={data}
+              cx="50%"
+              cy="50%"
+              innerRadius={55}
+              outerRadius={95}
+              paddingAngle={2}
+              dataKey="total"
+              nameKey="category"
+            >
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.fill} strokeWidth={0} />
+              ))}
+            </Pie>
+            <Tooltip content={<CustomTooltip />} />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
 
       {/* Legend table */}
-      <div className="space-y-1.5">
+      <div className="space-y-1">
         {data.map((item) => (
           <div
             key={item.category}
-            className="flex items-center justify-between rounded-md px-2 py-1.5 text-sm hover:bg-muted/50"
+            className="flex items-center justify-between rounded-md px-2 py-1 text-xs hover:bg-muted/50 sm:py-1.5 sm:text-sm"
           >
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2">
               <span
-                className="size-2.5 shrink-0 rounded-full"
+                className="size-2 shrink-0 rounded-full sm:size-2.5"
                 style={{ backgroundColor: item.fill }}
               />
               <span className="font-medium text-foreground">
                 {item.category}
               </span>
             </div>
-            <div className="flex items-center gap-3 text-right">
-              <span className="text-muted-foreground tabular-nums">
+            <div className="flex items-center gap-2.5 text-right sm:gap-3">
+              <span className="font-mono text-[11px] text-muted-foreground tabular-nums sm:text-xs">
                 {formatCurrency(item.total)}
               </span>
-              <span className="w-12 text-xs font-semibold text-foreground tabular-nums">
+              <span className="w-10 text-right font-mono text-xs font-semibold text-foreground tabular-nums sm:w-12">
                 {item.percentage}%
               </span>
             </div>

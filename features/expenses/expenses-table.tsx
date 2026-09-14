@@ -50,6 +50,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { ExpenseFormDialog } from "./expense-form-dialog"
+import { ExpenseMobileCard } from "./expense-mobile-card"
 import { formatCurrency, formatDateIndonesian } from "@/lib/utils"
 import { deleteExpense } from "./expenses.actions"
 import { EXPENSE_CATEGORIES } from "./expenses.schema"
@@ -164,7 +165,7 @@ export function ExpensesTable({ expenses, initialFilter }: ExpensesTableProps) {
   const [, startTransition] = useTransition()
 
   const [currentPage, setCurrentPage] = useState(1)
-  const pageSize = 25
+  const pageSize = 20
 
   // Editing state
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null)
@@ -224,6 +225,9 @@ export function ExpensesTable({ expenses, initialFilter }: ExpensesTableProps) {
       }
       toast.success("Catatan pengeluaran berhasil dihapus")
       setDeletingExpense(null)
+      startTransition(() => {
+        router.refresh()
+      })
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Gagal menghapus pengeluaran"
@@ -241,9 +245,9 @@ export function ExpensesTable({ expenses, initialFilter }: ExpensesTableProps) {
 
   return (
     <>
-      <Card className="border-border bg-card/60 shadow-xs backdrop-blur-xs">
+      <Card className="border border-border shadow-xs">
         {/* Header & Filter Toolbar */}
-        <CardHeader className="flex flex-col gap-4 px-6 pt-6 pb-4 sm:flex-row sm:items-center sm:justify-between">
+        <CardHeader className="flex flex-col gap-4 p-4 sm:p-6">
           <div>
             <CardTitle className="text-base font-semibold">
               Buku Pengeluaran & Perawatan Truk
@@ -254,17 +258,17 @@ export function ExpensesTable({ expenses, initialFilter }: ExpensesTableProps) {
           </div>
 
           {/* Filters */}
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="grid grid-cols-2 gap-2 pt-1 sm:flex sm:flex-wrap sm:items-center sm:gap-2.5">
             {/* Truck Filter */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-medium text-muted-foreground">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-1.5">
+              <span className="text-[11px] font-medium text-muted-foreground sm:text-xs">
                 Armada:
               </span>
               <Select
                 value={currentTruckId}
                 onValueChange={(val) => val && updateQuery("truckId", val)}
               >
-                <SelectTrigger className="h-8 w-34 text-xs">
+                <SelectTrigger className="h-8 w-full text-xs sm:w-34">
                   <SelectValue placeholder="Semua Armada" />
                 </SelectTrigger>
                 <SelectContent>
@@ -276,15 +280,15 @@ export function ExpensesTable({ expenses, initialFilter }: ExpensesTableProps) {
             </div>
 
             {/* Category Filter */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-medium text-muted-foreground">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-1.5">
+              <span className="text-[11px] font-medium text-muted-foreground sm:text-xs">
                 Kategori:
               </span>
               <Select
                 value={currentCategory}
                 onValueChange={(val) => val && updateQuery("category", val)}
               >
-                <SelectTrigger className="h-8 w-32 text-xs">
+                <SelectTrigger className="h-8 w-full text-xs sm:w-32">
                   <SelectValue placeholder="Semua Kategori" />
                 </SelectTrigger>
                 <SelectContent>
@@ -299,15 +303,15 @@ export function ExpensesTable({ expenses, initialFilter }: ExpensesTableProps) {
             </div>
 
             {/* Month Filter */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-medium text-muted-foreground">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-1.5">
+              <span className="text-[11px] font-medium text-muted-foreground sm:text-xs">
                 Bulan:
               </span>
               <Select
                 value={currentMonth}
                 onValueChange={(val) => val && updateQuery("month", val)}
               >
-                <SelectTrigger className="h-8 w-30 text-xs">
+                <SelectTrigger className="h-8 w-full text-xs sm:w-30">
                   <SelectValue placeholder="Semua Bulan" />
                 </SelectTrigger>
                 <SelectContent>
@@ -322,15 +326,15 @@ export function ExpensesTable({ expenses, initialFilter }: ExpensesTableProps) {
             </div>
 
             {/* Year Filter */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-medium text-muted-foreground">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-1.5">
+              <span className="text-[11px] font-medium text-muted-foreground sm:text-xs">
                 Tahun:
               </span>
               <Select
                 value={currentYear}
                 onValueChange={(val) => val && updateQuery("year", val)}
               >
-                <SelectTrigger className="h-8 w-26 text-xs">
+                <SelectTrigger className="h-8 w-full text-xs sm:w-26">
                   <SelectValue placeholder="Semua" />
                 </SelectTrigger>
                 <SelectContent>
@@ -342,35 +346,67 @@ export function ExpensesTable({ expenses, initialFilter }: ExpensesTableProps) {
               </Select>
             </div>
 
-            {/* Reset Button */}
-            {hasActiveFilter && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleResetFilters}
-                className="h-8 gap-1 px-2.5 text-xs text-muted-foreground hover:text-foreground"
-              >
-                <RiFilterOffLine className="size-3.5" />
-                <span>Reset</span>
-              </Button>
-            )}
+            {/* Reset & Export Actions */}
+            <div className="col-span-2 flex flex-wrap items-center gap-2 sm:col-auto">
+              {hasActiveFilter && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleResetFilters}
+                  className="h-8 gap-1 px-2.5 text-xs text-muted-foreground hover:text-foreground"
+                >
+                  <RiFilterOffLine className="size-3.5" />
+                  <span>Reset</span>
+                </Button>
+              )}
 
-            {/* Export Kas Button */}
-            <ExpensesExportButton
-              expenses={expenses}
-              filter={{
-                truckId: currentTruckId,
-                category: currentCategory,
-                month: currentMonth,
-                year: currentYear,
-              }}
-            />
+              {/* Export Kas Button */}
+              <ExpensesExportButton
+                expenses={expenses}
+                filter={{
+                  truckId: currentTruckId,
+                  category: currentCategory,
+                  month: currentMonth,
+                  year: currentYear,
+                }}
+              />
+            </div>
           </div>
         </CardHeader>
 
-        {/* Table Content */}
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
+        {/* Table & Cards Content */}
+        <CardContent className="p-4 sm:px-6 sm:pb-4">
+          {/* Mobile View: Cards */}
+          <div className="block space-y-3 md:hidden">
+            {paginatedExpenses.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed border-border py-8 text-center text-muted-foreground">
+                <RiReceiptLine className="size-8 text-muted-foreground/40" />
+                <p className="font-medium text-foreground">
+                  Belum ada catatan pengeluaran
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {hasActiveFilter
+                    ? "Coba sesuaikan atau reset filter di atas"
+                    : "Gunakan tombol 'Catat Pengeluaran' untuk menambahkan data baru"}
+                </p>
+              </div>
+            ) : (
+              paginatedExpenses.map((item) => (
+                <ExpenseMobileCard
+                  key={item.id}
+                  expense={item}
+                  onEdit={(expense) => {
+                    setEditingExpense(expense)
+                    setIsEditDialogOpen(true)
+                  }}
+                  onDelete={setDeletingExpense}
+                />
+              ))
+            )}
+          </div>
+
+          {/* Desktop View: Table */}
+          <div className="hidden overflow-hidden rounded-lg border border-border md:block">
             <Table>
               <TableHeader>
                 <TableRow className="border-border bg-muted/30 hover:bg-muted/30">

@@ -69,13 +69,13 @@ export function PeriodCard({
   return (
     <>
       <Card className="flex flex-col justify-between transition-all hover:border-primary/40 hover:shadow-md">
-        <CardHeader className="p-5 pb-3">
+        <CardHeader className="p-4 pb-2 sm:p-5 sm:pb-3">
           <div className="flex items-start justify-between gap-3">
             <div className="space-y-1">
-              <h3 className="line-clamp-1 text-base font-bold tracking-tight text-foreground">
+              <h3 className="line-clamp-1 text-sm font-bold tracking-tight text-foreground sm:text-base">
                 {period.title}
               </h3>
-              <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground sm:text-xs">
                 <RiCalendarLine className="size-3.5" />
                 {formatDateIndonesian(period.startDate, true)} –{" "}
                 {formatDateIndonesian(period.endDate, true)}
@@ -83,7 +83,7 @@ export function PeriodCard({
             </div>
             <Badge
               variant={isFinalized ? "default" : "outline"}
-              className={`shrink-0 text-[11px] ${
+              className={`shrink-0 text-[10px] sm:text-[11px] ${
                 isFinalized
                   ? "bg-emerald-600 text-white hover:bg-emerald-700"
                   : "text-muted-foreground"
@@ -104,11 +104,11 @@ export function PeriodCard({
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-3 p-5 pt-2 pb-3">
+        <CardContent className="space-y-3 p-4 pt-1 pb-3 sm:p-5 sm:pt-2 sm:pb-3">
           {/* Key Metrics Grid */}
-          <div className="grid grid-cols-2 gap-2.5 rounded-lg border bg-muted/40 p-3">
+          <div className="grid grid-cols-2 gap-2 rounded-lg border bg-muted/40 p-2.5 sm:gap-2.5 sm:p-3">
             <div>
-              <span className="block text-[11px] text-muted-foreground">
+              <span className="block text-[10px] text-muted-foreground sm:text-[11px]">
                 Laba Kotor (Gross)
               </span>
               <span
@@ -122,7 +122,7 @@ export function PeriodCard({
               </span>
             </div>
             <div>
-              <span className="block text-[11px] text-muted-foreground">
+              <span className="block text-[10px] text-muted-foreground sm:text-[11px]">
                 Laba Dibagi
               </span>
               <span className="text-xs font-bold text-primary">
@@ -130,7 +130,7 @@ export function PeriodCard({
               </span>
             </div>
             <div>
-              <span className="block text-[11px] text-muted-foreground">
+              <span className="block text-[10px] text-muted-foreground sm:text-[11px]">
                 Take Home Pengelola
               </span>
               <span className="text-xs font-bold text-foreground">
@@ -138,7 +138,7 @@ export function PeriodCard({
               </span>
             </div>
             <div>
-              <span className="block text-[11px] text-muted-foreground">
+              <span className="block text-[10px] text-muted-foreground sm:text-[11px]">
                 Jumlah Investor
               </span>
               <span className="flex items-center gap-1 text-xs font-bold text-foreground">
@@ -164,7 +164,7 @@ export function PeriodCard({
           )}
         </CardContent>
 
-        <CardFooter className="mt-2 flex items-center justify-between gap-2 border-t p-5 pt-0">
+        <CardFooter className="flex items-center justify-between gap-2 border-t p-4 pt-3 sm:p-5 sm:pt-3">
           <Button
             variant="outline"
             size="sm"

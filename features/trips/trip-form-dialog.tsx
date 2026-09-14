@@ -16,14 +16,7 @@ import { z } from "zod"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -232,331 +225,317 @@ export function TripFormDialog({ rateReferences }: TripFormDialogProps) {
         <span>Input Ritase Baru</span>
       </Button>
 
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto p-6">
-          <DialogHeader className="pb-2">
-            <DialogTitle className="flex items-center gap-2 text-lg">
-              <RiTruckLine className="size-5 text-primary" />
-              <span>Input Ritase Baru</span>
-            </DialogTitle>
-            <DialogDescription className="text-xs">
-              Catat order pengiriman semen curah. Tarif dan uang sangu supir
-              terhitung otomatis.
-            </DialogDescription>
-          </DialogHeader>
-
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Row 1: Unit Armada & Nomor Order */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Unit Truk</Label>
-                <Select
-                  value={watchedTruckId}
-                  onValueChange={(val) => {
-                    if (val === "W8187UA" || val === "H8133OF") {
-                      setValue("truckId", val)
-                    }
-                  }}
-                >
-                  <SelectTrigger className="h-9 text-xs">
-                    <SelectValue placeholder="Pilih unit armada" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="W8187UA">
-                      W 8187 UA (Hino 500)
-                    </SelectItem>
-                    <SelectItem value="H8133OF">
-                      H 8133 OF (Hino 500)
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">
-                  Nomor Order / Surat Jalan
-                </Label>
-                <Input
-                  type="number"
-                  {...register("orderNumber", { valueAsNumber: true })}
-                  className="h-9 font-mono text-xs"
-                  placeholder="Contoh: 121"
-                />
-                {errors.orderNumber && (
-                  <p className="text-[11px] text-destructive">
-                    {errors.orderNumber.message}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Row 2: Tanggal Order & Tanggal Bongkar */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">
-                  Tanggal Order <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  type="date"
-                  {...register("orderDate")}
-                  className="h-9 font-mono text-xs"
-                />
-                {errors.orderDate && (
-                  <p className="text-[11px] text-destructive">
-                    {errors.orderDate.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <Label className="text-xs font-semibold">
-                    Tanggal Bongkar
-                  </Label>
-                  <span className="text-[10px] text-muted-foreground">
-                    (Pengakuan Bagi Hasil)
-                  </span>
-                </div>
-                <Input
-                  type="date"
-                  {...register("unloadingDate")}
-                  className="h-9 font-mono text-xs"
-                />
-              </div>
-            </div>
-
-            {/* Row 3: Rute & Tujuan Pabrik (Combobox) */}
+      <ResponsiveDialog
+        open={open}
+        onOpenChange={setOpen}
+        title={
+          <span className="flex items-center gap-2">
+            <RiTruckLine className="size-5 text-primary" />
+            <span>Input Ritase Baru</span>
+          </span>
+        }
+        description="Catat order pengiriman semen curah. Tarif dan uang sangu supir terhitung otomatis."
+        className="max-w-2xl sm:p-6"
+      >
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Row 1: Unit Armada & Nomor Order */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <Label className="text-xs font-semibold">
-                  Rute / Tujuan Pabrik{" "}
-                  <span className="text-destructive">*</span>
-                </Label>
-                <span className="text-[10px] text-muted-foreground">
-                  Pilih dari 289 rute acuan
-                </span>
-              </div>
-              <TripDestinationCombobox
-                rateReferences={rateReferences}
-                selectedId={selectedRateId}
-                onSelect={handleRouteSelect}
+              <Label className="text-xs font-semibold">Unit Truk</Label>
+              <Select
+                value={watchedTruckId}
+                onValueChange={(val) => {
+                  if (val === "W8187UA" || val === "H8133OF") {
+                    setValue("truckId", val)
+                  }
+                }}
+              >
+                <SelectTrigger className="h-9 text-xs">
+                  <SelectValue placeholder="Pilih unit armada" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="W8187UA">W 8187 UA (Hino 500)</SelectItem>
+                  <SelectItem value="H8133OF">H 8133 OF (Hino 500)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold">
+                Nomor Order / Surat Jalan
+              </Label>
+              <Input
+                type="number"
+                {...register("orderNumber", { valueAsNumber: true })}
+                className="h-9 font-mono text-xs"
+                placeholder="Contoh: 121"
               />
-              {errors.destinationCity && (
+              {errors.orderNumber && (
                 <p className="text-[11px] text-destructive">
-                  Kota dan tujuan wajib dipilih
+                  {errors.orderNumber.message}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Row 2: Tanggal Order & Tanggal Bongkar */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold">
+                Tanggal Order <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                type="date"
+                {...register("orderDate")}
+                className="h-9 font-mono text-xs"
+              />
+              {errors.orderDate && (
+                <p className="text-[11px] text-destructive">
+                  {errors.orderDate.message}
                 </p>
               )}
             </div>
 
-            {/* Row 4: Tarif per Ton, Tonase Bongkar, Tonase Muat */}
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">
-                  Tarif / Ton (Rp)
-                </Label>
-                <Input
-                  type="number"
-                  step="100"
-                  {...register("ratePerTon")}
-                  className="h-9 font-mono text-xs"
-                />
-                {errors.ratePerTon && (
-                  <p className="text-[11px] text-destructive">
-                    {errors.ratePerTon.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <Label className="text-xs font-semibold">
-                    Tonase Bongkar <span className="text-destructive">*</span>
-                  </Label>
-                  <span className="text-[10px] text-muted-foreground">
-                    Maks Sangu 31T
-                  </span>
-                </div>
-                <Input
-                  type="number"
-                  step="0.01"
-                  {...register("unloadedTonnage")}
-                  className="h-9 font-mono text-xs font-semibold"
-                  placeholder="31.00"
-                />
-                {errors.unloadedTonnage && (
-                  <p className="text-[11px] text-destructive">
-                    {errors.unloadedTonnage.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-muted-foreground">
-                  Tonase Muat (Opsional)
-                </Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  {...register("loadedTonnage")}
-                  className="h-9 font-mono text-xs"
-                  placeholder="31.50"
-                />
-              </div>
-            </div>
-
-            {/* Live Calculation Preview Card */}
-            <div className="space-y-2 rounded-xl border border-primary/20 bg-primary/5 p-3.5">
+            <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 text-xs font-semibold text-primary">
-                  <RiCalculatorLine className="size-4" />
-                  <span>Kalkulasi Otomatis (Live)</span>
-                </div>
-                <Badge
-                  variant="outline"
-                  className="py-0 text-[10px] font-normal"
-                >
-                  Sangu {Math.round(sanguPercentage * 100)}% (Maks 31 Ton)
-                </Badge>
+                <Label className="text-xs font-semibold">Tanggal Bongkar</Label>
+                <span className="text-[10px] text-muted-foreground">
+                  (Pengakuan Bagi Hasil)
+                </span>
               </div>
+              <Input
+                type="date"
+                {...register("unloadingDate")}
+                className="h-9 font-mono text-xs"
+              />
+            </div>
+          </div>
 
-              <div className="grid grid-cols-3 gap-3 border-t border-primary/10 pt-1 text-center">
-                <div>
-                  <span className="block text-[10px] text-muted-foreground">
-                    Omset Bruto
-                  </span>
-                  <span className="font-mono text-sm font-bold">
-                    {formatCurrency(liveCalc.omset)}
-                  </span>
-                </div>
-                <div>
-                  <span className="block text-[10px] text-muted-foreground">
-                    Sangu Supir
-                  </span>
-                  <span className="font-mono text-sm font-bold text-amber-600 dark:text-amber-400">
-                    {formatCurrency(liveCalc.sangu)}
-                  </span>
-                </div>
-                <div>
-                  <span className="block text-[10px] text-muted-foreground">
-                    Laba Ritase
-                  </span>
-                  <span className="font-mono text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                    {formatCurrency(liveCalc.profit)}
-                  </span>
-                </div>
-              </div>
+          {/* Row 3: Rute & Tujuan Pabrik (Combobox) */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs font-semibold">
+                Rute / Tujuan Pabrik <span className="text-destructive">*</span>
+              </Label>
+              <span className="text-[10px] text-muted-foreground">
+                Pilih dari 289 rute acuan
+              </span>
+            </div>
+            <TripDestinationCombobox
+              rateReferences={rateReferences}
+              selectedId={selectedRateId}
+              onSelect={handleRouteSelect}
+            />
+            {errors.destinationCity && (
+              <p className="text-[11px] text-destructive">
+                Kota dan tujuan wajib dipilih
+              </p>
+            )}
+          </div>
 
-              {hasSpecialDeductions && (
-                <div className="mt-2 flex items-center justify-between border-t border-dashed border-primary/10 pt-2 text-[11px] text-muted-foreground">
-                  <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
-                    <RiInformationLine className="size-3.5" />
-                    Potongan Khusus Grobogan/LJU (8% dari Omset):
-                  </span>
-                  <span className="font-mono font-medium">
-                    {formatCurrency(
-                      liveCalc.tax1Pct +
-                        liveCalc.deduction2PctLju +
-                        liveCalc.deduction5PctUjGrb
-                    )}
-                  </span>
-                </div>
+          {/* Row 4: Tarif per Ton, Tonase Bongkar, Tonase Muat */}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold">Tarif / Ton (Rp)</Label>
+              <Input
+                type="number"
+                step="100"
+                {...register("ratePerTon")}
+                className="h-9 font-mono text-xs"
+              />
+              {errors.ratePerTon && (
+                <p className="text-[11px] text-destructive">
+                  {errors.ratePerTon.message}
+                </p>
               )}
             </div>
 
-            {/* Optional: Fee Pihak Ketiga & Potongan Tambahan */}
-            <div className="grid grid-cols-1 gap-3 pt-1 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-muted-foreground">
-                  Fee Pihak Ketiga / DO (Rp)
-                </Label>
-                <Input
-                  type="number"
-                  step="1000"
-                  {...register("thirdPartyFee")}
-                  className="h-8 font-mono text-xs"
-                  placeholder="0"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-muted-foreground">
-                  Nama Pihak Ketiga
-                </Label>
-                <Input
-                  type="text"
-                  {...register("thirdPartyName")}
-                  className="h-8 text-xs"
-                  placeholder="Mas Mawan / SILOG"
-                />
-              </div>
-            </div>
-
-            {/* Status Pelunasan DO & Insentif */}
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-muted-foreground">
-                  Status Pembayaran Fee DO
-                </Label>
-                <Input
-                  type="text"
-                  {...register("thirdPartyStatus")}
-                  className="h-8 text-xs"
-                  placeholder="Belum Dibayar / Lunas / Tgl Bayar"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-muted-foreground">
-                  Status Insentif Supir
-                </Label>
-                <Input
-                  type="text"
-                  {...register("incentiveStatus")}
-                  className="h-8 text-xs"
-                  placeholder="Belum Dibayar / Lunas"
-                />
-              </div>
-            </div>
-
-            {/* Notes */}
             <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-muted-foreground">
-                Catatan Tambahan
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-semibold">
+                  Tonase Bongkar <span className="text-destructive">*</span>
+                </Label>
+                <span className="text-[10px] text-muted-foreground">
+                  Maks Sangu 31T
+                </span>
+              </div>
+              <Input
+                type="number"
+                step="0.01"
+                {...register("unloadedTonnage")}
+                className="h-9 font-mono text-xs font-semibold"
+                placeholder="31.00"
+              />
+              {errors.unloadedTonnage && (
+                <p className="text-[11px] text-destructive">
+                  {errors.unloadedTonnage.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-muted-foreground">
+                Tonase Muat (Opsional)
               </Label>
-              <Textarea
-                {...register("notes")}
-                className="min-h-15 text-xs"
-                placeholder="Keterangan rute, supir, atau kendala lapangan..."
+              <Input
+                type="number"
+                step="0.01"
+                {...register("loadedTonnage")}
+                className="h-9 font-mono text-xs"
+                placeholder="31.50"
               />
             </div>
+          </div>
 
-            <DialogFooter className="flex items-center justify-end gap-2 border-t border-border pt-3">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setOpen(false)}
-                disabled={isSubmitting}
-              >
-                Batal
-              </Button>
-              <Button
-                type="submit"
-                size="sm"
-                disabled={isSubmitting}
-                className="gap-1.5"
-              >
-                {isSubmitting ? (
-                  <>
-                    <RiLoaderLine className="size-4 animate-spin" />
-                    <span>Menyimpan...</span>
-                  </>
-                ) : (
-                  <span>Simpan Ritase</span>
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+          {/* Live Calculation Preview Card */}
+          <div className="space-y-2 rounded-xl border border-primary/20 bg-primary/5 p-3.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-primary">
+                <RiCalculatorLine className="size-4" />
+                <span>Kalkulasi Otomatis (Live)</span>
+              </div>
+              <Badge variant="outline" className="py-0 text-[10px] font-normal">
+                Sangu {Math.round(sanguPercentage * 100)}% (Maks 31 Ton)
+              </Badge>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3 border-t border-primary/10 pt-1 text-center">
+              <div>
+                <span className="block text-[10px] text-muted-foreground">
+                  Omset Bruto
+                </span>
+                <span className="font-mono text-sm font-bold">
+                  {formatCurrency(liveCalc.omset)}
+                </span>
+              </div>
+              <div>
+                <span className="block text-[10px] text-muted-foreground">
+                  Sangu Supir
+                </span>
+                <span className="font-mono text-sm font-bold text-amber-600 dark:text-amber-400">
+                  {formatCurrency(liveCalc.sangu)}
+                </span>
+              </div>
+              <div>
+                <span className="block text-[10px] text-muted-foreground">
+                  Laba Ritase
+                </span>
+                <span className="font-mono text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                  {formatCurrency(liveCalc.profit)}
+                </span>
+              </div>
+            </div>
+
+            {hasSpecialDeductions && (
+              <div className="mt-2 flex items-center justify-between border-t border-dashed border-primary/10 pt-2 text-[11px] text-muted-foreground">
+                <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
+                  <RiInformationLine className="size-3.5" />
+                  Potongan Khusus Grobogan/LJU (8% dari Omset):
+                </span>
+                <span className="font-mono font-medium">
+                  {formatCurrency(
+                    liveCalc.tax1Pct +
+                      liveCalc.deduction2PctLju +
+                      liveCalc.deduction5PctUjGrb
+                  )}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Optional: Fee Pihak Ketiga & Potongan Tambahan */}
+          <div className="grid grid-cols-1 gap-3 pt-1 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-muted-foreground">
+                Fee Pihak Ketiga / DO (Rp)
+              </Label>
+              <Input
+                type="number"
+                step="1000"
+                {...register("thirdPartyFee")}
+                className="h-8 font-mono text-xs"
+                placeholder="0"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-muted-foreground">
+                Nama Pihak Ketiga
+              </Label>
+              <Input
+                type="text"
+                {...register("thirdPartyName")}
+                className="h-8 text-xs"
+                placeholder="Mas Mawan / SILOG"
+              />
+            </div>
+          </div>
+
+          {/* Status Pelunasan DO & Insentif */}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-muted-foreground">
+                Status Pembayaran Fee DO
+              </Label>
+              <Input
+                type="text"
+                {...register("thirdPartyStatus")}
+                className="h-8 text-xs"
+                placeholder="Belum Dibayar / Lunas / Tgl Bayar"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-muted-foreground">
+                Status Insentif Supir
+              </Label>
+              <Input
+                type="text"
+                {...register("incentiveStatus")}
+                className="h-8 text-xs"
+                placeholder="Belum Dibayar / Lunas"
+              />
+            </div>
+          </div>
+
+          {/* Notes */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium text-muted-foreground">
+              Catatan Tambahan
+            </Label>
+            <Textarea
+              {...register("notes")}
+              className="min-h-15 text-xs"
+              placeholder="Keterangan rute, supir, atau kendala lapangan..."
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-2 border-t border-border pt-3">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setOpen(false)}
+              disabled={isSubmitting}
+            >
+              Batal
+            </Button>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={isSubmitting}
+              className="gap-1.5"
+            >
+              {isSubmitting ? (
+                <>
+                  <RiLoaderLine className="size-4 animate-spin" />
+                  <span>Menyimpan...</span>
+                </>
+              ) : (
+                <span>Simpan Ritase</span>
+              )}
+            </Button>
+          </div>
+        </form>
+      </ResponsiveDialog>
     </>
   )
 }

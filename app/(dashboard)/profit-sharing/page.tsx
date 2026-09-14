@@ -97,47 +97,47 @@ export default async function ProfitSharingPage() {
         ) : (
           <div className="space-y-6">
             {/* Top Stat Cards */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div className="rounded-xl border bg-card p-4 shadow-sm">
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 sm:gap-4">
+              <div className="rounded-xl border bg-card p-3 shadow-xs sm:p-4">
                 <div className="flex items-center justify-between text-muted-foreground">
-                  <span className="text-xs font-medium">
+                  <span className="text-[11px] font-medium sm:text-xs">
                     Total Periode Ditutup
                   </span>
-                  <RiTimeLine className="size-4" />
+                  <RiTimeLine className="size-3.5 sm:size-4" />
                 </div>
-                <div className="mt-2 flex items-baseline gap-2">
-                  <span className="text-2xl font-bold text-foreground">
+                <div className="mt-1.5 flex items-baseline gap-1.5 sm:mt-2 sm:gap-2">
+                  <span className="text-xl font-bold text-foreground sm:text-2xl">
                     {periods.length}
                   </span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-[10px] text-muted-foreground sm:text-xs">
                     Bulan/Siklus
                   </span>
                 </div>
               </div>
 
-              <div className="rounded-xl border bg-card p-4 shadow-sm">
+              <div className="rounded-xl border bg-card p-3 shadow-xs sm:p-4">
                 <div className="flex items-center justify-between text-muted-foreground">
-                  <span className="text-xs font-medium">
+                  <span className="text-[11px] font-medium sm:text-xs">
                     Total Dividen Dibagikan
                   </span>
-                  <RiHandCoinLine className="size-4 text-emerald-500" />
+                  <RiHandCoinLine className="size-3.5 text-emerald-500 sm:size-4" />
                 </div>
-                <div className="mt-2 flex items-baseline gap-2">
-                  <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                <div className="mt-1.5 flex items-baseline gap-1.5 sm:mt-2 sm:gap-2">
+                  <span className="text-lg font-bold text-emerald-600 sm:text-2xl dark:text-emerald-400">
                     {formatCurrency(totalDistributedAllTime)}
                   </span>
                 </div>
               </div>
 
-              <div className="rounded-xl border bg-card p-4 shadow-sm">
+              <div className="rounded-xl border bg-card p-3 shadow-xs sm:p-4">
                 <div className="flex items-center justify-between text-muted-foreground">
-                  <span className="text-xs font-medium">
-                    Total Hak Pengelola Kumulatif
+                  <span className="text-[11px] font-medium sm:text-xs">
+                    Total Hak Pengelola
                   </span>
-                  <RiCoinsLine className="size-4 text-primary" />
+                  <RiCoinsLine className="size-3.5 text-primary sm:size-4" />
                 </div>
-                <div className="mt-2 flex items-baseline gap-2">
-                  <span className="text-2xl font-bold text-primary">
+                <div className="mt-1.5 flex items-baseline gap-1.5 sm:mt-2 sm:gap-2">
+                  <span className="text-lg font-bold text-primary sm:text-2xl">
                     {formatCurrency(totalManagerTakeHomeAllTime)}
                   </span>
                 </div>

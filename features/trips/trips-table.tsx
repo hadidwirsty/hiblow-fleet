@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { TripFeeStatusDialog } from "@/features/trips/trip-fee-status-dialog"
 import { TripsExportButton } from "@/features/trips/trips-export-button"
+import { TripMobileCard } from "@/features/trips/trip-mobile-card"
 import {
   Card,
   CardContent,
@@ -149,9 +150,8 @@ export function TripsTable({ trips, initialFilter }: TripsTableProps) {
   const paginatedTrips = filteredTrips.slice(startIndex, endIndex)
 
   return (
-    <Card className="border-border bg-card/60 shadow-xs backdrop-blur-xs">
-      {/* Integrated Header & Filter Toolbar */}
-      <CardHeader className="flex flex-col gap-4 px-6 pt-6 pb-4 sm:flex-row sm:items-center sm:justify-between">
+    <Card className="border border-border shadow-xs">
+      <CardHeader className="space-y-3 p-4 sm:p-6">
         <div>
           <CardTitle className="text-base font-semibold">
             Daftar Surat Jalan & Ritase
@@ -162,17 +162,17 @@ export function TripsTable({ trips, initialFilter }: TripsTableProps) {
         </div>
 
         {/* Filters and Counters */}
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="grid grid-cols-2 gap-2 pt-1 sm:flex sm:flex-wrap sm:items-center sm:gap-2.5">
           {/* Truck Filter */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-xs font-medium text-muted-foreground">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-1.5">
+            <span className="text-[11px] font-medium text-muted-foreground sm:text-xs">
               Armada:
             </span>
             <Select
               value={currentTruckId}
               onValueChange={(val) => val && updateQuery("truckId", val)}
             >
-              <SelectTrigger className="h-8 w-34 text-xs">
+              <SelectTrigger className="h-8 w-full text-xs sm:w-34">
                 <SelectValue placeholder="Semua Armada" />
               </SelectTrigger>
               <SelectContent>
@@ -184,15 +184,15 @@ export function TripsTable({ trips, initialFilter }: TripsTableProps) {
           </div>
 
           {/* Month Filter */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-xs font-medium text-muted-foreground">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-1.5">
+            <span className="text-[11px] font-medium text-muted-foreground sm:text-xs">
               Bulan:
             </span>
             <Select
               value={currentMonth}
               onValueChange={(val) => val && updateQuery("month", val)}
             >
-              <SelectTrigger className="h-8 w-30 text-xs">
+              <SelectTrigger className="h-8 w-full text-xs sm:w-30">
                 <SelectValue placeholder="Semua Bulan" />
               </SelectTrigger>
               <SelectContent>
@@ -207,15 +207,15 @@ export function TripsTable({ trips, initialFilter }: TripsTableProps) {
           </div>
 
           {/* Year Filter */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-xs font-medium text-muted-foreground">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-1.5">
+            <span className="text-[11px] font-medium text-muted-foreground sm:text-xs">
               Tahun:
             </span>
             <Select
               value={currentYear}
               onValueChange={(val) => val && updateQuery("year", val)}
             >
-              <SelectTrigger className="h-8 w-24 text-xs">
+              <SelectTrigger className="h-8 w-full text-xs sm:w-24">
                 <SelectValue placeholder="Semua" />
               </SelectTrigger>
               <SelectContent>
@@ -227,8 +227,8 @@ export function TripsTable({ trips, initialFilter }: TripsTableProps) {
           </div>
 
           {/* Fee DO Status Filter */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-xs font-medium text-muted-foreground">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-1.5">
+            <span className="text-[11px] font-medium text-muted-foreground sm:text-xs">
               Status DO:
             </span>
             <Select
@@ -238,7 +238,7 @@ export function TripsTable({ trips, initialFilter }: TripsTableProps) {
                 setCurrentPage(1)
               }}
             >
-              <SelectTrigger className="h-8 w-34 text-xs">
+              <SelectTrigger className="h-8 w-full text-xs sm:w-34">
                 <SelectValue placeholder="Semua Status" />
               </SelectTrigger>
               <SelectContent>
@@ -249,31 +249,32 @@ export function TripsTable({ trips, initialFilter }: TripsTableProps) {
             </Select>
           </div>
 
-          {/* Reset Filter Button */}
-          {hasActiveFilter && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleResetFilters}
-              className="h-8 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground"
-            >
-              <RiFilterOffLine className="size-3.5" />
-              <span>Reset</span>
-            </Button>
-          )}
+          {/* Action Buttons: Reset & Export */}
+          <div className="col-span-2 flex flex-wrap items-center gap-2 sm:col-auto">
+            {hasActiveFilter && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleResetFilters}
+                className="h-8 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground"
+              >
+                <RiFilterOffLine className="size-3.5" />
+                <span>Reset</span>
+              </Button>
+            )}
 
-          {/* Export Data Button */}
-          <TripsExportButton
-            trips={trips}
-            filter={{
-              truckId: currentTruckId,
-              month: currentMonth,
-              year: currentYear,
-            }}
-          />
+            <TripsExportButton
+              trips={trips}
+              filter={{
+                truckId: currentTruckId,
+                month: currentMonth,
+                year: currentYear,
+              }}
+            />
+          </div>
 
           {/* Status Loading indicator */}
-          <div className="hidden pl-2 text-xs text-muted-foreground md:block">
+          <div className="col-span-2 text-xs text-muted-foreground sm:col-auto sm:pl-2">
             {isPending ? (
               <span className="animate-pulse font-medium text-primary">
                 Memuat data...
@@ -287,9 +288,41 @@ export function TripsTable({ trips, initialFilter }: TripsTableProps) {
         </div>
       </CardHeader>
 
-      {/* Table Section */}
-      <CardContent className="px-6 pb-4">
-        <div className="overflow-hidden rounded-lg border border-border">
+      {/* Table & Mobile Cards Section */}
+      <CardContent className="p-4 sm:px-6 sm:pb-4">
+        {/* Mobile View: Cards */}
+        <div className="block space-y-3 md:hidden">
+          {paginatedTrips.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border p-6 text-center text-muted-foreground">
+              <RiTruckLine className="size-8 stroke-[1.5]" />
+              <p className="text-sm font-medium">Tidak ada data ritase</p>
+              <p className="text-xs">
+                Tidak ditemukan ritase yang cocok dengan filter yang dipilih.
+              </p>
+              {hasActiveFilter && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleResetFilters}
+                  className="mt-1 h-8 text-xs"
+                >
+                  Reset Filter
+                </Button>
+              )}
+            </div>
+          ) : (
+            paginatedTrips.map((trip) => (
+              <TripMobileCard
+                key={trip.id}
+                trip={trip}
+                onEditFee={setEditingFeeTrip}
+              />
+            ))
+          )}
+        </div>
+
+        {/* Desktop View: 11-column Tabular Table */}
+        <div className="hidden overflow-hidden rounded-lg border border-border md:block">
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/50 text-xs hover:bg-muted/50">

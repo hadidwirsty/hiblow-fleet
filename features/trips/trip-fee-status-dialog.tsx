@@ -5,14 +5,7 @@ import { RiCheckLine, RiHandCoinLine, RiLoaderLine } from "@remixicon/react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { updateTripFeeStatus } from "@/features/trips/trips.actions"
@@ -72,19 +65,7 @@ function FeeStatusFormContent({ trip, onClose }: FeeStatusFormContentProps) {
   }
 
   return (
-    <>
-      <DialogHeader className="pb-2">
-        <DialogTitle className="flex items-center gap-2 text-base font-semibold">
-          <RiHandCoinLine className="size-5 text-primary" />
-          <span>Update Status Fee DO Pihak Ketiga</span>
-        </DialogTitle>
-        <DialogDescription className="text-xs">
-          Surat Jalan Order #{trip.orderNumber} (
-          {trip.truckId === "W8187UA" ? "W 8187 UA" : "H 8133 OF"}) —{" "}
-          {trip.destinationCity}
-        </DialogDescription>
-      </DialogHeader>
-
+    <div className="space-y-4">
       {/* Info Card Ringkasan Fee */}
       <div className="space-y-2 rounded-lg border bg-muted/40 p-3 text-xs">
         <div className="flex justify-between text-muted-foreground">
@@ -109,7 +90,7 @@ function FeeStatusFormContent({ trip, onClose }: FeeStatusFormContentProps) {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {/* Third Party Status Field */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
@@ -174,7 +155,7 @@ function FeeStatusFormContent({ trip, onClose }: FeeStatusFormContentProps) {
           />
         </div>
 
-        <DialogFooter className="flex items-center justify-end gap-2 border-t border-border pt-3">
+        <div className="flex items-center justify-end gap-2 border-t border-border pt-3">
           <Button
             type="button"
             variant="outline"
@@ -199,9 +180,9 @@ function FeeStatusFormContent({ trip, onClose }: FeeStatusFormContentProps) {
               <span>Simpan Status</span>
             )}
           </Button>
-        </DialogFooter>
+        </div>
       </form>
-    </>
+    </div>
   )
 }
 
@@ -212,15 +193,30 @@ export function TripFeeStatusDialog({
 }: TripFeeStatusDialogProps) {
   if (!trip) return null
 
+  const title = (
+    <span className="flex items-center gap-2">
+      <RiHandCoinLine className="size-5 text-primary" />
+      <span>Update Status Fee DO Pihak Ketiga</span>
+    </span>
+  )
+
+  const description = `Surat Jalan Order #${trip.orderNumber} (${
+    trip.truckId === "W8187UA" ? "W 8187 UA" : "H 8133 OF"
+  }) — ${trip.destinationCity}`
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md p-6">
-        <FeeStatusFormContent
-          key={trip.id}
-          trip={trip}
-          onClose={() => onOpenChange(false)}
-        />
-      </DialogContent>
-    </Dialog>
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={title}
+      description={description}
+      className="max-w-md"
+    >
+      <FeeStatusFormContent
+        key={trip.id}
+        trip={trip}
+        onClose={() => onOpenChange(false)}
+      />
+    </ResponsiveDialog>
   )
 }
