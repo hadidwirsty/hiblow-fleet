@@ -3,6 +3,9 @@ import { and, desc, ne, sql } from "drizzle-orm"
 import { db } from "@/db"
 import { expenses, trips } from "@/db/schema"
 import type { Trip } from "@/db/schema"
+import type { RouteBreakdownItem } from "@/domain/route-trend"
+
+export type { RouteBreakdownItem }
 
 export interface DashboardKPIs {
   totalOmset: number
@@ -171,4 +174,33 @@ export async function getRecentTrips(
     .from(trips)
     .orderBy(desc(trips.orderDate), desc(trips.orderNumber))
     .limit(limitCount)
+}
+
+export async function getTopRoutes(
+  month: number,
+  year: number,
+  limit = 10
+): Promise<RouteBreakdownItem[]> {
+  const conditions = []
+
+  if (month > 0 && year > 0) {
+    conditions.push(
+      sql`EXTRACT(MONTH FROM ${trips.unloadingDate}) = ${month}`,
+      sql`EXTRACT(YEAR FROM ${trips.unloadingDate}) = ${year}`
+    )
+  }
+
+  return db
+    .select({
+      destinationCity: trips.destinationCity,
+      tripCount: sql<number>`count(*)::int`,
+      totalOmset: sql<number>`coalesce(sum(${trips.omset}::numeric), 0)::float`,
+      totalProfit: sql<number>`coalesce(sum(${trips.profit}::numeric), 0)::float`,
+      avgOmset: sql<number>`coalesce(avg(${trips.omset}::numeric), 0)::float`,
+    })
+    .from(trips)
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
+    .groupBy(trips.destinationCity)
+    .orderBy(sql`count(*) DESC`)
+    .limit(limit)
 }

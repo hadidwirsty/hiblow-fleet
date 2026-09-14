@@ -154,3 +154,70 @@ describe("getRecentTrips", () => {
     expect(mockFromLimit).toHaveBeenCalledWith(5)
   })
 })
+
+describe("getTopRoutes", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it("harus mengembalikan array RouteBreakdownItem", async () => {
+    const mockRoutes = [
+      {
+        destinationCity: "TUBAN",
+        tripCount: 15,
+        totalOmset: 75_000_000,
+        totalProfit: 30_000_000,
+        avgOmset: 5_000_000,
+      },
+    ]
+    const mockLimit = vi.fn().mockResolvedValue(mockRoutes)
+    const mockOrderBy = vi.fn().mockReturnValue({ limit: mockLimit })
+    const mockGroupBy = vi.fn().mockReturnValue({ orderBy: mockOrderBy })
+    mockFromWhere.mockReturnValueOnce({ groupBy: mockGroupBy })
+
+    const { getTopRoutes } =
+      await import("@/features/dashboard/dashboard.queries")
+    const result = await getTopRoutes(9, 2026)
+    expect(Array.isArray(result)).toBe(true)
+  })
+
+  it("setiap item harus memiliki destinationCity, tripCount, totalOmset, totalProfit, avgOmset", async () => {
+    const mockRoutes = [
+      {
+        destinationCity: "TUBAN",
+        tripCount: 15,
+        totalOmset: 75_000_000,
+        totalProfit: 30_000_000,
+        avgOmset: 5_000_000,
+      },
+    ]
+    const mockLimit = vi.fn().mockResolvedValue(mockRoutes)
+    const mockOrderBy = vi.fn().mockReturnValue({ limit: mockLimit })
+    const mockGroupBy = vi.fn().mockReturnValue({ orderBy: mockOrderBy })
+    mockFromWhere.mockReturnValueOnce({ groupBy: mockGroupBy })
+
+    const { getTopRoutes } =
+      await import("@/features/dashboard/dashboard.queries")
+    const result = await getTopRoutes(9, 2026)
+    if (result.length > 0) {
+      expect(result[0]).toHaveProperty("destinationCity")
+      expect(result[0]).toHaveProperty("tripCount")
+      expect(result[0]).toHaveProperty("totalOmset")
+      expect(result[0]).toHaveProperty("totalProfit")
+      expect(result[0]).toHaveProperty("avgOmset")
+    }
+  })
+
+  it("harus menerima parameter limit opsional", async () => {
+    const mockLimit = vi.fn().mockResolvedValue([])
+    const mockOrderBy = vi.fn().mockReturnValue({ limit: mockLimit })
+    const mockGroupBy = vi.fn().mockReturnValue({ orderBy: mockOrderBy })
+    mockFromWhere.mockReturnValueOnce({ groupBy: mockGroupBy })
+
+    const { getTopRoutes } =
+      await import("@/features/dashboard/dashboard.queries")
+    const result = await getTopRoutes(9, 2026, 5)
+    expect(Array.isArray(result)).toBe(true)
+    expect(mockLimit).toHaveBeenCalledWith(5)
+  })
+})

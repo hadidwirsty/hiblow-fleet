@@ -12,6 +12,7 @@ import {
 import { ChartAreaInteractive } from "@/components/chart-area-interactive"
 import { DataTable } from "@/components/data-table"
 import { SectionCards } from "@/components/section-cards"
+import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import {
   Card,
@@ -20,10 +21,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { prepareRouteChartData } from "@/domain/route-trend"
+import { DashboardRouteChart } from "@/features/dashboard/dashboard-route-chart"
 import {
   getDailyTripChart,
   getDashboardKPIs,
   getRecentTrips,
+  getTopRoutes,
   getTruckBreakdown,
 } from "@/features/dashboard/dashboard.queries"
 
@@ -48,12 +52,16 @@ export default async function DashboardPage({
     ? parseInt(resolvedParams.year, 10)
     : now.getFullYear()
 
-  const [kpis, truckBreakdown, chartData, recentTrips] = await Promise.all([
-    getDashboardKPIs(month, year),
-    getTruckBreakdown(month, year),
-    getDailyTripChart(month, year),
-    getRecentTrips(10),
-  ])
+  const [kpis, truckBreakdown, chartData, recentTrips, topRoutes] =
+    await Promise.all([
+      getDashboardKPIs(month, year),
+      getTruckBreakdown(month, year),
+      getDailyTripChart(month, year),
+      getRecentTrips(10),
+      getTopRoutes(month, year, 10),
+    ])
+
+  const routeChartData = prepareRouteChartData(topRoutes)
 
   const monthLabel = new Intl.DateTimeFormat("id-ID", {
     month: "long",
@@ -102,10 +110,36 @@ export default async function DashboardPage({
         <ChartAreaInteractive data={chartData} />
       </div>
 
+      {/* Top Routes Widget */}
+      <div className="px-4 lg:px-6">
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <CardTitle className="text-base font-semibold">
+                  Top Rute Teratas Bulan Ini
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  Peringkat destinasi berdasarkan frekuensi ritase dan
+                  kontribusi omset
+                </CardDescription>
+              </div>
+              <Badge variant="outline" className="text-xs font-normal">
+                {routeChartData.length} Rute
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <DashboardRouteChart data={routeChartData} />
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Recent Trips Data Table */}
       <div className="px-4 lg:px-6">
         <DataTable trips={recentTrips} />
       </div>
+
 
       {/* Modul Navigasi Operasional */}
       <div className="px-4 lg:px-6">
