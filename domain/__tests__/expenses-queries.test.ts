@@ -23,13 +23,30 @@ vi.mock("@/db", () => {
     },
   ]
 
-  const mockOrderBy = vi.fn().mockResolvedValue(dummyExpenses)
+  const dummyBreakdown = [
+    {
+      category: "Servis",
+      total: 502500,
+      count: 1,
+    },
+  ]
+
+  const mockOrderBy = vi
+    .fn()
+    .mockImplementation(() => Promise.resolve(dummyBreakdown))
+  const mockGroupBy = vi.fn().mockReturnValue({
+    orderBy: mockOrderBy,
+    then: (resolve: (v: typeof dummyBreakdown) => void) =>
+      resolve(dummyBreakdown),
+  })
   const mockWhere = vi.fn().mockImplementation(() => ({
+    groupBy: mockGroupBy,
     orderBy: mockOrderBy,
     then: (resolve: (v: typeof dummySummary) => void) => resolve(dummySummary),
   }))
   const mockFrom = vi.fn().mockReturnValue({
     where: mockWhere,
+    groupBy: mockGroupBy,
     orderBy: mockOrderBy,
     then: (resolve: (v: typeof dummyExpenses) => void) =>
       resolve(dummyExpenses),
@@ -63,5 +80,30 @@ describe("expenses.queries", () => {
     expect(result).toHaveProperty("totalExpenses")
     expect(result).toHaveProperty("totalAmount")
     expect(result).toHaveProperty("totalAdminFee")
+  })
+
+  it("getExpensesCategoryBreakdown should return array", async () => {
+    const { getExpensesCategoryBreakdown } =
+      await import("@/features/expenses/expenses.queries")
+    const result = await getExpensesCategoryBreakdown({})
+    expect(Array.isArray(result)).toBe(true)
+  })
+
+  it("getExpensesCategoryBreakdown should accept truckId filter", async () => {
+    const { getExpensesCategoryBreakdown } =
+      await import("@/features/expenses/expenses.queries")
+    const result = await getExpensesCategoryBreakdown({ truckId: "W8187UA" })
+    expect(Array.isArray(result)).toBe(true)
+  })
+
+  it("getExpensesCategoryBreakdown items should have category, total, count", async () => {
+    const { getExpensesCategoryBreakdown } =
+      await import("@/features/expenses/expenses.queries")
+    const result = await getExpensesCategoryBreakdown({})
+    if (result.length > 0) {
+      expect(result[0]).toHaveProperty("category")
+      expect(result[0]).toHaveProperty("total")
+      expect(result[0]).toHaveProperty("count")
+    }
   })
 })

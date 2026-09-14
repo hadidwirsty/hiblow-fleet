@@ -3,6 +3,9 @@ import { and, desc, eq, sql } from "drizzle-orm"
 import { db } from "@/db"
 import { expenses } from "@/db/schema"
 import type { Expense } from "@/db/schema"
+import type { CategoryBreakdownItem } from "@/domain/expense-category"
+
+export type { CategoryBreakdownItem }
 
 export interface ListExpensesFilter {
   truckId?: string
@@ -83,4 +86,34 @@ export async function getExpensesSummary(
       totalAdminFee: 0,
     }
   )
+}
+
+export async function getExpensesCategoryBreakdown(
+  filter: ListExpensesFilter = {}
+): Promise<CategoryBreakdownItem[]> {
+  const conditions = []
+
+  if (filter.truckId) {
+    conditions.push(eq(expenses.truckId, filter.truckId))
+  }
+
+  if (filter.month && filter.year) {
+    conditions.push(
+      sql`EXTRACT(MONTH FROM ${expenses.expenseDate}) = ${filter.month}`,
+      sql`EXTRACT(YEAR FROM ${expenses.expenseDate}) = ${filter.year}`
+    )
+  }
+
+  return db
+    .select({
+      category: expenses.category,
+      total: sql<number>`coalesce(sum(${expenses.amount}::numeric + ${expenses.adminFee}::numeric), 0)::float`,
+      count: sql<number>`count(*)::int`,
+    })
+    .from(expenses)
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
+    .groupBy(expenses.category)
+    .orderBy(
+      sql`sum(${expenses.amount}::numeric + ${expenses.adminFee}::numeric) DESC`
+    )
 }

@@ -2,16 +2,26 @@ import { RiCalendarLine } from "@remixicon/react"
 
 import { Badge } from "@/components/ui/badge"
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { prepareCategoryChartData } from "@/domain/expense-category"
+import { ExpenseFormDialog } from "@/features/expenses/expense-form-dialog"
+import { ExpensesCategoryChart } from "@/features/expenses/expenses-category-chart"
+import {
+  getExpensesCategoryBreakdown,
   getExpensesSummary,
   listExpenses,
 } from "@/features/expenses/expenses.queries"
-import { ExpenseFormDialog } from "@/features/expenses/expense-form-dialog"
-import { ExpensesSummary } from "@/features/expenses/expenses-summary"
-import { ExpensesTable } from "@/features/expenses/expenses-table"
 import {
   EXPENSE_CATEGORIES,
   type ExpenseCategory,
 } from "@/features/expenses/expenses.schema"
+import { ExpensesSummary } from "@/features/expenses/expenses-summary"
+import { ExpensesTable } from "@/features/expenses/expenses-table"
 
 interface ExpensesPageProps {
   searchParams: Promise<{
@@ -48,10 +58,13 @@ export default async function ExpensesPage({
     year: year && year >= 2024 ? year : undefined,
   }
 
-  const [expensesData, summary] = await Promise.all([
+  const [expensesData, summary, breakdown] = await Promise.all([
     listExpenses(filter),
     getExpensesSummary(filter),
+    getExpensesCategoryBreakdown(filter),
   ])
+
+  const chartData = prepareCategoryChartData(breakdown, summary.totalExpenses)
 
   return (
     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
@@ -84,6 +97,26 @@ export default async function ExpensesPage({
 
       {/* KPI Summary Cards */}
       <ExpensesSummary summary={summary} />
+
+      {/* Category Breakdown Chart */}
+      <div className="px-4 lg:px-6">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-semibold">
+              Komposisi Biaya per Kategori
+            </CardTitle>
+            <CardDescription className="text-xs">
+              Proporsi pengeluaran berdasarkan jenis biaya operasional armada
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ExpensesCategoryChart
+              data={chartData}
+              totalExpenses={summary.totalExpenses}
+            />
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Interactive Expenses Table */}
       <div className="px-4 lg:px-6">
