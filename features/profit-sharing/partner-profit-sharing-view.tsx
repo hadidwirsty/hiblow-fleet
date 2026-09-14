@@ -2,7 +2,7 @@ import { RiHandCoinLine, RiPieChartLine, RiTimeLine } from "@remixicon/react"
 
 import { Badge } from "@/components/ui/badge"
 import { PeriodCard } from "@/features/profit-sharing/period-card"
-import { listProfitSharingPeriodsWithShares } from "@/features/profit-sharing/profit-sharing.queries"
+import type { ProfitSharingPeriodDetail } from "@/features/profit-sharing/profit-sharing.queries"
 import { formatCurrency } from "@/lib/utils"
 
 interface PartnerProfitSharingViewProps {
@@ -10,13 +10,19 @@ interface PartnerProfitSharingViewProps {
     name?: string | null
     email?: string | null
   }
+  userId?: string
+  myTotalDividend?: number
+  mySharesMap?: Map<string, number>
+  periods: ProfitSharingPeriodDetail[]
 }
 
-export async function PartnerProfitSharingView({
+export function PartnerProfitSharingView({
   user,
+  myTotalDividend,
+  mySharesMap,
+  periods,
 }: PartnerProfitSharingViewProps) {
-  const allPeriods = await listProfitSharingPeriodsWithShares()
-  const finalizedPeriods = allPeriods.filter((p) => p.status === "finalized")
+  const finalizedPeriods = periods.filter((p) => p.status === "finalized")
 
   const totalDistributed = finalizedPeriods.reduce(
     (sum, p) => sum + parseFloat(p.distributableProfit || "0"),
@@ -66,6 +72,29 @@ export async function PartnerProfitSharingView({
           </div>
         ) : (
           <div className="space-y-6">
+            {/* Kartu Sorotan Hak Dividen Personal Investor */}
+            {myTotalDividend !== undefined && myTotalDividend > 0 && (
+              <div className="rounded-xl border-2 border-emerald-500/40 bg-emerald-500/5 p-4 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                      Total Hak Dividen Anda (All-Time)
+                    </p>
+                    <p className="text-2xl font-bold text-emerald-600 tabular-nums dark:text-emerald-400">
+                      {formatCurrency(myTotalDividend)}
+                    </p>
+                  </div>
+                  <div className="flex size-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                    <RiHandCoinLine className="size-6" />
+                  </div>
+                </div>
+                <p className="mt-1.5 text-xs text-muted-foreground">
+                  Akumulasi dividen resmi dari seluruh periode bagi hasil yang
+                  sudah finalized
+                </p>
+              </div>
+            )}
+
             {/* Top Stat Cards */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="rounded-xl border bg-card p-4 shadow-sm">
@@ -116,7 +145,12 @@ export async function PartnerProfitSharingView({
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {finalizedPeriods.map((period) => (
-                  <PeriodCard key={period.id} period={period} readOnly />
+                  <PeriodCard
+                    key={period.id}
+                    period={period}
+                    readOnly
+                    myPayoutAmount={mySharesMap?.get(period.id)}
+                  />
                 ))}
               </div>
             </div>

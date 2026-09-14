@@ -5,6 +5,7 @@ import {
   RiCalendarLine,
   RiDeleteBinLine,
   RiFileTextLine,
+  RiHandCoinLine,
   RiLockLine,
   RiLockUnlockLine,
   RiUserLine,
@@ -31,9 +32,14 @@ import type { ProfitSharingPeriodDetail } from "./profit-sharing.queries"
 interface PeriodCardProps {
   period: ProfitSharingPeriodDetail
   readOnly?: boolean
+  myPayoutAmount?: number
 }
 
-export function PeriodCard({ period, readOnly = false }: PeriodCardProps) {
+export function PeriodCard({
+  period,
+  readOnly = false,
+  myPayoutAmount,
+}: PeriodCardProps) {
   const [isDetailOpen, setIsDetailOpen] = React.useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = React.useState(false)
   const [isDeleting, setIsDeleting] = React.useState(false)
@@ -141,6 +147,21 @@ export function PeriodCard({ period, readOnly = false }: PeriodCardProps) {
               </span>
             </div>
           </div>
+
+          {/* Sorotan Hak Dividen Personal Investor */}
+          {myPayoutAmount !== undefined && myPayoutAmount > 0 && (
+            <div className="flex items-center justify-between rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2">
+              <div className="flex items-center gap-1.5">
+                <RiHandCoinLine className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                  Hak Anda
+                </span>
+              </div>
+              <span className="text-sm font-bold text-emerald-600 tabular-nums dark:text-emerald-400">
+                {formatCurrency(myPayoutAmount)}
+              </span>
+            </div>
+          )}
         </CardContent>
 
         <CardFooter className="mt-2 flex items-center justify-between gap-2 border-t p-5 pt-0">

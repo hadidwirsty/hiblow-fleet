@@ -126,3 +126,29 @@ export async function getProfitSharingPeriodDetail(
     shares,
   }
 }
+
+/**
+ * Menghitung total akumulasi dividen untuk investor tertentu
+ * berdasarkan partner_user_id di seluruh periode yang sudah finalized.
+ */
+export async function getMyTotalDividend(userId: string): Promise<number> {
+  if (!userId) return 0
+
+  const [result] = await db
+    .select({
+      total: sql<number>`coalesce(sum(${profitShares.payoutAmount}::numeric), 0)::float`,
+    })
+    .from(profitShares)
+    .innerJoin(
+      profitSharingPeriods,
+      eq(profitShares.periodId, profitSharingPeriods.id)
+    )
+    .where(
+      and(
+        eq(profitShares.partnerUserId, userId),
+        eq(profitSharingPeriods.status, "finalized")
+      )
+    )
+
+  return result?.total ?? 0
+}

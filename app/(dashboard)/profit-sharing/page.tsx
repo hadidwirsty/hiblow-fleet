@@ -6,11 +6,15 @@ import {
 } from "@remixicon/react"
 
 import { Badge } from "@/components/ui/badge"
+import { extractMyShares } from "@/domain/investor-personalization"
 import { PartnerProfitSharingView } from "@/features/profit-sharing/partner-profit-sharing-view"
 import { PeriodCard } from "@/features/profit-sharing/period-card"
 import { PeriodWizardDialog } from "@/features/profit-sharing/period-wizard-dialog"
 import { ProfitSharingEmptyState } from "@/features/profit-sharing/profit-sharing-empty-state"
-import { listProfitSharingPeriodsWithShares } from "@/features/profit-sharing/profit-sharing.queries"
+import {
+  getMyTotalDividend,
+  listProfitSharingPeriodsWithShares,
+} from "@/features/profit-sharing/profit-sharing.queries"
 import { isAdmin } from "@/lib/rbac"
 import { getCurrentSession } from "@/lib/session"
 import { formatCurrency } from "@/lib/utils"
@@ -23,7 +27,25 @@ export default async function ProfitSharingPage() {
 
   // Otorisasi: Tampilan khusus untuk Partner / Investor
   if (!userIsAdmin) {
-    return <PartnerProfitSharingView user={session?.user} />
+    const userId = session?.user?.id ?? ""
+
+    const [allPeriods, myTotalDividend] = await Promise.all([
+      listProfitSharingPeriodsWithShares(),
+      getMyTotalDividend(userId),
+    ])
+
+    const finalizedPeriods = allPeriods.filter((p) => p.status === "finalized")
+    const mySharesMap = extractMyShares(finalizedPeriods, userId)
+
+    return (
+      <PartnerProfitSharingView
+        user={session?.user}
+        userId={userId}
+        myTotalDividend={myTotalDividend}
+        mySharesMap={mySharesMap}
+        periods={allPeriods}
+      />
+    )
   }
 
   const periods = await listProfitSharingPeriodsWithShares()
