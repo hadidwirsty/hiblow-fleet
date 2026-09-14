@@ -30,6 +30,8 @@ import {
   getTopRoutes,
   getTruckBreakdown,
 } from "@/features/dashboard/dashboard.queries"
+import { MaintenanceRemindersWidget } from "@/features/maintenance/maintenance-reminders-widget"
+import { getActiveReminders } from "@/features/maintenance/maintenance.queries"
 
 export const dynamic = "force-dynamic"
 
@@ -52,13 +54,14 @@ export default async function DashboardPage({
     ? parseInt(resolvedParams.year, 10)
     : now.getFullYear()
 
-  const [kpis, truckBreakdown, chartData, recentTrips, topRoutes] =
+  const [kpis, truckBreakdown, chartData, recentTrips, topRoutes, reminders] =
     await Promise.all([
       getDashboardKPIs(month, year),
       getTruckBreakdown(month, year),
       getDailyTripChart(month, year),
       getRecentTrips(10),
       getTopRoutes(month, year, 10),
+      getActiveReminders(),
     ])
 
   const routeChartData = prepareRouteChartData(topRoutes)
@@ -140,6 +143,32 @@ export default async function DashboardPage({
         <DataTable trips={recentTrips} />
       </div>
 
+      {/* Maintenance Reminders Widget */}
+      <div className="px-4 lg:px-6">
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <CardTitle className="text-base font-semibold">
+                  Jadwal Servis & Pajak Armada
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  Pengingat ganti oli, uji KIR, dan pajak STNK unit W 8187 UA &
+                  H 8133 OF
+                </CardDescription>
+              </div>
+              {reminders.length > 0 && (
+                <Badge variant="outline" className="text-xs font-normal">
+                  {reminders.length} Jadwal
+                </Badge>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            <MaintenanceRemindersWidget reminders={reminders} />
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Modul Navigasi Operasional */}
       <div className="px-4 lg:px-6">
