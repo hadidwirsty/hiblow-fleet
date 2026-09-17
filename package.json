@@ -19,6 +19,7 @@
     "db:seed": "tsx db/seed.ts",
     "db:seed-users": "tsx db/seed-users.ts",
     "db:import-history": "tsx db/import-history.ts",
+    "db:sync-csv": "tsx --env-file=.env.local scripts/sync-csv-to-database.ts",
     "verify:deployment": "tsx scripts/verify-deployment.ts"
   },
   "dependencies": {
