@@ -26,18 +26,30 @@ function parseIndoDate(dateStr: any): string | null {
   if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s
 
   const months: Record<string, string> = {
-    januari: "01", jan: "01",
-    februari: "02", feb: "02",
-    maret: "03", mar: "03",
-    april: "04", apr: "04",
+    januari: "01",
+    jan: "01",
+    februari: "02",
+    feb: "02",
+    maret: "03",
+    mar: "03",
+    april: "04",
+    apr: "04",
     mei: "05",
-    juni: "06", jun: "06",
-    juli: "07", jul: "07",
-    agustus: "08", agu: "08", agt: "08",
-    september: "09", sep: "09",
-    oktober: "10", okt: "10",
-    november: "11", nov: "11",
-    desember: "12", des: "12",
+    juni: "06",
+    jun: "06",
+    juli: "07",
+    jul: "07",
+    agustus: "08",
+    agu: "08",
+    agt: "08",
+    september: "09",
+    sep: "09",
+    oktober: "10",
+    okt: "10",
+    november: "11",
+    nov: "11",
+    desember: "12",
+    des: "12",
   }
 
   const clean = s.replace(/^[a-zA-Z'’]+,\s*/, "").trim()
@@ -54,7 +66,9 @@ function parseIndoDate(dateStr: any): string | null {
 
 function parseMoney(val: any): string {
   if (val === undefined || val === null || val === "") return "0.00"
-  let s = String(val).trim().replace(/[^\d,\.-]/g, "")
+  let s = String(val)
+    .trim()
+    .replace(/[^\d,\.-]/g, "")
   if (s.includes(",") && s.includes(".")) {
     s = s.replace(/\./g, "").replace(/,/g, ".")
   } else if (s.includes(",")) {
@@ -71,7 +85,9 @@ function parseMoney(val: any): string {
 
 function parseTonnage(val: any): string {
   if (!val) return "0.00"
-  let s = String(val).trim().replace(/[^\d,\.-]/g, "")
+  let s = String(val)
+    .trim()
+    .replace(/[^\d,\.-]/g, "")
   if (s.includes(",")) {
     s = s.replace(/,/g, ".")
   }
@@ -85,7 +101,9 @@ function parseTonnage(val: any): string {
 
 function parseTarif(val: any): string {
   if (!val) return "0.00"
-  let s = String(val).trim().replace(/[^\d,\.-]/g, "")
+  let s = String(val)
+    .trim()
+    .replace(/[^\d,\.-]/g, "")
   if (s.includes(",") && s.includes(".")) {
     s = s.replace(/\./g, "").replace(/,/g, ".")
   } else if (s.includes(",")) {
@@ -122,7 +140,11 @@ function categorizeExpense(desc: string): string {
   ) {
     return "Servis"
   }
-  if (d.includes("dp") || d.includes("cicilan") || d.includes("pembayaran truk")) {
+  if (
+    d.includes("dp") ||
+    d.includes("cicilan") ||
+    d.includes("pembayaran truk")
+  ) {
     return "DP/Cicilan"
   }
   if (d.includes("gps")) {
@@ -161,11 +183,19 @@ function categorizeExpense(desc: string): string {
 }
 
 function parseTripsFromCSV(fileName: string, truckId: string) {
-  const wb = XLSX.read(fs.readFileSync(path.join(csvDir, fileName), "utf-8"), { type: "string", raw: true })
-  const rows: any[] = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: true })
-  const tripRows = rows.filter(r => r[0] !== undefined && !isNaN(Number(r[0])) && Number(r[0]) > 0)
-  
-  return tripRows.map(r => {
+  const wb = XLSX.read(fs.readFileSync(path.join(csvDir, fileName), "utf-8"), {
+    type: "string",
+    raw: true,
+  })
+  const rows: any[] = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {
+    header: 1,
+    raw: true,
+  })
+  const tripRows = rows.filter(
+    (r) => r[0] !== undefined && !isNaN(Number(r[0])) && Number(r[0]) > 0
+  )
+
+  return tripRows.map((r) => {
     const orderNumber = Number(r[0])
     const orderDate = parseIndoDate(r[1]) || "2026-08-01"
     const unloadingDate = parseIndoDate(r[2])
@@ -215,8 +245,14 @@ function parseTripsFromCSV(fileName: string, truckId: string) {
 }
 
 function parseExpensesFromCSV(fileName: string, truckId: string) {
-  const wb = XLSX.read(fs.readFileSync(path.join(csvDir, fileName), "utf-8"), { type: "string", raw: true })
-  const rows: any[] = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: true })
+  const wb = XLSX.read(fs.readFileSync(path.join(csvDir, fileName), "utf-8"), {
+    type: "string",
+    raw: true,
+  })
+  const rows: any[] = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {
+    header: 1,
+    raw: true,
+  })
   let currentDate: string | null = null
   const list = []
 
@@ -225,7 +261,12 @@ function parseExpensesFromCSV(fileName: string, truckId: string) {
     if (!r) continue
     if (r[3] && String(r[3]).toLowerCase() === "total") break
     if (r[2] && String(r[2]).toLowerCase() === "total") break
-    if (r[3] && (String(r[3]).toLowerCase().includes("truk") || String(r[3]).toLowerCase().includes("stnk"))) break
+    if (
+      r[3] &&
+      (String(r[3]).toLowerCase().includes("truk") ||
+        String(r[3]).toLowerCase().includes("stnk"))
+    )
+      break
 
     if (r[1]) {
       const d = parseIndoDate(r[1])
@@ -262,29 +303,53 @@ export async function runSync() {
   // ----------------------------------------------------
   // 1. TRIPS SINKRONISASI DARI CSV
   // ----------------------------------------------------
-  console.log("📦 1. Mem-parse seluruh Trip dari CSV Masuk W8187UA & H8133OF...")
-  const tripsW = parseTripsFromCSV("PERHITUNGAN HIBLOW HW Trans.xlsx - Masuk W8187UA.csv", "W8187UA")
-  const tripsH = parseTripsFromCSV("PERHITUNGAN HIBLOW HW Trans.xlsx - Masuk H8133OF.csv", "H8133OF")
+  console.log(
+    "📦 1. Mem-parse seluruh Trip dari CSV Masuk W8187UA & H8133OF..."
+  )
+  const tripsW = parseTripsFromCSV(
+    "PERHITUNGAN HIBLOW HW Trans.xlsx - Masuk W8187UA.csv",
+    "W8187UA"
+  )
+  const tripsH = parseTripsFromCSV(
+    "PERHITUNGAN HIBLOW HW Trans.xlsx - Masuk H8133OF.csv",
+    "H8133OF"
+  )
   const allTrips = [...tripsW, ...tripsH]
-  console.log(`  ✅ W8187UA Trips: ${tripsW.length} trips (Order 1 s/d ${tripsW[tripsW.length - 1].orderNumber})`)
-  console.log(`  ✅ H8133OF Trips: ${tripsH.length} trips (Order 1 s/d ${tripsH[tripsH.length - 1].orderNumber})`)
+  console.log(
+    `  ✅ W8187UA Trips: ${tripsW.length} trips (Order 1 s/d ${tripsW[tripsW.length - 1].orderNumber})`
+  )
+  console.log(
+    `  ✅ H8133OF Trips: ${tripsH.length} trips (Order 1 s/d ${tripsH[tripsH.length - 1].orderNumber})`
+  )
   console.log(`  ✅ Total Ritase (Trips): ${allTrips.length} trips\n`)
 
   // ----------------------------------------------------
   // 2. EXPENSES SINKRONISASI DARI CSV
   // ----------------------------------------------------
-  console.log("🧾 2. Mem-parse seluruh Pengeluaran dari CSV Keluar W8187UA & H8133OF...")
-  const expW = parseExpensesFromCSV("PERHITUNGAN HIBLOW HW Trans.xlsx - Keluar W8187UA.csv", "W8187UA")
-  const expH = parseExpensesFromCSV("PERHITUNGAN HIBLOW HW Trans.xlsx - Keluar H8133OF.csv", "H8133OF")
+  console.log(
+    "🧾 2. Mem-parse seluruh Pengeluaran dari CSV Keluar W8187UA & H8133OF..."
+  )
+  const expW = parseExpensesFromCSV(
+    "PERHITUNGAN HIBLOW HW Trans.xlsx - Keluar W8187UA.csv",
+    "W8187UA"
+  )
+  const expH = parseExpensesFromCSV(
+    "PERHITUNGAN HIBLOW HW Trans.xlsx - Keluar H8133OF.csv",
+    "H8133OF"
+  )
   const allExpenses = [...expW, ...expH]
   console.log(`  ✅ W8187UA Expenses: ${expW.length} pengeluaran`)
   console.log(`  ✅ H8133OF Expenses: ${expH.length} pengeluaran`)
-  console.log(`  ✅ Total Pengeluaran (Expenses): ${allExpenses.length} transaksi\n`)
+  console.log(
+    `  ✅ Total Pengeluaran (Expenses): ${allExpenses.length} transaksi\n`
+  )
 
   // ----------------------------------------------------
   // 3. BAGI HASIL REVISI
   // ----------------------------------------------------
-  console.log("📊 3. Memperbarui Periode Bagi Hasil (Termasuk Revisi September 2025)...")
+  console.log(
+    "📊 3. Memperbarui Periode Bagi Hasil (Termasuk Revisi September 2025)..."
+  )
   const profitSharingPeriodsData = [
     {
       title: "Bagi Hasil 25 Jul - 31 Agu 2025",
@@ -342,7 +407,9 @@ export async function runSync() {
       ],
     },
   ]
-  console.log("  ✅ Periode Bagi Hasil siap dengan 2 periode final (Agustus 2025 & September 2025 Revisi).\n")
+  console.log(
+    "  ✅ Periode Bagi Hasil siap dengan 2 periode final (Agustus 2025 & September 2025 Revisi).\n"
+  )
 
   // ----------------------------------------------------
   // 4. RATES (SI REMBANG)
@@ -350,9 +417,15 @@ export async function runSync() {
   console.log("🗺️ 4. Menambahkan 31 Rute Baru Pabrik SI Rembang...")
   const rates = JSON.parse(fs.readFileSync(ratesJsonPath, "utf-8"))
   const fileRembang = "PERHITUNGAN HIBLOW HW Trans.xlsx - SI Rembang.csv"
-  const wbRembang = XLSX.read(fs.readFileSync(path.join(csvDir, fileRembang), "utf-8"), { type: "string", raw: true })
-  const rowsRembang: any[] = XLSX.utils.sheet_to_json(wbRembang.Sheets[wbRembang.SheetNames[0]], { header: 1, raw: true })
-  
+  const wbRembang = XLSX.read(
+    fs.readFileSync(path.join(csvDir, fileRembang), "utf-8"),
+    { type: "string", raw: true }
+  )
+  const rowsRembang: any[] = XLSX.utils.sheet_to_json(
+    wbRembang.Sheets[wbRembang.SheetNames[0]],
+    { header: 1, raw: true }
+  )
+
   let addedRates = 0
   for (let i = 1; i < rowsRembang.length; i++) {
     const r = rowsRembang[i]
@@ -363,9 +436,10 @@ export async function runSync() {
     const standardTonnage = parseTonnage(r[4]) || "31.00"
     const additionalTonnageRate = parseTarif(r[8]) || "25000.00"
 
-    const exists = rates.some((rt: any) => 
-      rt.clientName === "SI Rembang" && 
-      rt.city.toLowerCase() === city.toLowerCase()
+    const exists = rates.some(
+      (rt: any) =>
+        rt.clientName === "SI Rembang" &&
+        rt.city.toLowerCase() === city.toLowerCase()
     )
     if (!exists) {
       rates.push({
@@ -382,7 +456,9 @@ export async function runSync() {
       addedRates++
     }
   }
-  console.log(`  ✅ Total Referensi Tarif: ${rates.length} (+${addedRates} rute SI Rembang)\n`)
+  console.log(
+    `  ✅ Total Referensi Tarif: ${rates.length} (+${addedRates} rute SI Rembang)\n`
+  )
 
   // ----------------------------------------------------
   // 5. SIMPAN KE FILE JSON LOKAL
@@ -393,20 +469,39 @@ export async function runSync() {
     profitSharingPeriods: profitSharingPeriodsData,
   }
 
-  fs.writeFileSync(historyJsonPath, JSON.stringify(historyData, null, 2), "utf-8")
+  fs.writeFileSync(
+    historyJsonPath,
+    JSON.stringify(historyData, null, 2),
+    "utf-8"
+  )
   fs.writeFileSync(ratesJsonPath, JSON.stringify(rates, null, 2), "utf-8")
-  console.log("💾 Berhasil menyimpan data canonical ke db/data/history.json & db/data/rates.json!\n")
+  console.log(
+    "💾 Berhasil menyimpan data canonical ke db/data/history.json & db/data/rates.json!\n"
+  )
 
   // ----------------------------------------------------
   // 6. SYNC KE DATABASE NEON / POSTGRES
   // ----------------------------------------------------
   console.log("🚀 6. Menyinkronkan ke Database PostgreSQL/Neon Cloud...")
-  
+
   // 6.1 Ensure trucks
-  await db.insert(trucks).values([
-    { id: "W8187UA", plateNumber: "W 8187 UA", brandModel: "Hino 500 Tronton Hi-Blow", isActive: true },
-    { id: "H8133OF", plateNumber: "H 8133 OF", brandModel: "Hino 500 Tronton Hi-Blow", isActive: true },
-  ]).onConflictDoNothing()
+  await db
+    .insert(trucks)
+    .values([
+      {
+        id: "W8187UA",
+        plateNumber: "W 8187 UA",
+        brandModel: "Hino 500 Tronton Hi-Blow",
+        isActive: true,
+      },
+      {
+        id: "H8133OF",
+        plateNumber: "H 8133 OF",
+        brandModel: "Hino 500 Tronton Hi-Blow",
+        isActive: true,
+      },
+    ])
+    .onConflictDoNothing()
   console.log("  🚛 Armada Truk (W8187UA, H8133OF) terverifikasi.")
 
   // 6.2 Rate references
@@ -417,7 +512,9 @@ export async function runSync() {
   }
 
   // 6.3 Clear and re-populate transactional tables
-  console.log("  🧹 Resetting tabel transaksional (trips, expenses, profit_shares, profit_sharing_periods)...")
+  console.log(
+    "  🧹 Resetting tabel transaksional (trips, expenses, profit_shares, profit_sharing_periods)..."
+  )
   await db.delete(profitShares)
   await db.delete(profitSharingPeriods)
   await db.delete(expenses)
@@ -438,23 +535,28 @@ export async function runSync() {
   }
 
   // 6.6 Insert profit sharing
-  console.log(`  📊 Mengunggah ${profitSharingPeriodsData.length} profit sharing periods...`)
+  console.log(
+    `  📊 Mengunggah ${profitSharingPeriodsData.length} profit sharing periods...`
+  )
   for (const period of profitSharingPeriodsData) {
-    const [insertedPeriod] = await db.insert(profitSharingPeriods).values({
-      title: period.title,
-      startDate: period.startDate,
-      endDate: period.endDate,
-      totalIncome: period.totalIncome,
-      totalExpenses: period.totalExpenses,
-      grossBalance: period.grossBalance,
-      managerCommissionRate: period.managerCommissionRate,
-      managerCommissionAmount: period.managerCommissionAmount,
-      distributableProfit: period.distributableProfit,
-      fleetValuation: period.fleetValuation,
-      managerProfit: period.managerProfit,
-      managerTakeHome: period.managerTakeHome,
-      status: period.status,
-    }).returning({ id: profitSharingPeriods.id })
+    const [insertedPeriod] = await db
+      .insert(profitSharingPeriods)
+      .values({
+        title: period.title,
+        startDate: period.startDate,
+        endDate: period.endDate,
+        totalIncome: period.totalIncome,
+        totalExpenses: period.totalExpenses,
+        grossBalance: period.grossBalance,
+        managerCommissionRate: period.managerCommissionRate,
+        managerCommissionAmount: period.managerCommissionAmount,
+        distributableProfit: period.distributableProfit,
+        fleetValuation: period.fleetValuation,
+        managerProfit: period.managerProfit,
+        managerTakeHome: period.managerTakeHome,
+        status: period.status,
+      })
+      .returning({ id: profitSharingPeriods.id })
 
     if (period.shares && period.shares.length > 0) {
       await db.insert(profitShares).values(
@@ -472,8 +574,12 @@ export async function runSync() {
 
   console.log("\n==========================================")
   console.log("🎉 SINKRONISASI DATABASE NEON 100% SUKSES!")
-  console.log(`🚛 Total Trips: ${allTrips.length} (W8187UA: ${tripsW.length}, H8133OF: ${tripsH.length})`)
-  console.log(`🧾 Total Expenses: ${allExpenses.length} (W8187UA: ${expW.length}, H8133OF: ${expH.length})`)
+  console.log(
+    `🚛 Total Trips: ${allTrips.length} (W8187UA: ${tripsW.length}, H8133OF: ${tripsH.length})`
+  )
+  console.log(
+    `🧾 Total Expenses: ${allExpenses.length} (W8187UA: ${expW.length}, H8133OF: ${expH.length})`
+  )
   console.log(`🗺️ Referensi Tarif: ${rates.length}`)
   console.log(`📊 Periode Bagi Hasil: ${profitSharingPeriodsData.length}`)
   console.log("==========================================\n")
@@ -481,7 +587,7 @@ export async function runSync() {
   await pool.end()
 }
 
-runSync().catch(err => {
+runSync().catch((err) => {
   console.error("❌ Sync Error:", err)
   pool.end().finally(() => process.exit(1))
 })
