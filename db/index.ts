@@ -1,6 +1,7 @@
 import { drizzle } from "drizzle-orm/node-postgres"
 import { Pool } from "pg"
 
+import { resolvePoolConfig } from "@/domain/database/pool-config"
 import * as schema from "./schema"
 
 const connectionString =
@@ -13,10 +14,7 @@ const globalForDb = globalThis as unknown as {
 }
 
 export const pool =
-  globalForDb.pool ??
-  new Pool({
-    connectionString,
-  })
+  globalForDb.pool ?? new Pool(resolvePoolConfig(connectionString))
 
 if (process.env.NODE_ENV !== "production") {
   globalForDb.pool = pool
