@@ -15,12 +15,12 @@ async function seedUsers() {
   await db.delete(verification)
   await db.delete(user)
 
-  // 1. Create Admin User
+  // 1. Create Admin User (Muhammad Hafidz Wirandryo)
   const adminResult = await auth.api.signUpEmail({
     body: {
       email: "hafidz@hiblow.fleet",
       password: "password123",
-      name: "Mas Hafidz",
+      name: "Muhammad Hafidz Wirandryo",
       role: "admin",
     },
   })
@@ -30,12 +30,27 @@ async function seedUsers() {
     `(Role: ${adminResult?.user?.role})`
   )
 
-  // 2. Create Partner User
+  // 2. Create Admin User (Muhammad Hadid Wiransetyo)
+  const hadidResult = await auth.api.signUpEmail({
+    body: {
+      email: "hadid@hiblow.fleet",
+      password: "password123",
+      name: "Muhammad Hadid Wiransetyo",
+      role: "admin",
+    },
+  })
+  console.log(
+    "✅ Admin user created:",
+    hadidResult?.user?.email,
+    `(Role: ${hadidResult?.user?.role})`
+  )
+
+  // 3. Create Partner User (Alfiah Dwi Ayu Wirandari)
   const partnerResult = await auth.api.signUpEmail({
     body: {
       email: "alfiah@hiblow.fleet",
       password: "password123",
-      name: "Hj. Alfiah",
+      name: "Alfiah Dwi Ayu Wirandari",
       role: "partner",
     },
   })

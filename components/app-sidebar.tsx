@@ -27,7 +27,7 @@ import {
 
 const data = {
   user: {
-    name: "Mas Hafidz",
+    name: "Muhammad Hafidz Wirandryo",
     email: "hafidz@hiblow.fleet",
     role: "Super Admin",
   },
@@ -109,7 +109,7 @@ export function AppSidebar({
     : data.navSecondary.filter((item) => item.url !== "/rates")
 
   const currentUser = {
-    name: user?.name ?? (isAdmin ? "Mas Hafidz" : "Investor"),
+    name: user?.name ?? (isAdmin ? "Muhammad Hafidz Wirandryo" : "Investor"),
     email: user?.email ?? "",
     role: isAdmin ? "Admin" : "Partner",
   }
