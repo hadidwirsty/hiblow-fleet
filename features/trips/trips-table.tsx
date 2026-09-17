@@ -177,8 +177,8 @@ export function TripsTable({ trips, initialFilter }: TripsTableProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ALL">Semua Armada</SelectItem>
-                <SelectItem value="W8187UA">W 8187 UA (Dutro)</SelectItem>
-                <SelectItem value="H8133OF">H 8133 OF (Hino 500)</SelectItem>
+                <SelectItem value="W8187UA">W 8187 UA (Triyono)</SelectItem>
+                <SelectItem value="H8133OF">H 8133 OF (Khoirul)</SelectItem>
               </SelectContent>
             </Select>
           </div>

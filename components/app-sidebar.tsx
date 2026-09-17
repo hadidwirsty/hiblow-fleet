@@ -62,13 +62,13 @@ const data = {
     {
       name: "W 8187 UA",
       url: "/trips?truckId=W8187UA",
-      subtitle: "Hino Dutro Hi-Blow",
+      subtitle: "Supir: Triyono",
       status: "Beroperasi",
     },
     {
       name: "H 8133 OF",
       url: "/trips?truckId=H8133OF",
-      subtitle: "Hino 500 Hi-Blow",
+      subtitle: "Supir: Khoirul",
       status: "Beroperasi",
     },
   ],
@@ -133,7 +133,7 @@ export function AppSidebar({
                       HW TRANS FLEET
                     </span>
                     <span className="truncate text-xs text-muted-foreground">
-                      PT. Hadid Wirst Mandiri
+                      Hadya Wiran Trans
                     </span>
                   </div>
                 </Link>

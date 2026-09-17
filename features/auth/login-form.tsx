@@ -74,7 +74,7 @@ export function LoginForm() {
           HW Trans Fleet
         </CardTitle>
         <CardDescription className="text-xs">
-          Masuk ke sistem manajemen armada & keuangan
+          Hadya Wiran Trans — Sistem Manajemen Armada & Keuangan
         </CardDescription>
       </CardHeader>
       <CardContent>

@@ -1,6 +1,6 @@
 # hiblow-fleet
 
-Aplikasi manajemen operasional armada truk tronton tangki semen curah (*HI-Blow Truck*) dan pencatatan keuangan bulanan HW Trans, menggantikan pencatatan manual spreadsheet Excel.
+Aplikasi manajemen operasional armada truk tronton tangki semen curah (*HI-Blow Truck*) dan pencatatan keuangan bulanan Hadya Wiran Trans (HW Trans), menggantikan pencatatan manual spreadsheet Excel.
 
 ---
 

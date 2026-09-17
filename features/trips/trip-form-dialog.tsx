@@ -254,8 +254,8 @@ export function TripFormDialog({ rateReferences }: TripFormDialogProps) {
                   <SelectValue placeholder="Pilih unit armada" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="W8187UA">W 8187 UA (Hino 500)</SelectItem>
-                  <SelectItem value="H8133OF">H 8133 OF (Hino 500)</SelectItem>
+                  <SelectItem value="W8187UA">W 8187 UA (Triyono)</SelectItem>
+                  <SelectItem value="H8133OF">H 8133 OF (Khoirul)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

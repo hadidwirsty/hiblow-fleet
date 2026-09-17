@@ -37,11 +37,11 @@ const chartConfig = {
     label: "Total Ritase",
   },
   w8187ua: {
-    label: "W 8187 UA (Dutro)",
+    label: "W 8187 UA (Triyono)",
     color: "var(--primary)",
   },
   h8133of: {
-    label: "H 8133 OF (Hino 500)",
+    label: "H 8133 OF (Khoirul)",
     color: "#f59e0b",
   },
 } satisfies ChartConfig
@@ -77,11 +77,11 @@ export function ChartAreaInteractive({ data = [] }: ChartAreaInteractiveProps) {
             <div className="hidden items-center gap-3 text-xs md:flex">
               <span className="flex items-center gap-1.5 font-medium">
                 <span className="size-2 rounded-full bg-primary" />W 8187 UA
-                (Dutro)
+                (Triyono)
               </span>
               <span className="flex items-center gap-1.5 font-medium">
                 <span className="size-2 rounded-full bg-amber-500" />H 8133 OF
-                (Hino 500)
+                (Khoirul)
               </span>
             </div>
           </div>

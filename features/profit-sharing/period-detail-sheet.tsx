@@ -212,7 +212,7 @@ export function PeriodDetailSheet({
           {/* Printable Header Letterhead */}
           <div className="mb-4 hidden border-b pb-4 text-center print:block">
             <h2 className="text-lg font-bold tracking-wider uppercase">
-              HW TRANS — SEMEN CURAH HI-BLOW
+              HADYA WIRAN TRANS (HW TRANS) — SEMEN CURAH HI-BLOW
             </h2>
             <p className="text-xs text-muted-foreground">
               Laporan Rekapitulasi Pembagian Hasil Periode Tutup Buku
