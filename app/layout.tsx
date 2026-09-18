@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { Geist_Mono, Inter } from "next/font/google"
 
 import { ThemeProvider } from "@/components/theme-provider"
@@ -13,6 +14,31 @@ const fontMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
 })
+
+export const metadata: Metadata = {
+  title: {
+    default: "HW Trans Fleet",
+    template: "%s — HW Trans Fleet",
+  },
+  description: "Sistem Manajemen Armada & Keuangan PT Hadya Wiran Trans",
+  icons: {
+    icon: [
+      {
+        url: "/icon-light.png?v=2",
+        media: "(prefers-color-scheme: light)",
+      },
+      {
+        url: "/icon-dark.png?v=2",
+        media: "(prefers-color-scheme: dark)",
+      },
+    ],
+    apple: [
+      {
+        url: "/icon-dark.png?v=2",
+      },
+    ],
+  },
+}
 
 export default function RootLayout({
   children,
