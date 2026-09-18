@@ -26,6 +26,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -68,7 +69,7 @@ export function RatesTable({ rates, distinctClients }: RatesTableProps) {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize, setPageSize] = useState(25)
+  const [pageSize, setPageSize] = useState(10)
 
   // Dialog action state
   const [editingRate, setEditingRate] = useState<RateReference | null>(null)
@@ -144,8 +145,8 @@ export function RatesTable({ rates, distinctClients }: RatesTableProps) {
 
   return (
     <div className="space-y-4">
-      {/* Search & Filter Toolbar */}
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+      {/* Search & Filter Toolbar Terpadu */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative max-w-sm flex-1">
           <RiSearchLine className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -155,14 +156,19 @@ export function RatesTable({ rates, distinctClients }: RatesTableProps) {
               setCurrentPage(1)
             }}
             placeholder="Cari kota, tujuan, atau pabrik..."
-            className="pl-9 text-sm"
+            className="h-9 w-full rounded-lg border-border/70 bg-card/60 pl-9 text-xs shadow-2xs focus-visible:ring-1"
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-2.5">
-          {/* Filter Klien */}
-          <div className="flex items-center gap-1.5">
-            <RiFilterLine className="hidden size-4 text-muted-foreground sm:inline" />
+        {/* Filter Group: Dibungkus Menjadi Satu Kontainer */}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex w-full items-center gap-1.5 rounded-xl border border-border/80 bg-muted/40 p-1 shadow-2xs sm:w-auto">
+            <div className="hidden items-center gap-1 px-2 text-xs font-medium text-muted-foreground sm:flex">
+              <RiFilterLine className="size-3.5" />
+              <span>Filter:</span>
+            </div>
+
+            {/* Filter Klien */}
             <Select
               value={selectedClient}
               onValueChange={(val) => {
@@ -172,11 +178,13 @@ export function RatesTable({ rates, distinctClients }: RatesTableProps) {
                 }
               }}
             >
-              <SelectTrigger className="h-9 w-full text-xs sm:w-40">
-                <SelectValue placeholder="Pabrik Klien" />
+              <SelectTrigger className="h-7.5 min-w-0 flex-1 rounded-lg border-border/60 bg-background px-2.5 text-xs font-medium text-foreground shadow-2xs hover:bg-accent/50 sm:w-40 sm:flex-none">
+                <SelectValue>
+                  {selectedClient === "ALL" ? "Semua Pabrik" : selectedClient}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL" className="text-xs">
+                <SelectItem value="ALL" className="text-xs font-medium">
                   Semua Pabrik
                 </SelectItem>
                 {distinctClients.map((client) => (
@@ -186,60 +194,86 @@ export function RatesTable({ rates, distinctClients }: RatesTableProps) {
                 ))}
               </SelectContent>
             </Select>
-          </div>
 
-          {/* Filter Status */}
-          <Select
-            value={selectedStatus}
-            onValueChange={(val) => {
-              if (val) {
-                setSelectedStatus(val)
-                setCurrentPage(1)
-              }
-            }}
-          >
-            <SelectTrigger className="h-9 w-full text-xs sm:w-32.5">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL" className="text-xs">
-                Semua Status
-              </SelectItem>
-              <SelectItem value="ACTIVE" className="text-xs">
-                Aktif
-              </SelectItem>
-              <SelectItem value="INACTIVE" className="text-xs">
-                Non-Aktif
-              </SelectItem>
-            </SelectContent>
-          </Select>
-
-          {/* Page Size */}
-          <div className="col-span-2 sm:col-auto">
+            {/* Filter Status */}
             <Select
-              value={pageSize.toString()}
+              value={selectedStatus}
               onValueChange={(val) => {
                 if (val) {
-                  setPageSize(Number(val))
+                  setSelectedStatus(val)
                   setCurrentPage(1)
                 }
               }}
             >
-              <SelectTrigger className="h-9 w-full text-xs sm:w-27.5">
-                <SelectValue />
+              <SelectTrigger className="h-7.5 min-w-0 flex-1 rounded-lg border-border/60 bg-background px-2.5 text-xs font-medium text-foreground shadow-2xs hover:bg-accent/50 sm:w-32 sm:flex-none">
+                <SelectValue>
+                  {selectedStatus === "ALL"
+                    ? "Semua Status"
+                    : selectedStatus === "ACTIVE"
+                      ? "Aktif"
+                      : "Non-Aktif"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="10" className="text-xs">
-                  10 baris
+                <SelectItem value="ALL" className="text-xs font-medium">
+                  Semua Status
                 </SelectItem>
-                <SelectItem value="25" className="text-xs">
-                  25 baris
+                <SelectItem value="ACTIVE" className="text-xs">
+                  Aktif
                 </SelectItem>
-                <SelectItem value="50" className="text-xs">
-                  50 baris
+                <SelectItem value="INACTIVE" className="text-xs">
+                  Non-Aktif
                 </SelectItem>
               </SelectContent>
             </Select>
+
+            {/* Page Size: Hanya Tampil Selain di Mobile (Tablet & Desktop) */}
+            <div className="hidden sm:block">
+              <Select
+                value={pageSize.toString()}
+                onValueChange={(val) => {
+                  if (val) {
+                    setPageSize(Number(val))
+                    setCurrentPage(1)
+                  }
+                }}
+              >
+                <SelectTrigger className="h-7.5 w-28 rounded-lg border-border/60 bg-background px-2.5 text-xs font-medium text-foreground shadow-2xs hover:bg-accent/50">
+                  <SelectValue>{pageSize} Baris</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10" className="text-xs font-medium">
+                    10 Baris
+                  </SelectItem>
+                  <SelectItem value="25" className="text-xs font-medium">
+                    25 Baris
+                  </SelectItem>
+                  <SelectItem value="50" className="text-xs font-medium">
+                    50 Baris
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Reset Button saat filter aktif */}
+            {(Boolean(search.trim()) ||
+              selectedClient !== "ALL" ||
+              selectedStatus !== "ALL") && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setSearch("")
+                  setSelectedClient("ALL")
+                  setSelectedStatus("ALL")
+                  setCurrentPage(1)
+                }}
+                className="h-7.5 shrink-0 px-2 text-xs text-muted-foreground hover:text-foreground"
+              >
+                <RiCloseLine className="size-3.5" />
+                <span className="hidden sm:inline">Reset</span>
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -378,47 +412,51 @@ export function RatesTable({ rates, distinctClients }: RatesTableProps) {
                                 variant="ghost"
                                 size="icon"
                                 className="size-7"
-                              />
+                              >
+                                <RiMoreLine className="size-4" />
+                              </Button>
                             }
-                          >
-                            <RiMoreLine className="size-4" />
-                          </DropdownMenuTrigger>
+                          />
                           <DropdownMenuContent align="end" className="w-44">
-                            <DropdownMenuLabel className="text-xs">
-                              Aksi Rute
-                            </DropdownMenuLabel>
+                            <DropdownMenuGroup>
+                              <DropdownMenuLabel className="text-xs">
+                                Aksi Rute
+                              </DropdownMenuLabel>
+                            </DropdownMenuGroup>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              className="cursor-pointer gap-2 text-xs"
-                              onClick={() => setEditingRate(rate)}
-                            >
-                              <RiEditLine className="size-3.5" />
-                              <span>Edit Tarif</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="cursor-pointer gap-2 text-xs"
-                              onClick={() => handleToggleStatus(rate)}
-                            >
-                              {rate.isActive ? (
-                                <>
-                                  <RiCloseLine className="size-3.5 text-amber-600" />
-                                  <span>Nonaktifkan</span>
-                                </>
-                              ) : (
-                                <>
-                                  <RiCheckLine className="size-3.5 text-emerald-600" />
-                                  <span>Aktifkan</span>
-                                </>
-                              )}
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              className="cursor-pointer gap-2 text-xs text-destructive focus:text-destructive"
-                              onClick={() => setDeletingRate(rate)}
-                            >
-                              <RiDeleteBinLine className="size-3.5" />
-                              <span>Hapus Rute</span>
-                            </DropdownMenuItem>
+                            <DropdownMenuGroup>
+                              <DropdownMenuItem
+                                className="cursor-pointer gap-2 text-xs"
+                                onClick={() => setEditingRate(rate)}
+                              >
+                                <RiEditLine className="size-3.5" />
+                                <span>Edit Tarif</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="cursor-pointer gap-2 text-xs"
+                                onClick={() => handleToggleStatus(rate)}
+                              >
+                                {rate.isActive ? (
+                                  <>
+                                    <RiCloseLine className="size-3.5 text-amber-600" />
+                                    <span>Nonaktifkan</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <RiCheckLine className="size-3.5 text-emerald-600" />
+                                    <span>Aktifkan</span>
+                                  </>
+                                )}
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="cursor-pointer gap-2 text-xs text-destructive focus:text-destructive"
+                                onClick={() => setDeletingRate(rate)}
+                              >
+                                <RiDeleteBinLine className="size-3.5" />
+                                <span>Hapus Rute</span>
+                              </DropdownMenuItem>
+                            </DropdownMenuGroup>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>

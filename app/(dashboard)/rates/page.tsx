@@ -49,7 +49,7 @@ export default async function RatesPage() {
         </div>
 
         {/* CTA Button: Tambah Rute Baru */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex w-full items-center gap-2.5 sm:w-auto">
           <RateFormDialog distinctClients={distinctClients} />
         </div>
       </div>

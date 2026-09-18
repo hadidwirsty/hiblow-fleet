@@ -130,11 +130,14 @@ export function RateFormDialog({
   return (
     <>
       {!isControlled && (
-        <div onClick={() => setOpen(true)} className="inline-block">
+        <div onClick={() => setOpen(true)} className="w-full sm:w-auto">
           {trigger ?? (
-            <Button size="sm" className="gap-1.5 font-medium shadow-sm">
+            <Button
+              size="sm"
+              className="h-9 w-full gap-1.5 px-4 font-medium shadow-sm sm:w-auto"
+            >
               <RiAddLine className="size-4" />
-              <span>Tambah Rute Baru</span>
+              <span>Tambah Tarif Baru</span>
             </Button>
           )}
         </div>
