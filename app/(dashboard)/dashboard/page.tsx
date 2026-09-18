@@ -1,6 +1,5 @@
 import Link from "next/link"
 import {
-  RiAddLine,
   RiArrowRightLine,
   RiCalendarLine,
   RiHandCoinLine,
@@ -78,7 +77,7 @@ export default async function DashboardPage({
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
-              Dashboard Operasional
+              Dasbor Operasional
             </h1>
             <span className="hidden items-center gap-1 rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground sm:inline-flex">
               <RiCalendarLine className="size-3" />
@@ -91,16 +90,17 @@ export default async function DashboardPage({
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex w-full items-center gap-2.5 sm:w-auto">
           <Link
             href="/trips"
             className={buttonVariants({
               size: "sm",
-              className: "h-9 gap-1.5 px-4 font-medium shadow-sm",
+              className:
+                "h-9 w-full gap-1.5 px-4 font-medium shadow-sm sm:w-auto",
             })}
           >
-            <RiAddLine className="size-4" />
-            <span>Order Ritase Baru</span>
+            <RiTruckLine className="size-4" />
+            <span>Kelola Ritase</span>
           </Link>
         </div>
       </div>
@@ -190,7 +190,7 @@ export default async function DashboardPage({
               </div>
               <CardTitle className="text-base">Pencatatan Ritase</CardTitle>
               <CardDescription className="text-xs leading-relaxed">
-                Input order surat jalan, auto-fill tarif master rute, dan
+                Input surat jalan ritase, auto-fill tarif master rute, dan
                 perhitungan otomatis sangu supir.
               </CardDescription>
             </CardHeader>

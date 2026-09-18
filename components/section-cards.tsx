@@ -3,18 +3,12 @@ import {
   RiArrowUpLine,
   RiCheckLine,
   RiGasStationLine,
+  RiLineChartLine,
   RiMoneyDollarCircleLine,
+  RiTruckLine,
 } from "@remixicon/react"
 
 import { Badge } from "@/components/ui/badge"
-import {
-  Card,
-  CardAction,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import { formatCurrency } from "@/lib/utils"
 import type {
   DashboardKPIs,
@@ -48,21 +42,23 @@ export function SectionCards({ kpis, truckBreakdown }: SectionCardsProps) {
     kpis.totalOmset > 0 ? (kpis.estimasiLaba / kpis.totalOmset) * 100 : 0
 
   return (
-    <div className="grid grid-cols-2 gap-2.5 px-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4 lg:px-6">
-      {/* Card 1: Omset Ritase */}
-      <Card className="flex h-full flex-col justify-between border-border bg-card/60 p-3 shadow-xs backdrop-blur-xs transition-all hover:border-primary/50 sm:p-6">
-        <CardHeader className="p-0 pb-2">
-          <CardDescription className="text-[11px] font-medium text-muted-foreground sm:text-xs">
-            Omset Ritase Berjalan
-          </CardDescription>
-          <CardTitle className="text-base font-bold tracking-tight text-foreground tabular-nums sm:text-2xl">
-            {formatCurrency(kpis.totalOmset)}
-          </CardTitle>
-          <CardAction>
+    <div className="grid grid-cols-1 gap-3 px-4 sm:grid-cols-2 xl:grid-cols-4 xl:gap-4 xl:px-6">
+      {/* Card 1: Omset Ritase Berjalan */}
+      <div className="group flex h-full flex-col justify-between rounded-2xl border border-border/80 bg-card/75 p-4.5 shadow-xs backdrop-blur-xs transition-all duration-200 hover:border-emerald-500/30 hover:shadow-md sm:p-5">
+        <div>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-500/25 dark:text-emerald-400">
+                <RiMoneyDollarCircleLine className="size-4" />
+              </div>
+              <span className="truncate text-xs font-semibold text-muted-foreground">
+                Omset Ritase Berjalan
+              </span>
+            </div>
             {kpis.previousOmset > 0 ? (
               <Badge
                 variant="outline"
-                className={`gap-1 text-[10px] font-medium sm:text-xs ${
+                className={`shrink-0 gap-0.5 rounded-full px-2 py-0.5 text-[10px] font-semibold sm:text-xs ${
                   isOmsetUp
                     ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                     : "border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400"
@@ -80,16 +76,23 @@ export function SectionCards({ kpis, truckBreakdown }: SectionCardsProps) {
             ) : (
               <Badge
                 variant="outline"
-                className="border-muted bg-muted/50 text-[10px] font-medium text-muted-foreground sm:text-xs"
+                className="shrink-0 rounded-full border-muted bg-muted/50 text-[10px] font-medium text-muted-foreground"
               >
                 Bulan baru
               </Badge>
             )}
-          </CardAction>
-        </CardHeader>
-        <CardFooter className="flex-col items-start gap-1 p-0 pt-1 text-[10px] sm:pt-2 sm:text-xs">
+          </div>
+
+          <div className="mt-3">
+            <span className="text-2xl font-bold tracking-tight text-foreground tabular-nums sm:text-3xl">
+              {formatCurrency(kpis.totalOmset)}
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-4 flex flex-col gap-0.5 border-t border-border/50 pt-3">
           <div
-            className={`flex items-center gap-1.5 font-medium ${
+            className={`flex items-center gap-1.5 text-xs font-medium ${
               kpis.previousOmset === 0
                 ? "text-muted-foreground"
                 : isOmsetUp
@@ -97,38 +100,40 @@ export function SectionCards({ kpis, truckBreakdown }: SectionCardsProps) {
                   : "text-rose-600 dark:text-rose-400"
             }`}
           >
-            <span className="line-clamp-1">
+            <span className="truncate">
               {kpis.previousOmset === 0
                 ? "Periode bulan pertama tercatat"
                 : `Tren ${isOmsetUp ? "naik" : "turun"} dibanding bulan lalu`}
             </span>
             {kpis.previousOmset > 0 &&
               (isOmsetUp ? (
-                <RiArrowUpLine className="size-3 shrink-0 sm:size-3.5" />
+                <RiArrowUpLine className="size-3 shrink-0" />
               ) : (
-                <RiArrowDownLine className="size-3 shrink-0 sm:size-3.5" />
+                <RiArrowDownLine className="size-3 shrink-0" />
               ))}
           </div>
-          <div className="line-clamp-1 text-muted-foreground">
+          <p className="truncate text-[11px] text-muted-foreground">
             Akumulasi ritase PT Semen Indonesia & SBI
-          </div>
-        </CardFooter>
-      </Card>
+          </p>
+        </div>
+      </div>
 
       {/* Card 2: Ritase Selesai */}
-      <Card className="flex h-full flex-col justify-between border-border bg-card/60 p-3 shadow-xs backdrop-blur-xs transition-all hover:border-primary/50 sm:p-6">
-        <CardHeader className="p-0 pb-2">
-          <CardDescription className="text-[11px] font-medium text-muted-foreground sm:text-xs">
-            Ritase Selesai
-          </CardDescription>
-          <CardTitle className="text-base font-bold tracking-tight text-foreground tabular-nums sm:text-2xl">
-            {kpis.totalTrips} Rit
-          </CardTitle>
-          <CardAction>
+      <div className="group flex h-full flex-col justify-between rounded-2xl border border-border/80 bg-card/75 p-4.5 shadow-xs backdrop-blur-xs transition-all duration-200 hover:border-blue-500/30 hover:shadow-md sm:p-5">
+        <div>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600 ring-1 ring-blue-500/25 dark:text-blue-400">
+                <RiTruckLine className="size-4" />
+              </div>
+              <span className="truncate text-xs font-semibold text-muted-foreground">
+                Ritase Selesai
+              </span>
+            </div>
             {kpis.previousTrips > 0 ? (
               <Badge
                 variant="outline"
-                className="gap-1 border-blue-500/30 bg-blue-500/10 text-[10px] font-medium text-blue-600 sm:text-xs dark:text-blue-400"
+                className="shrink-0 gap-0.5 rounded-full border-blue-500/30 bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-600 sm:text-xs dark:text-blue-400"
               >
                 <RiCheckLine className="size-3" />
                 {tripDiff >= 0 ? `+${tripDiff} rit` : `${tripDiff} rit`}
@@ -136,82 +141,103 @@ export function SectionCards({ kpis, truckBreakdown }: SectionCardsProps) {
             ) : (
               <Badge
                 variant="outline"
-                className="border-muted bg-muted/50 text-[10px] font-medium text-muted-foreground sm:text-xs"
+                className="shrink-0 rounded-full border-muted bg-muted/50 text-[10px] font-medium text-muted-foreground"
               >
                 Bulan baru
               </Badge>
             )}
-          </CardAction>
-        </CardHeader>
-        <CardFooter className="flex-col items-start gap-1 p-0 pt-1 text-[10px] sm:pt-2 sm:text-xs">
-          <div className="flex items-center gap-1.5 font-medium text-blue-600 dark:text-blue-400">
-            <span className="line-clamp-1">
-              Target 50 rit/bln ({targetPct}%)
+          </div>
+
+          <div className="mt-3">
+            <span className="text-2xl font-bold tracking-tight text-foreground tabular-nums sm:text-3xl">
+              {kpis.totalTrips} Rit
             </span>
           </div>
-          <div className="line-clamp-1 text-muted-foreground">
-            W 8187 UA ({wRit} rit) & H 8133 OF ({hRit} rit)
+        </div>
+
+        <div className="mt-4 flex flex-col gap-0.5 border-t border-border/50 pt-3">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-blue-600 dark:text-blue-400">
+            <span className="truncate">Target 50 rit/bln ({targetPct}%)</span>
           </div>
-        </CardFooter>
-      </Card>
+          <p className="truncate text-[11px] text-muted-foreground">
+            W 8187 UA ({wRit} rit) & H 8133 OF ({hRit} rit)
+          </p>
+        </div>
+      </div>
 
       {/* Card 3: Sangu Supir & Solar */}
-      <Card className="flex h-full flex-col justify-between border-border bg-card/60 p-3 shadow-xs backdrop-blur-xs transition-all hover:border-primary/50 sm:p-6">
-        <CardHeader className="p-0 pb-2">
-          <CardDescription className="text-[11px] font-medium text-muted-foreground sm:text-xs">
-            Sangu Supir & Solar
-          </CardDescription>
-          <CardTitle className="text-base font-bold tracking-tight text-foreground tabular-nums sm:text-2xl">
-            {formatCurrency(kpis.totalSangu)}
-          </CardTitle>
-          <CardAction>
+      <div className="group flex h-full flex-col justify-between rounded-2xl border border-border/80 bg-card/75 p-4.5 shadow-xs backdrop-blur-xs transition-all duration-200 hover:border-amber-500/30 hover:shadow-md sm:p-5">
+        <div>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 ring-1 ring-amber-500/25 dark:text-amber-400">
+                <RiGasStationLine className="size-4" />
+              </div>
+              <span className="truncate text-xs font-semibold text-muted-foreground">
+                Sangu Supir & Solar
+              </span>
+            </div>
             <Badge
               variant="outline"
-              className="gap-1 border-amber-500/30 bg-amber-500/10 text-[10px] font-medium text-amber-600 sm:text-xs dark:text-amber-400"
+              className="shrink-0 gap-0.5 rounded-full border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-600 sm:text-xs dark:text-amber-400"
             >
-              <RiGasStationLine className="size-3" />
               {sanguRatio.toFixed(1)}%
             </Badge>
-          </CardAction>
-        </CardHeader>
-        <CardFooter className="flex-col items-start gap-1 p-0 pt-1 text-[10px] sm:pt-2 sm:text-xs">
-          <div className="flex items-center gap-1.5 font-medium text-amber-600 dark:text-amber-400">
-            <span className="line-clamp-1">Rasio operasional aman</span>
           </div>
-          <div className="line-clamp-1 text-muted-foreground">
-            Total biaya jalan langsung supir & solar
-          </div>
-        </CardFooter>
-      </Card>
 
-      {/* Card 4: Estimasi Laba Bersih */}
-      <Card className="flex h-full flex-col justify-between border-border bg-card/60 p-3 shadow-xs backdrop-blur-xs transition-all hover:border-primary/50 sm:p-6">
-        <CardHeader className="p-0 pb-2">
-          <CardDescription className="text-[11px] font-medium text-muted-foreground sm:text-xs">
-            Estimasi Laba Berjalan
-          </CardDescription>
-          <CardTitle className="text-base font-bold tracking-tight text-foreground tabular-nums sm:text-2xl">
-            {formatCurrency(kpis.estimasiLaba)}
-          </CardTitle>
-          <CardAction>
+          <div className="mt-3">
+            <span className="text-2xl font-bold tracking-tight text-foreground tabular-nums sm:text-3xl">
+              {formatCurrency(kpis.totalSangu)}
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-4 flex flex-col gap-0.5 border-t border-border/50 pt-3">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-amber-600 dark:text-amber-400">
+            <span className="truncate">Rasio operasional aman</span>
+          </div>
+          <p className="truncate text-[11px] text-muted-foreground">
+            Total biaya jalan langsung supir & solar
+          </p>
+        </div>
+      </div>
+
+      {/* Card 4: Estimasi Laba Berjalan */}
+      <div className="group flex h-full flex-col justify-between rounded-2xl border border-border/80 bg-card/75 p-4.5 shadow-xs backdrop-blur-xs transition-all duration-200 hover:border-emerald-500/30 hover:shadow-md sm:p-5">
+        <div>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-500/25 dark:text-emerald-400">
+                <RiLineChartLine className="size-4" />
+              </div>
+              <span className="truncate text-xs font-semibold text-muted-foreground">
+                Estimasi Laba Berjalan
+              </span>
+            </div>
             <Badge
               variant="outline"
-              className="gap-1 border-emerald-500/30 bg-emerald-500/10 text-[10px] font-medium text-emerald-600 sm:text-xs dark:text-emerald-400"
+              className="shrink-0 gap-0.5 rounded-full border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 sm:text-xs dark:text-emerald-400"
             >
-              <RiMoneyDollarCircleLine className="size-3" />
               {marginRatio.toFixed(1)}%
             </Badge>
-          </CardAction>
-        </CardHeader>
-        <CardFooter className="flex-col items-start gap-1 p-0 pt-1 text-[10px] sm:pt-2 sm:text-xs">
-          <div className="flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400">
-            <span className="line-clamp-1">Margin operasional ritase</span>
           </div>
-          <div className="line-clamp-1 text-muted-foreground">
+
+          <div className="mt-3">
+            <span className="text-2xl font-bold tracking-tight text-foreground tabular-nums sm:text-3xl">
+              {formatCurrency(kpis.estimasiLaba)}
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-4 flex flex-col gap-0.5 border-t border-border/50 pt-3">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+            <span className="truncate">Margin operasional ritase</span>
+          </div>
+          <p className="truncate text-[11px] text-muted-foreground">
             Siap rekonsiliasi saat tutup buku bulanan
-          </div>
-        </CardFooter>
-      </Card>
+          </p>
+        </div>
+      </div>
     </div>
   )
 }

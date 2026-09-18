@@ -6,7 +6,6 @@ import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { useIsMobile } from "@/hooks/use-mobile"
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -18,14 +17,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { cn } from "@/lib/utils"
 import type { ChartDataPoint } from "@/features/dashboard/dashboard.queries"
 
 export interface ChartAreaInteractiveProps {
@@ -69,17 +61,17 @@ export function ChartAreaInteractive({ data = [] }: ChartAreaInteractiveProps) {
   return (
     <Card className="border-border bg-card/60 shadow-xs backdrop-blur-xs">
       <CardHeader className="flex flex-col gap-4 pb-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="flex items-center gap-3">
+        <div className="space-y-1">
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
             <CardTitle className="text-base font-semibold">
               Aktivitas Ritase Harian Armada
             </CardTitle>
-            <div className="hidden items-center gap-3 text-xs md:flex">
-              <span className="flex items-center gap-1.5 font-medium">
+            <div className="flex items-center gap-2.5 text-xs">
+              <span className="flex items-center gap-1.5 font-medium text-foreground">
                 <span className="size-2 rounded-full bg-primary" />W 8187 UA
                 (Triyono)
               </span>
-              <span className="flex items-center gap-1.5 font-medium">
+              <span className="flex items-center gap-1.5 font-medium text-foreground">
                 <span className="size-2 rounded-full bg-amber-500" />H 8133 OF
                 (Khoirul)
               </span>
@@ -91,48 +83,58 @@ export function ChartAreaInteractive({ data = [] }: ChartAreaInteractiveProps) {
           </CardDescription>
         </div>
 
-        <CardAction>
-          <ToggleGroup
-            multiple={false}
-            value={timeRange ? [timeRange] : []}
-            onValueChange={(value) => {
-              setSelectedRange(value[0] ?? (isMobile ? "7d" : "30d"))
-            }}
-            variant="outline"
-            className="hidden rounded-lg p-0.5 *:data-[slot=toggle-group-item]:h-7 *:data-[slot=toggle-group-item]:px-3 *:data-[slot=toggle-group-item]:text-xs @[767px]/card:flex"
+        {/* Segmented Tabs Control ala Total Visitors */}
+        <div
+          role="tablist"
+          aria-label="Filter Rentang Waktu"
+          className="inline-flex w-fit items-center rounded-lg border border-border/80 bg-muted/60 p-1"
+        >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={timeRange === "30d"}
+            onClick={() => setSelectedRange("30d")}
+            className={cn(
+              "rounded-md px-3 py-1.5 text-xs font-medium transition-all",
+              timeRange === "30d"
+                ? "bg-background font-semibold text-foreground shadow-xs"
+                : "text-muted-foreground hover:text-foreground"
+            )}
           >
-            <ToggleGroupItem value="30d">30 Hari</ToggleGroupItem>
-            <ToggleGroupItem value="14d">14 Hari</ToggleGroupItem>
-            <ToggleGroupItem value="7d">7 Hari</ToggleGroupItem>
-          </ToggleGroup>
-          <Select
-            value={timeRange}
-            onValueChange={(value) => {
-              if (value !== null) {
-                setSelectedRange(value)
-              }
-            }}
+            <span className="hidden sm:inline">30 Hari Terakhir</span>
+            <span className="sm:hidden">30 Hari</span>
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={timeRange === "14d"}
+            onClick={() => setSelectedRange("14d")}
+            className={cn(
+              "rounded-md px-3 py-1.5 text-xs font-medium transition-all",
+              timeRange === "14d"
+                ? "bg-background font-semibold text-foreground shadow-xs"
+                : "text-muted-foreground hover:text-foreground"
+            )}
           >
-            <SelectTrigger
-              className="flex h-8 w-32 text-xs @[767px]/card:hidden"
-              size="sm"
-              aria-label="Pilih rentang waktu"
-            >
-              <SelectValue placeholder="30 Hari" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl">
-              <SelectItem value="30d" className="text-xs">
-                30 Hari
-              </SelectItem>
-              <SelectItem value="14d" className="text-xs">
-                14 Hari
-              </SelectItem>
-              <SelectItem value="7d" className="text-xs">
-                7 Hari
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </CardAction>
+            <span className="hidden sm:inline">14 Hari Terakhir</span>
+            <span className="sm:hidden">14 Hari</span>
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={timeRange === "7d"}
+            onClick={() => setSelectedRange("7d")}
+            className={cn(
+              "rounded-md px-3 py-1.5 text-xs font-medium transition-all",
+              timeRange === "7d"
+                ? "bg-background font-semibold text-foreground shadow-xs"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <span className="hidden sm:inline">7 Hari Terakhir</span>
+            <span className="sm:hidden">7 Hari</span>
+          </button>
+        </div>
       </CardHeader>
 
       <CardContent className="px-1 pt-2 sm:px-6 sm:pt-4">
