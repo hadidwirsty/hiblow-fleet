@@ -308,8 +308,9 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ## 7. Kebijakan Keamanan, Akses & Tata Kelola Kode
 
-### 7.1 Bahasa Komunikasi
+### 7.1 Bahasa Komunikasi & Copywriting UI
 - **Output Percakapan & Status:** Seluruh interaksi dengan user — laporan, status, pertanyaan, dan checkpoint — **WAJIB menggunakan Bahasa Indonesia**.
+- **Wording & Antarmuka Pengguna (UI Copywriting):** Seluruh elemen antarmuka (label input, tombol, kartu ringkasan, dialog, toast, badge status, dan deskripsi grafik) **WAJIB 100% menggunakan Bahasa Indonesia** yang baku, lugas, dan profesional. DILARANG mencampur istilah Bahasa Inggris pada tampilan visual pengguna kecuali nama merek yang tidak dapat diterjemahkan (*PT Hadya Wiran Trans*).
 - **Artefak Teknis:** Kode sumber, nama variabel, commit message, schema database, tipe TypeScript, dan file path tetap dalam **Bahasa Inggris**.
 
 ### 7.2 Otorisasi & Role-Based Access Control (RBAC)

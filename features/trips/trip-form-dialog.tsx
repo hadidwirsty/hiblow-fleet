@@ -218,11 +218,12 @@ export function TripFormDialog({ rateReferences }: TripFormDialogProps) {
     <>
       <Button
         id="btn-input-trip"
+        size="sm"
         onClick={() => setOpen(true)}
-        className="gap-1.5 shadow-sm"
+        className="h-9 w-full gap-1.5 px-4 font-medium shadow-sm sm:w-auto"
       >
         <RiAddLine className="size-4" />
-        <span>Input Ritase Baru</span>
+        <span>Tambah Ritase Baru</span>
       </Button>
 
       <ResponsiveDialog
@@ -231,7 +232,7 @@ export function TripFormDialog({ rateReferences }: TripFormDialogProps) {
         title={
           <span className="flex items-center gap-2">
             <RiTruckLine className="size-5 text-primary" />
-            <span>Input Ritase Baru</span>
+            <span>Tambah Ritase Baru</span>
           </span>
         }
         description="Catat order pengiriman semen curah. Tarif dan uang sangu supir terhitung otomatis."

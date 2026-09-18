@@ -270,14 +270,15 @@ export function PeriodWizardDialog({
   return (
     <>
       {!isControlled && (
-        <div onClick={() => setOpen(true)} className="inline-block">
+        <div onClick={() => setOpen(true)} className="w-full sm:w-auto">
           {trigger ?? (
             <Button
               id="btn-open-profit-sharing-wizard"
-              className="gap-2 font-medium shadow-sm"
+              size="sm"
+              className="h-9 w-full gap-1.5 px-4 font-medium shadow-sm sm:w-auto"
             >
               <RiAddLine className="size-4" />
-              Tutup Buku / Bagi Hasil
+              <span>Tutup Buku Baru</span>
             </Button>
           )}
         </div>

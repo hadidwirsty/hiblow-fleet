@@ -159,15 +159,15 @@ export function ExpenseFormDialog({
   return (
     <>
       {!isControlled && (
-        <div onClick={() => setOpen(true)} className="inline-block">
+        <div onClick={() => setOpen(true)} className="w-full sm:w-auto">
           {trigger ?? (
             <Button
               id="btn-add-expense"
               size="sm"
-              className="gap-2 bg-primary font-medium text-primary-foreground shadow-xs hover:bg-primary/90"
+              className="h-9 w-full gap-1.5 px-4 font-medium shadow-sm sm:w-auto"
             >
               <RiAddLine className="size-4" />
-              <span>Catat Pengeluaran</span>
+              <span>Tambah Pengeluaran Baru</span>
             </Button>
           )}
         </div>

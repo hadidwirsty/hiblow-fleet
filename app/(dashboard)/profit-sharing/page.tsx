@@ -83,7 +83,7 @@ export default async function ProfitSharingPage() {
         </div>
 
         {/* CTA Wizard Trigger Button */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex w-full items-center gap-2.5 sm:w-auto">
           <PeriodWizardDialog />
         </div>
       </div>

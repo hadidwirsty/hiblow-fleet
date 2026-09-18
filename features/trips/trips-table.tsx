@@ -80,7 +80,7 @@ export function TripsTable({ trips, initialFilter }: TripsTableProps) {
   const [isPending, startTransition] = useTransition()
 
   const [currentPage, setCurrentPage] = useState(1)
-  const pageSize = 25
+  const pageSize = 10
 
   // Quick edit modal state for third party fee
   const [editingFeeTrip, setEditingFeeTrip] = useState<TripRecord | null>(null)

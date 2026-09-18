@@ -64,8 +64,8 @@ export default async function TripsPage({ searchParams }: TripsPageProps) {
           </p>
         </div>
 
-        {/* Modal Dialog Form Input Ritase Baru */}
-        <div className="flex items-center gap-2.5">
+        {/* Modal Dialog Form Tambah Ritase Baru */}
+        <div className="flex w-full items-center gap-2.5 sm:w-auto">
           <TripFormDialog rateReferences={rateRefs} />
         </div>
       </div>

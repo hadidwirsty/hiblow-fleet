@@ -97,7 +97,7 @@ export function DataTable({ trips = [] }: DataTableProps) {
               <TableHeader>
                 <TableRow className="bg-muted/50 text-xs">
                   <TableHead className="w-32 py-3 font-semibold text-foreground">
-                    No. Trip
+                    No. Ritase
                   </TableHead>
                   <TableHead className="py-3 font-semibold text-foreground">
                     Armada & Supir

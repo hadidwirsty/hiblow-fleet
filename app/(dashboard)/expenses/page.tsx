@@ -89,8 +89,8 @@ export default async function ExpensesPage({
           </p>
         </div>
 
-        {/* Modal Dialog Form Catat Pengeluaran Baru */}
-        <div className="flex items-center gap-2.5">
+        {/* Modal Dialog Form Tambah Pengeluaran Baru */}
+        <div className="flex w-full items-center gap-2.5 sm:w-auto">
           <ExpenseFormDialog />
         </div>
       </div>
