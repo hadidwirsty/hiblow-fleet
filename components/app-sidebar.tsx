@@ -3,6 +3,7 @@
 import * as React from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import {
   RiDashboardLine,
   RiHandCoinLine,
@@ -24,6 +25,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar"
 
 const data = {
@@ -34,7 +36,7 @@ const data = {
   },
   navMain: [
     {
-      title: "Dashboard",
+      title: "Dasbor",
       url: "/dashboard",
       icon: <RiDashboardLine className="size-4" />,
     },
@@ -101,6 +103,29 @@ export function AppSidebar({
   isAdmin = false,
   ...props
 }: AppSidebarProps) {
+  const { isMobile, setOpenMobile } = useSidebar()
+  const pathname = usePathname()
+
+  // Otomatis tutup sidebar saat berpindah halaman pada mode mobile, tablet, dan desktop 1024px
+  React.useEffect(() => {
+    if (isMobile) {
+      setOpenMobile(false)
+    }
+  }, [pathname, isMobile, setOpenMobile])
+
+  // Tangani klik tautan di sidebar agar langsung menutup seketika saat diklik
+  const handleNavClick = React.useCallback(
+    (e: React.MouseEvent) => {
+      const target = e.target as HTMLElement | null
+      if (target?.closest("a")) {
+        if (isMobile) {
+          setOpenMobile(false)
+        }
+      }
+    },
+    [isMobile, setOpenMobile]
+  )
+
   const navMainItems = isAdmin
     ? data.navMain
     : data.navMain.filter((item) => item.url === "/profit-sharing")
@@ -119,7 +144,7 @@ export function AppSidebar({
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader>
+      <SidebarHeader onClick={handleNavClick}>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
@@ -154,7 +179,7 @@ export function AppSidebar({
                         HW TRANS
                       </span>
                       <span className="rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[9px] font-bold tracking-wider text-emerald-600 uppercase ring-1 ring-emerald-500/30 dark:bg-emerald-500/20 dark:text-emerald-400 dark:ring-emerald-400/30">
-                        Fleet
+                        Armada
                       </span>
                     </div>
                     <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
@@ -171,7 +196,7 @@ export function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent onClick={handleNavClick}>
         <NavMain items={navMainItems} />
         {isAdmin && <NavDocuments items={data.armada} />}
         <NavSecondary items={navSecondaryItems} className="mt-auto" />
