@@ -19,7 +19,7 @@ const csvDir = path.resolve("./docs/csv")
 const historyJsonPath = path.resolve("./db/data/history.json")
 const ratesJsonPath = path.resolve("./db/data/rates.json")
 
-function parseIndoDate(dateStr: any): string | null {
+function parseIndoDate(dateStr: unknown): string | null {
   if (!dateStr) return null
   const s = String(dateStr).trim()
   if (!s) return null
@@ -64,7 +64,7 @@ function parseIndoDate(dateStr: any): string | null {
   return null
 }
 
-function parseMoney(val: any): string {
+function parseMoney(val: unknown): string {
   if (val === undefined || val === null || val === "") return "0.00"
   let s = String(val)
     .trim()
@@ -83,7 +83,7 @@ function parseMoney(val: any): string {
   return isNaN(n) ? "0.00" : n.toFixed(2)
 }
 
-function parseTonnage(val: any): string {
+function parseTonnage(val: unknown): string {
   if (!val) return "0.00"
   let s = String(val)
     .trim()
@@ -99,7 +99,7 @@ function parseTonnage(val: any): string {
   return n.toFixed(2)
 }
 
-function parseTarif(val: any): string {
+function parseTarif(val: unknown): string {
   if (!val) return "0.00"
   let s = String(val)
     .trim()
@@ -187,10 +187,13 @@ function parseTripsFromCSV(fileName: string, truckId: string) {
     type: "string",
     raw: true,
   })
-  const rows: any[] = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {
-    header: 1,
-    raw: true,
-  })
+  const rows = XLSX.utils.sheet_to_json<(string | number | undefined)[]>(
+    wb.Sheets[wb.SheetNames[0]],
+    {
+      header: 1,
+      raw: true,
+    }
+  )
   const tripRows = rows.filter(
     (r) => r[0] !== undefined && !isNaN(Number(r[0])) && Number(r[0]) > 0
   )
@@ -249,10 +252,13 @@ function parseExpensesFromCSV(fileName: string, truckId: string) {
     type: "string",
     raw: true,
   })
-  const rows: any[] = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {
-    header: 1,
-    raw: true,
-  })
+  const rows = XLSX.utils.sheet_to_json<(string | number | undefined)[]>(
+    wb.Sheets[wb.SheetNames[0]],
+    {
+      header: 1,
+      raw: true,
+    }
+  )
   let currentDate: string | null = null
   const list = []
 
@@ -421,7 +427,7 @@ export async function runSync() {
     fs.readFileSync(path.join(csvDir, fileRembang), "utf-8"),
     { type: "string", raw: true }
   )
-  const rowsRembang: any[] = XLSX.utils.sheet_to_json(
+  const rowsRembang = XLSX.utils.sheet_to_json<(string | number | undefined)[]>(
     wbRembang.Sheets[wbRembang.SheetNames[0]],
     { header: 1, raw: true }
   )
@@ -437,7 +443,7 @@ export async function runSync() {
     const additionalTonnageRate = parseTarif(r[8]) || "25000.00"
 
     const exists = rates.some(
-      (rt: any) =>
+      (rt: { clientName: string; city: string }) =>
         rt.clientName === "SI Rembang" &&
         rt.city.toLowerCase() === city.toLowerCase()
     )
@@ -559,8 +565,15 @@ export async function runSync() {
       .returning({ id: profitSharingPeriods.id })
 
     if (period.shares && period.shares.length > 0) {
+      interface PeriodShareData {
+        partnerName: string
+        capitalShare: string
+        sharePercentage: string
+        payoutAmount: string
+        notes?: string | null
+      }
       await db.insert(profitShares).values(
-        period.shares.map((s: any) => ({
+        period.shares.map((s: PeriodShareData) => ({
           periodId: insertedPeriod.id,
           partnerName: s.partnerName,
           capitalShare: s.capitalShare,
