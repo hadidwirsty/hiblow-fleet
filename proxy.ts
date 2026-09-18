@@ -61,8 +61,8 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Kecualikan file statis, next internal, dan endpoint api/auth
+     * Kecualikan file statis, gambar publik, next internal, dan endpoint api/auth
      */
-    "/((?!_next/static|_next/image|favicon.ico|api/auth).*)",
+    "/((?!_next/static|_next/image|favicon.ico|images|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$|api/auth).*)",
   ],
 }
