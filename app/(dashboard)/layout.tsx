@@ -2,6 +2,7 @@ import { redirect } from "next/navigation"
 import type { CSSProperties, ReactNode } from "react"
 
 import { AppSidebar } from "@/components/app-sidebar"
+import { DashboardNavigationLoading } from "@/components/dashboard-navigation-loading"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { isAdmin } from "@/lib/rbac"
@@ -30,6 +31,7 @@ export default async function DashboardLayout({
         } as CSSProperties
       }
     >
+      <DashboardNavigationLoading />
       <AppSidebar variant="inset" user={user} isAdmin={userIsAdmin} />
       <SidebarInset>
         <SiteHeader />
