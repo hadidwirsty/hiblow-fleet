@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
 import Link from "next/link"
 import {
   RiDashboardLine,
@@ -123,18 +124,45 @@ export function AppSidebar({
           <SidebarMenuItem>
             <SidebarMenuButton
               size="lg"
+              className="group/brand h-auto rounded-xl px-2 py-1.5 transition-colors hover:bg-sidebar-accent/50"
               render={
-                <Link href={brandHref} className="flex items-center gap-3">
-                  <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
-                    <RiTruckLine className="size-4.5" />
+                <Link
+                  href={brandHref}
+                  className="flex w-full items-center gap-3"
+                >
+                  <div className="relative flex size-12 shrink-0 items-center justify-center transition-transform duration-200 group-hover/brand:scale-105">
+                    <Image
+                      src="/images/logo_dark.png"
+                      alt="Logo Hadya Wiran Trans"
+                      width={52}
+                      height={52}
+                      priority
+                      className="hidden size-full object-contain dark:block"
+                    />
+                    <Image
+                      src="/images/logo_light.png"
+                      alt="Logo Hadya Wiran Trans"
+                      width={52}
+                      height={52}
+                      priority
+                      className="block size-full object-contain dark:hidden"
+                    />
                   </div>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-bold tracking-tight">
-                      HW TRANS FLEET
-                    </span>
-                    <span className="truncate text-xs text-muted-foreground">
-                      Hadya Wiran Trans
-                    </span>
+                  <div className="flex min-w-0 flex-1 flex-col leading-tight">
+                    <div className="flex items-center gap-1.5">
+                      <span className="truncate text-sm font-extrabold tracking-tight text-foreground">
+                        HW TRANS
+                      </span>
+                      <span className="rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[9px] font-bold tracking-wider text-emerald-600 uppercase ring-1 ring-emerald-500/30 dark:bg-emerald-500/20 dark:text-emerald-400 dark:ring-emerald-400/30">
+                        Fleet
+                      </span>
+                    </div>
+                    <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                      <span className="truncate font-medium">
+                        Hadya Wiran Trans
+                      </span>
+                      <span className="size-1 shrink-0 rounded-full bg-emerald-500" />
+                    </div>
                   </div>
                 </Link>
               }
