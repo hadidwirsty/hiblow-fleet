@@ -1,0 +1,2 @@
+ALTER TABLE "rate_references" ADD COLUMN "origin_plant" varchar(100) DEFAULT 'Semen Indonesia (SI) - Tuban' NOT NULL;--> statement-breakpoint
+ALTER TABLE "rate_references" ADD COLUMN "default_sangu" numeric(14, 2);

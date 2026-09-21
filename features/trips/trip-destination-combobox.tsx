@@ -53,39 +53,55 @@ export function TripDestinationCombobox({
       >
         <span className="truncate">
           {selectedRef ? (
-            <span className="flex items-center gap-1.5">
+            <span className="flex items-center gap-1.5 truncate">
+              {selectedRef.originPlant && (
+                <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-foreground">
+                  {selectedRef.originPlant}
+                </span>
+              )}
+              <span className="text-muted-foreground">→</span>
               <span className="font-semibold text-foreground">
                 {selectedRef.city}
               </span>
-              <span className="text-muted-foreground">→</span>
-              <span className="text-foreground">{selectedRef.destination}</span>
+              <span className="text-muted-foreground">-</span>
+              <span className="truncate text-foreground">
+                {selectedRef.destination}
+              </span>
             </span>
           ) : (
-            "Cari kota atau nama tujuan pabrik..."
+            "Pilih rute acuan (Pabrik Asal → Kota - Tujuan)..."
           )}
         </span>
         <RiExpandUpDownLine className="ml-2 size-4 shrink-0 opacity-50" />
       </PopoverTrigger>
 
-      <PopoverContent className="w-90 p-0 shadow-lg" align="start">
+      <PopoverContent
+        className="w-136 max-w-[95vw] p-0 shadow-lg"
+        align="start"
+      >
         <Command>
           <CommandInput
-            placeholder="Ketik kota atau nama pabrik..."
+            placeholder="Ketik pabrik asal, kota tujuan, atau proyek..."
             className="h-9 text-xs"
           />
           <CommandList className="max-h-75 overflow-y-auto p-1">
             <CommandEmpty className="p-4 text-center text-xs text-muted-foreground">
               Tidak ada rute acuan yang cocok.
             </CommandEmpty>
-            <CommandGroup heading="Daftar Rute Acuan (289 Rute)">
+            <CommandGroup
+              heading={`Daftar Rute Acuan (${rateReferences.length} Rute)`}
+            >
               {rateReferences.map((rate) => {
                 const isSelected = rate.id === selectedId
                 const rateNum = parseFloat(rate.ratePerTon)
+                const defaultSanguNum = rate.defaultSangu
+                  ? parseFloat(rate.defaultSangu)
+                  : 0
 
                 return (
                   <CommandItem
                     key={rate.id}
-                    value={`${rate.city} ${rate.destination} ${rate.clientName}`}
+                    value={`${rate.originPlant ?? ""} ${rate.city} ${rate.destination} ${rate.clientName}`}
                     onSelect={() => {
                       onSelect(rate)
                       setOpen(false)
@@ -94,15 +110,21 @@ export function TripDestinationCombobox({
                   >
                     <div className="flex min-w-0 flex-col">
                       <div className="flex items-center gap-1.5 truncate font-medium">
-                        <span className="font-semibold text-foreground">
-                          {rate.city}
-                        </span>
+                        {rate.originPlant && (
+                          <span className="shrink-0 font-semibold text-primary">
+                            {rate.originPlant}
+                          </span>
+                        )}
                         <span className="text-[10px] text-muted-foreground">
                           →
                         </span>
+                        <span className="font-semibold text-foreground">
+                          {rate.city}
+                        </span>
+                        <span className="text-muted-foreground">-</span>
                         <span className="truncate">{rate.destination}</span>
                       </div>
-                      <div className="mt-0.5 flex items-center gap-2 text-[11px] text-muted-foreground">
+                      <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
                         <Badge
                           variant="outline"
                           className="h-4 px-1 py-0 text-[9px] font-normal"
@@ -110,10 +132,17 @@ export function TripDestinationCombobox({
                           {rate.clientName}
                         </Badge>
                         <span>{formatCurrency(rateNum)}/ton</span>
-                        <span>
-                          • Sangu{" "}
-                          {Math.round(parseFloat(rate.sanguPercentage) * 100)}%
-                        </span>
+                        {defaultSanguNum > 0 ? (
+                          <span className="font-medium text-emerald-600 dark:text-emerald-400">
+                            • UJ Acuan: {formatCurrency(defaultSanguNum)}
+                          </span>
+                        ) : (
+                          <span>
+                            • Sangu{" "}
+                            {Math.round(parseFloat(rate.sanguPercentage) * 100)}
+                            %
+                          </span>
+                        )}
                         {rate.hasSpecialDeductions && (
                           <span className="font-medium text-amber-600 dark:text-amber-400">
                             • Pot. LJU

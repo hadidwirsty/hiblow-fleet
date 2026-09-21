@@ -1,7 +1,7 @@
 # Project Context: hiblow-fleet
 
 > **Authoritative Context Memory Document**  
-> Terakhir diperbarui via `/scaffold-onboard`: 2026-09-17  
+> Terakhir diperbarui via `/scaffold-onboard`: 2026-09-18  
 > Dokumen ini adalah *single source of truth* (sumber kebenaran tunggal) mengenai tech stack, arsitektur sistem, aturan domain bisnis & formula finansial, skema database, konvensi kode, serta workflow operasional proyek `hiblow-fleet`. Seluruh AI agent dan engineer wajib mematuhi standar yang terdokumentasi di sini.
 
 ---
@@ -16,9 +16,9 @@
   - Unit 2: `H8133OF` (Hino 500 Tronton Hi-Blow)
   - Skala armada bersifat tetap 2 unit (tidak memerlukan fitur penambahan/penghapusan unit truk dinamis).
 - **Multi-Role & Persona Pengguna:**
-  - **Admin (Pengelola Armada - Mas Hafidz & Mas Hadid):** Akses penuh ke seluruh modul (`/dashboard`, `/trips`, `/expenses`, `/rates`, `/profit-sharing`), formulir tambah/edit/hapus data, manajemen status fee pihak ketiga, dan wizard tutup buku periode bagi hasil.
+  - **Admin (Pengelola Armada - Muhammad Hafidz Wirandryo & Muhammad Hadid Wiransetyo):** Akses penuh ke seluruh modul (`/dashboard`, `/trips`, `/expenses`, `/rates`, `/profit-sharing`), formulir tambah/edit/hapus data, manajemen status fee pihak ketiga, pelacakan pengingat servis, dan wizard tutup buku periode bagi hasil.
   - **Partner (Pemodal/Investor - Hj. Alfiah Dwi Ayu Wirandari):** Tampilan personalisasi dividen pada modul `/profit-sharing` (menampilkan ringkasan modal, persentase kepemilikan, riwayat dividen yang didapat per siklus tutup buku berstatus `finalized`, dan bersifat *read-only* tanpa tombol mutasi data).
-- **Integritas Formula (Excel Ground Truth):** Logika kalkulasi matematis (omset, sangu, laba trip, dan bagi hasil) mengacu 100% pada formula historis spreadsheet acuan dan tidak boleh diubah secara sepihak.
+- **Integritas Formula (Excel Ground Truth):** Logika kalkulasi matematis (omset, sangu, laba trip, dan bagi hasil) mengacu 100% pada formula historis spreadsheet acuan (`docs/references/PERHITUNGAN HIBLOW HW Trans.xlsx` dan ekstraksi CSV di `docs/csv/`) dan tidak boleh diubah secara sepihak.
 
 ---
 
@@ -28,16 +28,18 @@
 - **Node.js:** Node.js v20+ / v25+
 - **Package Manager:** `pnpm` (menggunakan `pnpm-lock.yaml`, `pnpm-workspace.yaml`)
 - **Framework:** **Next.js 16.2.6** (React 19.2.4, TypeScript 5) dengan App Router architecture & Server Components / Server Actions
-  - *Catatan Penting:* Next.js 16 memiliki perubahan internal dari versi Next.js lama (misal Next.js 14/15). Selalu perhatikan panduan resmi dan deprecation notice.
+  - *Catatan Penting:* Next.js 16 memiliki perubahan internal dari versi Next.js lama (Next.js 14/15). Middleware autentikasi diimplementasikan via `proxy.ts`.
 - **Database:** PostgreSQL 17
   - **Lokal:** Docker container `hiblow-fleet-postgres` via `docker-compose.yml` (Port host **`5433`** $\to$ Port container `5432`).
   - **Cloud Produksi:** Neon Serverless PostgreSQL (`ap-southeast-1` Singapore) dengan PgBouncer pooling connection string (`?sslmode=require`).
-- **ORM & Database Migrations:** **Drizzle ORM 0.45.2** & **Drizzle Kit 0.31.10** (`node-postgres` pool driver dengan isolasi koneksi hot-reload).
+- **ORM & Database Migrations:** **Drizzle ORM 0.45.2** & **Drizzle Kit 0.31.10** (`node-postgres` / `pg: ^8.23.0` pool driver dengan isolasi koneksi hot-reload & auto SSL switch Neon).
 - **Autentikasi & RBAC:** **Better Auth 1.7.2** dengan Drizzle adapter, email & password authentication, session management, dan middleware proxy (`proxy.ts`).
 - **Styling & Komponen UI:**
-  - **Tailwind CSS v4** (`@tailwindcss/postcss: ^4`, `tw-animate-css: ^1.4.0`)
+  - **Tailwind CSS v4** (`@tailwindcss/postcss: ^4`, `tw-animate-css: ^1.4.0`, `tailwind-merge: ^3.6.0`, `clsx: ^2.1.1`)
+  - **Palette Warna:** Emerald Theme (`emerald-600` / `emerald-500` accents) dengan dukungan Dark Mode & Light Mode adaptif.
   - **Base UI & Radix Primitives:** `@base-ui/react: ^1.7.0`
-  - **Komponen:** `shadcn/ui` (Button, Input, Card, Badge, Dialog, Drawer, Sheet, Sidebar, Table, Tabs, Popover, Command, Checkbox, dll.)
+  - **Komponen:** `shadcn/ui` (Button, Input, InputGroup, Card, Badge, Dialog, ResponsiveDialog, Drawer, Sheet, Sidebar, Table, Tabs, Popover, Command, Checkbox, Progress, Skeleton, Tooltip, dll.)
+  - **Animasi Khusus:** `TruckSpinner` (`components/ui/truck-spinner.tsx`), `GlobalLoadingOverlay` (`components/global-loading-overlay.tsx`), `DashboardNavigationLoading` (`components/dashboard-navigation-loading.tsx`), `LoginWelcomeDialog` (`features/auth/login-welcome-dialog.tsx`).
   - **Ikon:** `@remixicon/react: ^4.9.0` (Remix Icon modern)
   - **Charts:** `recharts: 3.8.0` (Area interactive chart & horizontal bar/donut breakdown)
   - **Notifikasi Toast:** `sonner: ^2.0.8`
@@ -48,9 +50,9 @@
   - **Schema Validation:** `zod: ^4.5.4` (Validasi ketat di batas form dan Server Action)
 - **Tabel & Interaksi:**
   - **Data Table:** `@tanstack/react-table: ^9.2.4`
-  - **Drag and Drop:** `@dnd-kit/core: ^6.3.1`, `@dnd-kit/sortable: ^10.0.0`
-- **Spreadsheet / File Export:** `xlsx: ^0.18.5` + custom CSV builder & Excel builder
-- **Testing Engine:** **Vitest 4.1.11** + `@vitest/coverage-v8: ^4.1.11` (Node environment, path alias `@/*` didukung, 100% pure domain & queries test parity)
+  - **Drag and Drop:** `@dnd-kit/core: ^6.3.1`, `@dnd-kit/sortable: ^10.0.0`, `@dnd-kit/modifiers: ^9.0.0`, `@dnd-kit/utilities: ^3.2.2`
+- **Spreadsheet / File Export:** `xlsx: ^0.18.5` + custom CSV builder & Excel builder (`lib/export/`)
+- **Testing Engine:** **Vitest 4.1.11** + `@vitest/coverage-v8: ^4.1.11` (Node environment, path alias `@/*` didukung, 100% pure domain & queries test parity — 39 file test suite, 171 passed tests)
 
 ---
 
@@ -69,7 +71,7 @@ hiblow-fleet/
 │   │   ├── layout.tsx
 │   │   └── login/page.tsx              # Halaman Login (Better Auth)
 │   ├── (dashboard)/
-│   │   ├── layout.tsx                  # AppSidebar, SiteHeader, Session check
+│   │   ├── layout.tsx                  # AppSidebar, SiteHeader, Session check, Navigation loading
 │   │   ├── dashboard/page.tsx          # KPI Cards, Chart ritase, Top rute, Pengingat servis
 │   │   ├── trips/page.tsx              # Daftar surat jalan & input order ritase
 │   │   ├── expenses/page.tsx           # Rekapitulasi pengeluaran & grafik kategori
@@ -78,23 +80,35 @@ hiblow-fleet/
 │   ├── api/
 │   │   └── auth/[...all]/route.ts      # Better Auth handler endpoint
 │   ├── globals.css                     # Tailwind v4 theme & token CSS
-│   ├── layout.tsx                      # Root layout, ThemeProvider, Toaster
-│   └── page.tsx                        # Root redirect -> /dashboard
+│   ├── layout.tsx                      # Root layout, ThemeProvider, Toaster, GlobalLoadingOverlay
+│   └── page.tsx                        # Root redirect -> /dashboard (atau /login / /profit-sharing)
 ├── components/                         # Shared & UI Components
-│   ├── ui/                             # shadcn component primitives (Button, Dialog, etc.)
-│   ├── app-sidebar.tsx                 # Sidebar navigasi adaptif RBAC
+│   ├── ui/                             # shadcn component primitives
+│   │   ├── avatar.tsx, badge.tsx, button.tsx, card.tsx, chart.tsx, checkbox.tsx
+│   │   ├── command.tsx, dialog.tsx, drawer.tsx, dropdown-menu.tsx, input-group.tsx
+│   │   ├── input.tsx, label.tsx, popover.tsx, progress.tsx, responsive-dialog.tsx
+│   │   ├── select.tsx, separator.tsx, sheet.tsx, sidebar.tsx, skeleton.tsx
+│   │   ├── sonner.tsx, table.tsx, tabs.tsx, textarea.tsx, toggle-group.tsx
+│   │   ├── toggle.tsx, tooltip.tsx, truck-spinner.tsx
+│   ├── app-sidebar.tsx                 # Sidebar navigasi adaptif RBAC & branding 3D logo
 │   ├── site-header.tsx                 # Header atas (breadcrumb, theme toggle, user badge)
 │   ├── data-table.tsx                  # Reusable TanStack data table
 │   ├── chart-area-interactive.tsx      # Grafik ritase harian 2 unit truk
 │   ├── section-cards.tsx               # 4 KPI cards dashboard
+│   ├── nav-main.tsx                    # Menu utama navigasi sidebar
+│   ├── nav-documents.tsx               # Navigasi dokumen & referensi
+│   ├── nav-secondary.tsx               # Navigasi sekunder sidebar
 │   ├── nav-user.tsx                    # User dropdown profile & logout
-│   └── mode-toggle.tsx                 # Dark / light switcher
+│   ├── dashboard-navigation-loading.tsx# Indikator loading transisi navigasi dasbor
+│   ├── global-loading-overlay.tsx      # Overlay loading global dengan truck spinner
+│   ├── mode-toggle.tsx                 # Dark / light switcher
+│   └── theme-provider.tsx              # Wrapper next-themes provider
 ├── db/                                 # Database Layer (Drizzle ORM)
 │   ├── index.ts                        # Drizzle connection & pooled connection export
 │   ├── schema/                         # Schema definition per modul
 │   │   ├── index.ts                    # Re-export seluruh schema
 │   │   ├── trucks.ts                   # Master unit truk (W8187UA & H8133OF)
-│   │   ├── rate-references.ts          # Master tarif & rute semen
+│   │   ├── rate-references.ts          # Master tarif & rute semen (289 rute)
 │   │   ├── trips.ts                    # Transaksi surat jalan ritase & kalkulasi
 │   │   ├── expenses.ts                 # Transaksi pengeluaran & kategori biaya
 │   │   ├── profit-sharing.ts           # Periode tutup buku & distribusi pemodal
@@ -102,14 +116,15 @@ hiblow-fleet/
 │   │   └── auth.ts                     # User, session, account, verification (Better Auth)
 │   ├── migrations/                     # File migrasi SQL Drizzle Kit
 │   ├── data/
-│   │   └── rates.json                  # Data ekstraksi acuan 289 rute dari Excel
+│   │   ├── rates.json                  # Data ekstraksi acuan 289 rute dari Excel
+│   │   └── history.json                # Data riwayat transaksi awal
 │   ├── seed.ts                         # Seeding trucks & rate references
-│   ├── seed-users.ts                   # Seeding user admin & partner
+│   ├── seed-users.ts                   # Seeding user admin & partner (Hafidz, Hadid, Alfiah)
 │   └── import-history.ts               # Impor data historis transaksi dari Excel
 ├── domain/                             # Pure Domain Engine (Zero I/O, 100% Testable)
 │   ├── calculators/
 │   │   ├── omset.ts                    # Kalkulasi omset (rate * tonase)
-│   │   ├── sangu.ts                    # Kalkulasi sangu supir (pembulatan ribuan)
+│   │   ├── sangu.ts                    # Kalkulasi sangu supir (pembulatan kelipatan Rp 1.000)
 │   │   ├── trip-profit.ts              # Kalkulasi laba bersih surat jalan & potongan khusus
 │   │   └── profit-sharing.ts           # Kalkulasi laba tutup buku & dividen pemodal
 │   ├── database/
@@ -120,16 +135,18 @@ hiblow-fleet/
 │   ├── route-trend.ts                  # Transformasi data grafik top rute & truncate label
 │   ├── expense-category.ts             # Transformasi breakdown pengeluaran & color tokens
 │   ├── investor-personalization.ts     # Ekstraksi dividen investor spesifik (extractMyShares)
-│   └── __tests__/                      # 35+ file Vitest suite untuk pengujian domain logic & action
+│   └── __tests__/                      # 35 file Vitest suite untuk domain logic, queries, actions, schema
 ├── features/                           # Vertical Feature Slices
-│   ├── auth/                           # login-form.tsx, client auth helper
+│   ├── auth/                           # login-form.tsx, login-welcome-dialog.tsx
 │   ├── dashboard/                      # dashboard.queries.ts, dashboard-route-chart.tsx
 │   ├── trips/                          # trips.actions.ts, trips.queries.ts, trips.schema.ts,
-│   │                                   # trips.export.ts, trips-table.tsx, trip-form-dialog.tsx,
+│   │                                   # trips.export.ts, trips-export-button.tsx, trips-table.tsx,
+│   │                                   # trip-form-dialog.tsx, trip-destination-combobox.tsx,
 │   │                                   # trip-fee-status-dialog.tsx, trip-mobile-card.tsx, trips-summary.tsx
 │   ├── expenses/                       # expenses.actions.ts, expenses.queries.ts, expenses.schema.ts,
-│   │                                   # expenses.export.ts, expenses-table.tsx, expense-form-dialog.tsx,
-│   │                                   # expenses-category-chart.tsx, expense-mobile-card.tsx, expenses-summary.tsx
+│   │                                   # expenses.export.ts, expenses-export-button.tsx, expenses-table.tsx,
+│   │                                   # expense-form-dialog.tsx, expenses-category-chart.tsx,
+│   │                                   # expense-mobile-card.tsx, expenses-summary.tsx
 │   ├── rates/                          # rates.actions.ts, rates.queries.ts, rates.schema.ts,
 │   │                                   # rates-table.tsx, rate-form-dialog.tsx, rate-mobile-card.tsx, rates-summary.tsx
 │   ├── profit-sharing/                 # profit-sharing.actions.ts, profit-sharing.queries.ts, profit-sharing.schema.ts,
@@ -140,15 +157,25 @@ hiblow-fleet/
 ├── hooks/                              # Custom React Hooks (use-mobile.ts)
 ├── lib/                                # Shared Utilities & Server Helper
 │   ├── auth.ts                         # Instance Better Auth server
-│   ├── auth-client.ts                  # Client Better Auth hook (`useSession`, `signIn`, `signOut`)
-│   ├── session.ts                      # Helper `getCurrentSession()` server-side
-│   ├── rbac.ts                         # Role checking (`isAdmin`, `isPartner`, `assertAdmin`, `determineRedirectPath`)
-│   ├── utils.ts                        # `cn()`, `formatCurrency()`, `formatDate()`, format helpers
-│   └── export/                         # Helper export data: `excel-builder.ts`, `csv-builder.ts`, `download.ts`
+│   ├── auth-client.ts                  # Client Better Auth hook (useSession, signIn, signOut)
+│   ├── session.ts                      # Helper getCurrentSession() server-side
+│   ├── rbac.ts                         # Role checking (isAdmin, isPartner, assertAdmin, determineRedirectPath)
+│   ├── utils.ts                        # cn(), formatCurrency(), formatDate(), number helpers
+│   ├── export/                         # Helper export data: excel-builder.ts, csv-builder.ts, download.ts
+│   └── __tests__/                      # 4 file Vitest suite untuk lib (csv, excel, rbac, utils)
 ├── proxy.ts                            # Next.js request proxy / middleware untuk session check & role guard
+├── public/                             # Aset statis (logo_dark.png, logo_light.png, background, icons)
 ├── scripts/
 │   ├── sync-csv-to-database.ts         # Script sinkronisasi CSV data ke database
 │   └── verify-deployment.ts            # Script verifikasi environment variable sebelum deploy
+├── docs/                               # Dokumentasi Blueprint, Specs, Plans, CSV, PDF & References
+│   ├── DEPLOYMENT_GUIDE.md             # Panduan deployment Vercel + Neon
+│   ├── csv/                            # 9 file CSV ekstraksi spreadsheet historis
+│   ├── plans/                          # 13 implementation plans
+│   ├── specs/                          # 3 architectural specifications
+│   ├── pdf/                            # 4 dokumen PDF ringkasan proyek
+│   └── references/
+│       └── PERHITUNGAN HIBLOW HW Trans.xlsx # File Excel master referensi bisnis
 ├── docker-compose.yml                  # PostgreSQL 17 lokal container
 ├── drizzle.config.ts                   # Drizzle Kit config
 ├── vitest.config.ts                    # Vitest configuration
@@ -159,7 +186,7 @@ hiblow-fleet/
 
 ## 4. Aturan Bisnis & Formula Finansial Resmi (Ground Truth)
 
-Sumber acuan absolut: Workbook Excel `PERHITUNGAN HIBLOW HW Trans.xlsx` (Sheet `SI Tarif`, `SBI Tarif`, `Indocement Grobogan Tarif`, `Masuk W8187UA`, `Keluar W8187UA`, `Masuk H8133OF`, `Keluar H8133OF`, `Bagi Hasil`).
+Sumber acuan absolut: Workbook Excel `docs/references/PERHITUNGAN HIBLOW HW Trans.xlsx` (Sheet `SI Tarif`, `SBI Tarif`, `Indocement Grobogan Tarif`, `Masuk W8187UA`, `Keluar W8187UA`, `Masuk H8133OF`, `Keluar H8133OF`, `Bagi Hasil`).
 
 ### 4.1 Modul Referensi Tarif (`rate_references`)
 - Menampung master rute pabrik: `SI` (Semen Indonesia Tuban), `SBI` (Semen Bima / Solusi Bangun Indonesia Rembang), dan `Indocement Grobogan`.
@@ -275,7 +302,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
   ```bash
   pnpm typecheck
   ```
-- **Menjalankan Test Suite (Vitest):**
+- **Menjalankan Test Suite (Vitest - 39 Files, 171 Tests):**
   ```bash
   pnpm test
   pnpm test:watch
@@ -292,15 +319,16 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
   pnpm db:migrate     # Menjalankan migrasi SQL ke database
   pnpm db:studio      # Buka GUI Drizzle Studio inspector
   ```
-- **Seeding Data:**
+- **Seeding & Sinkronisasi Data:**
   ```bash
   pnpm db:seed           # Seed unit truk W8187UA/H8133OF & 289 referensi tarif
   pnpm run db:seed-users # Seed user awal: hafidz@hiblow.fleet, hadid@hiblow.fleet, alfiah@hiblow.fleet
   pnpm run db:import-history # Impor riwayat transaksi Excel ke database
+  pnpm run db:sync-csv   # Sinkronisasi CSV data docs/csv ke database
   ```
-- **Verifikasi Kesiapan Deployment:**
+- **Verifikasi Kesiapan Deployment & Build:**
   ```bash
-  pnpm verify:deployment
+  pnpm verify:deployment # Validasi kecukupan env vars
   pnpm build
   ```
 

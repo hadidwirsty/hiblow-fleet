@@ -18,7 +18,13 @@ export const createTripSchema = z.object({
     .string()
     .refine((v) => parseFloat(v) > 0, "Tonase bongkar harus lebih dari 0"),
   omset: z.string().min(1, "Omset harus terhitung"),
-  sangu: z.string().min(1, "Sangu harus terhitung"),
+  sangu: z
+    .string()
+    .min(1, "Uang sangu supir wajib diisi")
+    .refine(
+      (v) => !isNaN(parseFloat(v)) && parseFloat(v) >= 0,
+      "Uang sangu harus berupa angka valid (minimal 0)"
+    ),
   incentiveRate: z.string().default("35000.00"),
   incentivePaid: z.string().default("0.00"),
   incentiveStatus: z.string().optional().nullable(),

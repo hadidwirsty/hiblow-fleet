@@ -15,6 +15,13 @@
       "when": 1789361287276,
       "tag": "0001_wakeful_unus",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789971981009,
+      "tag": "0002_petite_naoko",
+      "breakpoints": true
     }
   ]
 }

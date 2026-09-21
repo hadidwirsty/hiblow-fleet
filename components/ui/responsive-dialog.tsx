@@ -60,7 +60,7 @@ export function ResponsiveDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className={className}>
-        <DialogHeader>
+        <DialogHeader className="px-1">
           <DialogTitle>{title}</DialogTitle>
           {description && (
             <DialogDescription className="text-xs">
@@ -68,7 +68,7 @@ export function ResponsiveDialog({
             </DialogDescription>
           )}
         </DialogHeader>
-        <div className="max-h-[80vh] overflow-y-auto pr-1">{children}</div>
+        <div className="max-h-[80vh] overflow-y-auto px-1">{children}</div>
       </DialogContent>
     </Dialog>
   )

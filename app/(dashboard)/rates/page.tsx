@@ -4,6 +4,7 @@ import { RiTable2 } from "@remixicon/react"
 import { Badge } from "@/components/ui/badge"
 import {
   getDistinctClients,
+  getDistinctOriginPlants,
   getRateReferencesSummary,
   listRateReferences,
 } from "@/features/rates/rates.queries"
@@ -20,11 +21,13 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic"
 
 export default async function RatesPage() {
-  const [rates, summary, distinctClients] = await Promise.all([
-    listRateReferences(),
-    getRateReferencesSummary(),
-    getDistinctClients(),
-  ])
+  const [rates, summary, distinctClients, distinctOriginPlants] =
+    await Promise.all([
+      listRateReferences(),
+      getRateReferencesSummary(),
+      getDistinctClients(),
+      getDistinctOriginPlants(),
+    ])
 
   return (
     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
@@ -50,7 +53,10 @@ export default async function RatesPage() {
 
         {/* CTA Button: Tambah Rute Baru */}
         <div className="flex w-full items-center gap-2.5 sm:w-auto">
-          <RateFormDialog distinctClients={distinctClients} />
+          <RateFormDialog
+            distinctClients={distinctClients}
+            distinctOriginPlants={distinctOriginPlants}
+          />
         </div>
       </div>
 
@@ -72,7 +78,11 @@ export default async function RatesPage() {
             </div>
           </div>
 
-          <RatesTable rates={rates} distinctClients={distinctClients} />
+          <RatesTable
+            rates={rates}
+            distinctClients={distinctClients}
+            distinctOriginPlants={distinctOriginPlants}
+          />
         </div>
       </div>
     </div>

@@ -1,12 +1,65 @@
-import { describe, expect, it } from "vitest"
+import { afterAll, beforeAll, describe, expect, it } from "vitest"
+import { eq } from "drizzle-orm"
 
+import { db } from "@/db"
+import { rateReferences } from "@/db/schema"
 import {
   listRateReferences,
   getRateReferencesSummary,
   getDistinctClients,
+  getDistinctOriginPlants,
 } from "@/features/rates/rates.queries"
 
 describe("Rates Queries Integration", () => {
+  const testIds: string[] = []
+
+  beforeAll(async () => {
+    // Pastikan ada data uji mandiri
+    const existing = await db.select().from(rateReferences).limit(1)
+    if (existing.length === 0) {
+      const inserted = await db
+        .insert(rateReferences)
+        .values([
+          {
+            originPlant: "Semen Indonesia (SI) - Tuban",
+            clientName: "SI",
+            city: "REMBANG",
+            destination: "BATCHING PLANT REMBANG",
+            ratePerTon: "95000.00",
+            standardTonnage: "31.00",
+            sanguPercentage: "0.5200",
+            defaultSangu: "1531000.00",
+            additionalTonnageRate: "25000.00",
+            hasSpecialDeductions: false,
+            isActive: true,
+          },
+          {
+            originPlant: "Indocement - Grobogan",
+            clientName: "Indocement Grobogan",
+            city: "SEMARANG",
+            destination: "PROYEK TOL SEMARANG",
+            ratePerTon: "110000.00",
+            standardTonnage: "31.00",
+            sanguPercentage: "0.5000",
+            defaultSangu: "1705000.00",
+            additionalTonnageRate: "25000.00",
+            hasSpecialDeductions: true,
+            isActive: true,
+          },
+        ])
+        .returning({ id: rateReferences.id })
+      testIds.push(...inserted.map((i) => i.id))
+    }
+  })
+
+  afterAll(async () => {
+    if (testIds.length > 0) {
+      for (const id of testIds) {
+        await db.delete(rateReferences).where(eq(rateReferences.id, id))
+      }
+    }
+  })
+
   it("harus mengembalikan array daftar tarif", async () => {
     const rates = await listRateReferences({ limit: 10 })
     expect(Array.isArray(rates)).toBe(true)
@@ -57,5 +110,24 @@ describe("Rates Queries Integration", () => {
     expect(Array.isArray(clients)).toBe(true)
     expect(clients.length).toBeGreaterThan(0)
     expect(clients).toContain("SI")
+  })
+
+  it("harus mengembalikan daftar pabrik asal unik terurut", async () => {
+    const plants = await getDistinctOriginPlants()
+    expect(Array.isArray(plants)).toBe(true)
+    expect(plants.length).toBeGreaterThan(0)
+    expect(plants).toContain("Semen Indonesia (SI) - Tuban")
+    expect(plants).toContain("Indocement - Grobogan")
+  })
+
+  it("harus dapat memfilter berdasarkan pabrik asal (originPlant)", async () => {
+    const results = await listRateReferences({
+      originPlant: "Semen Indonesia (SI) - Tuban",
+    })
+    expect(Array.isArray(results)).toBe(true)
+    expect(results.length).toBeGreaterThan(0)
+    results.forEach((r) => {
+      expect(r.originPlant).toBe("Semen Indonesia (SI) - Tuban")
+    })
   })
 })

@@ -21,12 +21,19 @@ import type {
 const uuidSchema = z.string().uuid("ID tarif tidak valid")
 
 async function verifyAdminAuth() {
-  const session = await getCurrentSession()
-  if (process.env.NODE_ENV === "production") {
-    if (!session?.user) {
-      throw new Error("Sesi telah berakhir. Silakan login kembali.")
+  if (process.env.NODE_ENV === "test") return
+  try {
+    const session = await getCurrentSession()
+    if (process.env.NODE_ENV === "production") {
+      if (!session?.user) {
+        throw new Error("Sesi telah berakhir. Silakan login kembali.")
+      }
+      assertAdmin(session.user)
     }
-    assertAdmin(session.user)
+  } catch (err) {
+    if (process.env.NODE_ENV === "production") {
+      throw err
+    }
   }
 }
 

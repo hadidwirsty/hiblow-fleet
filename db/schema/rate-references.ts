@@ -9,6 +9,9 @@ import {
 
 export const rateReferences = pgTable("rate_references", {
   id: uuid("id").defaultRandom().primaryKey(),
+  originPlant: varchar("origin_plant", { length: 100 })
+    .default("Semen Indonesia (SI) - Tuban")
+    .notNull(),
   clientName: varchar("client_name", { length: 50 }).notNull(), // 'SI', 'SBI', 'Indocement Grobogan'
   city: varchar("city", { length: 100 }).notNull(),
   destination: varchar("destination", { length: 255 }).notNull(),
@@ -20,6 +23,7 @@ export const rateReferences = pgTable("rate_references", {
     precision: 5,
     scale: 4,
   }).notNull(), // 0.5200 = 52%
+  defaultSangu: numeric("default_sangu", { precision: 14, scale: 2 }),
   additionalTonnageRate: numeric("additional_tonnage_rate", {
     precision: 12,
     scale: 2,

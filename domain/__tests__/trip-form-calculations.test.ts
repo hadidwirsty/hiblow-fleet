@@ -87,4 +87,48 @@ describe("Trip form live calculation integration", () => {
     expect(deduction5PctUjGrb).toBe(170500)
     expect(profitResult.profit).toBe(3410000 - 1705000 - 34100 - 68200 - 170500)
   })
+
+  it("calculates profit correctly when driver sangu is manually overridden (e.g. extra ton or special case)", () => {
+    const ratePerTon = 95000
+    const actualTonnage = 32.5
+    const omset = calculateOmset({ ratePerTon, unloadedTonnage: actualTonnage })
+
+    // Suppose admin manually sets driver sangu to Rp 1.650.000 instead of default formula
+    const manualSangu = 1650000
+
+    const profitResult = calculateTripProfit({
+      omset,
+      sangu: manualSangu,
+      thirdPartyFee: 50000,
+      tax1Pct: 0,
+      deduction2PctLju: 0,
+      deduction5PctUjGrb: 0,
+    })
+
+    expect(omset).toBe(3087500)
+    // Profit must respect the manual sangu value
+    expect(profitResult.profit).toBe(3087500 - 1650000 - 50000)
+  })
+
+  it("handles flat default sangu from rate reference if available", () => {
+    const ratePerTon = 110000
+    const unloadedTonnage = 31.0
+    const defaultSangu = 1650000
+
+    const omset = calculateOmset({ ratePerTon, unloadedTonnage })
+    // Route has flat default sangu (e.g. SBI Tuban or fixed UJ)
+    const sanguToUse = defaultSangu
+
+    const profitResult = calculateTripProfit({
+      omset,
+      sangu: sanguToUse,
+      thirdPartyFee: 0,
+      tax1Pct: 0,
+      deduction2PctLju: 0,
+      deduction5PctUjGrb: 0,
+    })
+
+    expect(omset).toBe(3410000)
+    expect(profitResult.profit).toBe(3410000 - 1650000)
+  })
 })

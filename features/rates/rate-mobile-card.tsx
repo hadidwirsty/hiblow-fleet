@@ -40,13 +40,16 @@ export function RateMobileCard({
         {/* Top: City, Client & Status */}
         <div className="flex items-start justify-between gap-2">
           <div className="space-y-1">
-            <div className="flex items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <Badge
+                variant="outline"
+                className="border-primary/20 bg-primary/5 text-[10px] font-semibold text-primary"
+              >
+                {rate.originPlant || rate.clientName}
+              </Badge>
               <span className="text-sm font-bold text-foreground">
                 {rate.city}
               </span>
-              <Badge variant="outline" className="text-[10px] font-medium">
-                {rate.clientName}
-              </Badge>
             </div>
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <RiMapPinLine className="size-3 shrink-0 text-primary" />
@@ -97,10 +100,12 @@ export function RateMobileCard({
           </div>
           <div className="rounded border border-border/70 p-2">
             <span className="text-[10px] text-muted-foreground">
-              Acuan Sangu (31t)
+              Acuan UJ ({rate.standardTonnage || "31"}t)
             </span>
             <div className="font-mono font-bold text-primary">
-              {formatCurrency(estimatedSangu)}
+              {rate.defaultSangu
+                ? formatCurrency(parseFloat(rate.defaultSangu))
+                : formatCurrency(estimatedSangu)}
             </div>
           </div>
         </div>

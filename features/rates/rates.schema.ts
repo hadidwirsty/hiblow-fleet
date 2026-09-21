@@ -1,6 +1,12 @@
 import { z } from "zod"
 
 export const createRateReferenceSchema = z.object({
+  originPlant: z
+    .string()
+    .trim()
+    .min(1, "Nama pabrik asal tidak boleh kosong")
+    .max(100, "Nama pabrik asal maksimal 100 karakter")
+    .default("Semen Indonesia (SI) - Tuban"),
   clientName: z
     .string()
     .trim()
@@ -36,6 +42,15 @@ export const createRateReferenceSchema = z.object({
       message: "Persentase sangu harus antara 0 dan 1 (contoh: 0.52 untuk 52%)",
     }
   ),
+  defaultSangu: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || (!isNaN(parseFloat(val)) && parseFloat(val) >= 0),
+      {
+        message: "Acuan uang jalan harus berupa angka non-negatif",
+      }
+    ),
   additionalTonnageRate: z
     .string()
     .default("25000.00")
@@ -48,6 +63,12 @@ export const createRateReferenceSchema = z.object({
 
 export const updateRateReferenceSchema = z.object({
   id: z.string().uuid("ID tarif tidak valid"),
+  originPlant: z
+    .string()
+    .trim()
+    .min(1, "Nama pabrik asal tidak boleh kosong")
+    .max(100, "Nama pabrik asal maksimal 100 karakter")
+    .optional(),
   clientName: z
     .string()
     .trim()
@@ -91,6 +112,15 @@ export const updateRateReferenceSchema = z.object({
       }
     )
     .optional(),
+  defaultSangu: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || (!isNaN(parseFloat(val)) && parseFloat(val) >= 0),
+      {
+        message: "Acuan uang jalan harus berupa angka non-negatif",
+      }
+    ),
   additionalTonnageRate: z
     .string()
     .refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) >= 0, {
@@ -103,6 +133,7 @@ export const updateRateReferenceSchema = z.object({
 
 export const rateReferenceFilterSchema = z.object({
   search: z.string().optional(),
+  originPlant: z.string().optional(),
   clientName: z.string().optional(),
   isActive: z.boolean().optional(),
   limit: z.number().int().positive().optional(),

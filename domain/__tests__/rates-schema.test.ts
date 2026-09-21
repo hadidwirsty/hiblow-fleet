@@ -10,12 +10,14 @@ describe("Rates Schema Validation", () => {
   describe("createRateReferenceSchema", () => {
     it("harus memvalidasi data pembuatan tarif yang sah", () => {
       const validData = {
+        originPlant: "Semen Indonesia (SI) - Tuban",
         clientName: "SI",
         city: "REMBANG",
         destination: "SAFINA PL RBG",
         ratePerTon: "62795.50",
         standardTonnage: "31.00",
         sanguPercentage: "0.5200",
+        defaultSangu: "1012000.00",
         additionalTonnageRate: "25000.00",
         hasSpecialDeductions: false,
         isActive: true,
@@ -23,11 +25,13 @@ describe("Rates Schema Validation", () => {
       const result = createRateReferenceSchema.safeParse(validData)
       expect(result.success).toBe(true)
       if (result.success) {
+        expect(result.data.originPlant).toBe("Semen Indonesia (SI) - Tuban")
         expect(result.data.clientName).toBe("SI")
         expect(result.data.city).toBe("REMBANG")
         expect(result.data.ratePerTon).toBe("62795.50")
         expect(result.data.standardTonnage).toBe("31.00")
         expect(result.data.sanguPercentage).toBe("0.5200")
+        expect(result.data.defaultSangu).toBe("1012000.00")
       }
     })
 

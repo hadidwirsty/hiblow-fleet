@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react"
 import {
+  RiAddLine,
   RiCheckLine,
   RiCloseLine,
   RiDeleteBinLine,
@@ -9,6 +10,7 @@ import {
   RiFilterLine,
   RiMoreLine,
   RiPercentLine,
+  RiRouteLine,
   RiSearchLine,
 } from "@remixicon/react"
 import { toast } from "sonner"
@@ -32,6 +34,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -60,9 +70,19 @@ import { formatCurrency } from "@/lib/utils"
 interface RatesTableProps {
   rates: RateReference[]
   distinctClients: string[]
+  distinctOriginPlants?: string[]
 }
 
-export function RatesTable({ rates, distinctClients }: RatesTableProps) {
+export function RatesTable({
+  rates,
+  distinctClients,
+  distinctOriginPlants = [
+    "Semen Indonesia (SI) - Tuban",
+    "Semen Indonesia (SI) - Rembang",
+    "Solusi Bangun Indonesia (SBI) - Tuban",
+    "Indocement - Grobogan",
+  ],
+}: RatesTableProps) {
   const [search, setSearch] = useState("")
   const [selectedClient, setSelectedClient] = useState<string>("ALL")
   const [selectedStatus, setSelectedStatus] = useState<string>("ALL")
@@ -72,20 +92,35 @@ export function RatesTable({ rates, distinctClients }: RatesTableProps) {
   const [pageSize, setPageSize] = useState(10)
 
   // Dialog action state
+  const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingRate, setEditingRate] = useState<RateReference | null>(null)
   const [deletingRate, setDeletingRate] = useState<RateReference | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
+  const isFiltered =
+    Boolean(search.trim()) ||
+    selectedClient !== "ALL" ||
+    selectedStatus !== "ALL"
+
+  const handleResetFilters = () => {
+    setSearch("")
+    setSelectedClient("ALL")
+    setSelectedStatus("ALL")
+    setCurrentPage(1)
+  }
+
   // Filtered dataset
   const filteredRates = useMemo(() => {
     return rates.filter((rate) => {
-      // 1. Search filter (city, destination, clientName)
+      // 1. Search filter (city, destination, clientName, originPlant)
       if (search.trim()) {
         const query = search.toLowerCase()
         const matchCity = rate.city.toLowerCase().includes(query)
         const matchDest = rate.destination.toLowerCase().includes(query)
         const matchClient = rate.clientName.toLowerCase().includes(query)
-        if (!matchCity && !matchDest && !matchClient) return false
+        const matchOrigin = rate.originPlant?.toLowerCase().includes(query)
+        if (!matchCity && !matchDest && !matchClient && !matchOrigin)
+          return false
       }
 
       // 2. Client filter
@@ -147,7 +182,7 @@ export function RatesTable({ rates, distinctClients }: RatesTableProps) {
     <div className="space-y-4">
       {/* Search & Filter Toolbar Terpadu */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative max-w-sm flex-1">
+        <div className="relative flex-1 sm:max-w-md md:max-w-lg">
           <RiSearchLine className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}
@@ -281,9 +316,52 @@ export function RatesTable({ rates, distinctClients }: RatesTableProps) {
       {/* Mobile Cards View (< md) */}
       <div className="block space-y-3 md:hidden">
         {paginatedRates.length === 0 ? (
-          <div className="rounded-xl border bg-card p-6 text-center text-sm text-muted-foreground">
-            Tidak ada referensi tarif yang sesuai dengan pencarian.
-          </div>
+          <Empty className="rounded-xl border border-dashed border-border/80 bg-card/60 py-12">
+            <EmptyMedia
+              variant="icon"
+              className="size-11 rounded-xl bg-primary/10 text-primary"
+            >
+              {isFiltered ? (
+                <RiSearchLine className="size-5 text-primary" />
+              ) : (
+                <RiRouteLine className="size-5 text-primary" />
+              )}
+            </EmptyMedia>
+            <EmptyHeader>
+              <EmptyTitle>
+                {isFiltered
+                  ? "Tidak Ada Rute yang Cocok"
+                  : "Belum Ada Referensi Tarif"}
+              </EmptyTitle>
+              <EmptyDescription>
+                {isFiltered
+                  ? "Tidak ada referensi tarif yang sesuai dengan pencarian atau filter aktif."
+                  : "Daftar referensi tarif pabrik masih kosong. Mulai tambahkan rute pertama Anda."}
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              {isFiltered ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleResetFilters}
+                  className="gap-1.5"
+                >
+                  <RiCloseLine className="size-3.5" />
+                  <span>Reset Filter</span>
+                </Button>
+              ) : (
+                <Button
+                  size="sm"
+                  onClick={() => setIsCreateOpen(true)}
+                  className="gap-1.5"
+                >
+                  <RiAddLine className="size-4" />
+                  <span>Tambah Tarif Baru</span>
+                </Button>
+              )}
+            </EmptyContent>
+          </Empty>
         ) : (
           paginatedRates.map((rate) => (
             <RateMobileCard
@@ -305,20 +383,22 @@ export function RatesTable({ rates, distinctClients }: RatesTableProps) {
               <TableRow>
                 <TableHead className="w-12 text-center text-xs">No</TableHead>
                 <TableHead className="text-xs font-semibold">
-                  Pabrik Klien
+                  Pabrik Asal
                 </TableHead>
-                <TableHead className="text-xs font-semibold">Kota</TableHead>
+                <TableHead className="text-xs font-semibold">
+                  Kota Tujuan
+                </TableHead>
                 <TableHead className="min-w-45 text-xs font-semibold">
-                  Tujuan Pabrik / Plant
+                  Tujuan Bongkar (Proyek / BP)
                 </TableHead>
                 <TableHead className="text-right text-xs font-semibold">
-                  Tarif / Ton
+                  Tarif OA / Ton
                 </TableHead>
                 <TableHead className="text-right text-xs font-semibold">
                   % Sangu
                 </TableHead>
                 <TableHead className="text-right text-xs font-semibold">
-                  Acuan Sangu (31t)
+                  Acuan UJ (31t)
                 </TableHead>
                 <TableHead className="text-center text-xs font-semibold">
                   Potongan
@@ -331,12 +411,54 @@ export function RatesTable({ rates, distinctClients }: RatesTableProps) {
             </TableHeader>
             <TableBody>
               {paginatedRates.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={10}
-                    className="py-12 text-center text-sm text-muted-foreground"
-                  >
-                    Tidak ada referensi tarif yang sesuai dengan pencarian.
+                <TableRow className="hover:bg-transparent">
+                  <TableCell colSpan={10} className="p-0">
+                    <Empty className="w-full border-0 py-20 sm:py-24 md:py-28 lg:py-32">
+                      <EmptyMedia
+                        variant="icon"
+                        className="mb-3 size-12 rounded-2xl bg-primary/10 text-primary md:size-14"
+                      >
+                        {isFiltered ? (
+                          <RiSearchLine className="size-6 text-primary md:size-7" />
+                        ) : (
+                          <RiRouteLine className="size-6 text-primary md:size-7" />
+                        )}
+                      </EmptyMedia>
+                      <EmptyHeader className="max-w-md gap-2.5 sm:max-w-lg md:max-w-xl lg:max-w-2xl">
+                        <EmptyTitle className="text-base font-semibold sm:text-lg md:text-xl">
+                          {isFiltered
+                            ? "Tidak Ada Rute yang Cocok"
+                            : "Belum Ada Referensi Tarif"}
+                        </EmptyTitle>
+                        <EmptyDescription className="text-xs leading-relaxed text-muted-foreground sm:text-sm md:text-base">
+                          {isFiltered
+                            ? "Tidak ada referensi tarif yang sesuai dengan kata kunci pencarian atau kombinasi filter aktif Anda. Silakan ubah kata kunci atau klik tombol reset di bawah."
+                            : "Daftar referensi tarif pabrik saat ini masih kosong. Mulai daftarkan rute baru beserta acuan tarif ongkos angkut (OA) dan uang jalan supir."}
+                        </EmptyDescription>
+                      </EmptyHeader>
+                      <EmptyContent className="mt-3 w-full max-w-xs sm:max-w-sm md:max-w-md">
+                        {isFiltered ? (
+                          <Button
+                            variant="outline"
+                            size="default"
+                            onClick={handleResetFilters}
+                            className="h-10 gap-2 px-5 text-sm font-medium shadow-xs"
+                          >
+                            <RiCloseLine className="size-4" />
+                            <span>Reset Filter</span>
+                          </Button>
+                        ) : (
+                          <Button
+                            size="default"
+                            onClick={() => setIsCreateOpen(true)}
+                            className="h-10 gap-2 px-6 text-sm font-medium shadow-xs transition-all hover:shadow-sm"
+                          >
+                            <RiAddLine className="size-4.5" />
+                            <span>Tambah Tarif Baru</span>
+                          </Button>
+                        )}
+                      </EmptyContent>
+                    </Empty>
                   </TableCell>
                 </TableRow>
               ) : (
@@ -359,9 +481,9 @@ export function RatesTable({ rates, distinctClients }: RatesTableProps) {
                       <TableCell>
                         <Badge
                           variant="outline"
-                          className="text-[11px] font-medium"
+                          className="border-primary/20 bg-primary/5 text-[11px] font-semibold text-primary"
                         >
-                          {rate.clientName}
+                          {rate.originPlant || rate.clientName}
                         </Badge>
                       </TableCell>
                       <TableCell className="font-semibold text-foreground">
@@ -377,7 +499,9 @@ export function RatesTable({ rates, distinctClients }: RatesTableProps) {
                         {(numPct * 100).toFixed(1)}%
                       </TableCell>
                       <TableCell className="text-right font-mono font-semibold text-primary">
-                        {formatCurrency(estimatedSangu)}
+                        {rate.defaultSangu
+                          ? formatCurrency(parseFloat(rate.defaultSangu))
+                          : formatCurrency(estimatedSangu)}
                       </TableCell>
                       <TableCell className="text-center">
                         {rate.hasSpecialDeductions ? (
@@ -508,6 +632,15 @@ export function RatesTable({ rates, distinctClients }: RatesTableProps) {
         </div>
       </div>
 
+      {/* Create Dialog Modal dari Empty State */}
+      <RateFormDialog
+        mode="create"
+        open={isCreateOpen}
+        onOpenChange={setIsCreateOpen}
+        distinctClients={distinctClients}
+        distinctOriginPlants={distinctOriginPlants}
+      />
+
       {/* Edit Dialog Modal */}
       {editingRate && (
         <RateFormDialog
@@ -516,6 +649,7 @@ export function RatesTable({ rates, distinctClients }: RatesTableProps) {
           open={!!editingRate}
           onOpenChange={(isOpen) => !isOpen && setEditingRate(null)}
           distinctClients={distinctClients}
+          distinctOriginPlants={distinctOriginPlants}
         />
       )}
 

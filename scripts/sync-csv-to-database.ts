@@ -448,13 +448,21 @@ export async function runSync() {
         rt.city.toLowerCase() === city.toLowerCase()
     )
     if (!exists) {
+      const sTonnage = parseFloat(standardTonnage) || 31
+      const rPerTon = parseFloat(ratePerTon) || 0
+      const dSangu = (
+        Math.round((rPerTon * sTonnage * 0.5) / 1000) * 1000
+      ).toFixed(2)
+
       rates.push({
+        originPlant: "Semen Indonesia (SI) - Rembang",
         clientName: "SI Rembang",
         city,
         destination,
         ratePerTon,
         standardTonnage,
         sanguPercentage: "0.5000",
+        defaultSangu: dSangu,
         additionalTonnageRate,
         hasSpecialDeductions: false,
         isActive: true,

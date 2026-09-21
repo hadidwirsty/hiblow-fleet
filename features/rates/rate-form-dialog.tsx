@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { RiAddLine, RiRouteLine } from "@remixicon/react"
 import { toast } from "sonner"
 
@@ -16,6 +18,57 @@ import {
 } from "@/features/rates/rates.actions"
 import { formatCurrency } from "@/lib/utils"
 
+function parseCurrencyInput(value: string): string {
+  const cleaned = value.trim()
+  if (!cleaned) return ""
+
+  if (cleaned.includes(",")) {
+    const parts = cleaned.split(",")
+    const intPart = parts[0].replace(/\D/g, "")
+    const decPart = parts.slice(1).join("").replace(/\D/g, "")
+    if (cleaned.endsWith(",")) {
+      return `${intPart}.`
+    }
+    return decPart ? `${intPart}.${decPart}` : intPart
+  }
+
+  if (cleaned.includes(".")) {
+    const parts = cleaned.split(".")
+    if (parts.length === 2 && parts[0].length > 3 && parts[1].length <= 2) {
+      return cleaned
+    }
+    return cleaned.replace(/\./g, "").replace(/\D/g, "")
+  }
+
+  return cleaned.replace(/\D/g, "")
+}
+
+function formatCurrencyInput(value: string): string {
+  if (!value) return ""
+
+  let intPart = ""
+  let decPart = ""
+  const hasCommaEnding = value.endsWith(".") || value.endsWith(",")
+
+  if (value.includes(".")) {
+    const parts = value.split(".")
+    intPart = parts[0].replace(/\D/g, "")
+    decPart = parts[1] === "00" || parts[1] === "0" ? "" : parts[1]
+  } else {
+    intPart = value.replace(/\D/g, "")
+  }
+
+  if (!intPart && !decPart) return ""
+  const formattedInt = intPart
+    ? new Intl.NumberFormat("id-ID").format(Number(intPart))
+    : "0"
+
+  if (hasCommaEnding) {
+    return `${formattedInt},`
+  }
+  return decPart ? `${formattedInt},${decPart}` : formattedInt
+}
+
 interface RateFormDialogProps {
   mode?: "create" | "edit"
   rate?: RateReference
@@ -23,7 +76,15 @@ interface RateFormDialogProps {
   open?: boolean
   onOpenChange?: (open: boolean) => void
   distinctClients?: string[]
+  distinctOriginPlants?: string[]
 }
+
+const DEFAULT_ORIGIN_PLANTS = [
+  "Semen Indonesia (SI) - Tuban",
+  "Semen Indonesia (SI) - Rembang",
+  "Solusi Bangun Indonesia (SBI) - Tuban",
+  "Indocement - Grobogan",
+]
 
 export function RateFormDialog({
   mode = "create",
@@ -31,27 +92,29 @@ export function RateFormDialog({
   trigger,
   open: controlledOpen,
   onOpenChange: setControlledOpen,
-  distinctClients = ["SI", "SBI", "Indocement Grobogan"],
+  distinctOriginPlants = DEFAULT_ORIGIN_PLANTS,
 }: RateFormDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false)
   const isControlled = controlledOpen !== undefined
   const open = isControlled ? controlledOpen : internalOpen
   const setOpen = isControlled ? setControlledOpen! : setInternalOpen
 
-  const [clientName, setClientName] = useState(rate?.clientName ?? "SI")
+  const [originPlant, setOriginPlant] = useState(rate?.originPlant ?? "")
+  const [clientName, setClientName] = useState(rate?.clientName ?? "")
   const [city, setCity] = useState(rate?.city ?? "")
   const [destination, setDestination] = useState(rate?.destination ?? "")
   const [ratePerTon, setRatePerTon] = useState(rate?.ratePerTon ?? "")
   const [standardTonnage, setStandardTonnage] = useState(
-    rate?.standardTonnage ?? "31.00"
+    rate?.standardTonnage ?? ""
   )
   const [sanguPercentage, setSanguPercentage] = useState(
     rate?.sanguPercentage
       ? (parseFloat(rate.sanguPercentage) * 100).toString()
-      : "52"
+      : ""
   )
+  const [defaultSangu, setDefaultSangu] = useState(rate?.defaultSangu ?? "")
   const [additionalTonnageRate, setAdditionalTonnageRate] = useState(
-    rate?.additionalTonnageRate ?? "25000.00"
+    rate?.additionalTonnageRate ?? ""
   )
   const [hasSpecialDeductions, setHasSpecialDeductions] = useState(
     rate?.hasSpecialDeductions ?? false
@@ -61,30 +124,97 @@ export function RateFormDialog({
   const [isPending, setIsPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Hitung live acuan sangu supir (tonase standar * tarif * % sangu dibulatkan ke ribuan)
+  useEffect(() => {
+    if (open) {
+      if (mode === "edit" && rate) {
+        setOriginPlant(rate.originPlant ?? "")
+        setClientName(rate.clientName ?? "")
+        setCity(rate.city ?? "")
+        setDestination(rate.destination ?? "")
+        setRatePerTon(rate.ratePerTon ?? "")
+        setStandardTonnage(rate.standardTonnage ?? "")
+        setSanguPercentage(
+          rate.sanguPercentage
+            ? (parseFloat(rate.sanguPercentage) * 100).toString()
+            : ""
+        )
+        setDefaultSangu(rate.defaultSangu ?? "")
+        setAdditionalTonnageRate(rate.additionalTonnageRate ?? "")
+        setHasSpecialDeductions(rate.hasSpecialDeductions ?? false)
+        setIsActive(rate.isActive ?? true)
+      } else if (mode === "create") {
+        setOriginPlant("")
+        setClientName("")
+        setCity("")
+        setDestination("")
+        setRatePerTon("")
+        setStandardTonnage("")
+        setSanguPercentage("")
+        setDefaultSangu("")
+        setAdditionalTonnageRate("")
+        setHasSpecialDeductions(false)
+        setIsActive(true)
+      }
+      setError(null)
+    }
+  }, [open, mode, rate])
+
   const numRate = parseFloat(ratePerTon) || 0
-  const numTon = parseFloat(standardTonnage) || 31
-  const numPct = (parseFloat(sanguPercentage) || 52) / 100
-  const estimatedSangu = Math.round((numRate * numTon * numPct) / 1000) * 1000
+  const numTon = parseFloat(standardTonnage) || 0
+  const numPct = (parseFloat(sanguPercentage) || 0) / 100
+  const estimatedSangu =
+    numRate > 0 && numTon > 0 && numPct > 0
+      ? Math.round((numRate * numTon * numPct) / 1000) * 1000
+      : 0
+  const numAdditionalRate = parseFloat(additionalTonnageRate) || 0
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
     setIsPending(true)
 
-    // Normalisasi sanguPercentage dari skala 0-100 (misal 52) ke desimal (0.5200)
-    const decimalSangu = (parseFloat(sanguPercentage) / 100).toFixed(4)
+    const decimalSangu = sanguPercentage
+      ? (parseFloat(sanguPercentage) / 100).toFixed(4)
+      : "0.5200"
+    const cleanRatePerTon = ratePerTon.endsWith(".")
+      ? ratePerTon.slice(0, -1)
+      : ratePerTon
+    const cleanAdditionalTonnageRate = additionalTonnageRate.endsWith(".")
+      ? additionalTonnageRate.slice(0, -1)
+      : additionalTonnageRate || "0.00"
+
+    const derivedClientName =
+      clientName ||
+      (originPlant.includes("SBI")
+        ? "SBI"
+        : originPlant.includes("Grobogan") || originPlant.includes("Indocement")
+          ? "Indocement Grobogan"
+          : originPlant.includes("Rembang")
+            ? "SI Rembang"
+            : originPlant
+              ? originPlant.split("-")[0].trim()
+              : "SI")
+
+    const cleanDefaultSangu = defaultSangu
+      ? defaultSangu.endsWith(".")
+        ? defaultSangu.slice(0, -1)
+        : defaultSangu
+      : undefined
+
+    const finalStandardTonnage = standardTonnage || "31.00"
 
     try {
       if (mode === "create") {
         const res = await createRateReference({
-          clientName,
+          originPlant: originPlant.trim(),
+          clientName: derivedClientName,
           city: city.toUpperCase().trim(),
           destination: destination.toUpperCase().trim(),
-          ratePerTon,
-          standardTonnage,
+          ratePerTon: cleanRatePerTon,
+          standardTonnage: finalStandardTonnage,
           sanguPercentage: decimalSangu,
-          additionalTonnageRate,
+          defaultSangu: cleanDefaultSangu,
+          additionalTonnageRate: cleanAdditionalTonnageRate,
           hasSpecialDeductions,
           isActive,
         })
@@ -92,23 +222,29 @@ export function RateFormDialog({
         if (res.success) {
           toast.success("Referensi tarif rute baru berhasil disimpan")
           setOpen(false)
-          // Reset form jika mode create
+          setClientName("")
           setCity("")
           setDestination("")
           setRatePerTon("")
+          setStandardTonnage("31.00")
+          setSanguPercentage("52")
+          setDefaultSangu("")
+          setAdditionalTonnageRate("25000")
         } else {
           setError(res.error)
         }
       } else if (mode === "edit" && rate) {
         const res = await updateRateReference({
           id: rate.id,
-          clientName,
+          originPlant: originPlant.trim(),
+          clientName: derivedClientName,
           city: city.toUpperCase().trim(),
           destination: destination.toUpperCase().trim(),
-          ratePerTon,
+          ratePerTon: cleanRatePerTon,
           standardTonnage,
           sanguPercentage: decimalSangu,
-          additionalTonnageRate,
+          defaultSangu: cleanDefaultSangu,
+          additionalTonnageRate: cleanAdditionalTonnageRate,
           hasSpecialDeductions,
           isActive,
         })
@@ -137,7 +273,7 @@ export function RateFormDialog({
               className="h-9 w-full gap-1.5 px-4 font-medium shadow-sm sm:w-auto"
             >
               <RiAddLine className="size-4" />
-              <span>Tambah Tarif Baru</span>
+              <span>Tambah Referensi Tarif</span>
             </Button>
           )}
         </div>
@@ -166,55 +302,55 @@ export function RateFormDialog({
         className="sm:max-w-lg"
       >
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-          {/* Pabrik Klien */}
+          {/* Pabrik Asal */}
           <div className="space-y-1.5">
-            <Label htmlFor="clientName" className="text-xs font-semibold">
-              Pabrik Klien / Produsen Semen
+            <Label htmlFor="originPlant" className="text-xs font-semibold">
+              Pabrik Asal (Nama Pabrik - Kota Asal)
             </Label>
             <Input
-              id="clientName"
-              value={clientName}
-              onChange={(e) => setClientName(e.target.value)}
-              placeholder="Contoh: SI, SBI, Indocement Grobogan"
+              id="originPlant"
+              value={originPlant}
+              onChange={(e) => setOriginPlant(e.target.value)}
+              placeholder="mis. Semen Indonesia (SI) - Tuban"
               required
-              list="client-suggestions"
-              className="text-sm uppercase"
+              list="origin-plant-suggestions"
+              className="text-sm font-medium"
             />
-            <datalist id="client-suggestions">
-              {distinctClients.map((client) => (
-                <option key={client} value={client} />
+            <datalist id="origin-plant-suggestions">
+              {distinctOriginPlants.map((plant) => (
+                <option key={plant} value={plant} />
               ))}
             </datalist>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            {/* Kota Tujuan */}
+            {/* Kota Tujuan Bongkar */}
             <div className="space-y-1.5">
               <Label htmlFor="city" className="text-xs font-semibold">
-                Kota Tujuan
+                Kota Tujuan Bongkar
               </Label>
               <Input
                 id="city"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
-                placeholder="Contoh: KUDUS"
+                placeholder="mis. Semarang"
                 required
-                className="text-sm uppercase"
+                className="text-sm"
               />
             </div>
 
-            {/* Nama Pabrik / Batching Plant */}
+            {/* Nama Proyek / Titik Bongkar */}
             <div className="space-y-1.5">
               <Label htmlFor="destination" className="text-xs font-semibold">
-                Nama Pabrik / Tujuan
+                Tujuan Bongkar (Proyek / BP)
               </Label>
               <Input
                 id="destination"
                 value={destination}
                 onChange={(e) => setDestination(e.target.value)}
-                placeholder="Contoh: VARIA USAHA"
+                placeholder="mis. PT Ananda Pratama"
                 required
-                className="text-sm uppercase"
+                className="text-sm"
               />
             </div>
           </div>
@@ -223,18 +359,25 @@ export function RateFormDialog({
             {/* Tarif per Ton */}
             <div className="space-y-1.5">
               <Label htmlFor="ratePerTon" className="text-xs font-semibold">
-                Tarif per Ton (Rp)
+                Tarif OA per Ton (Rp)
               </Label>
-              <Input
-                id="ratePerTon"
-                type="number"
-                step="any"
-                value={ratePerTon}
-                onChange={(e) => setRatePerTon(e.target.value)}
-                placeholder="62795.50"
-                required
-                className="text-sm font-medium"
-              />
+              <div className="relative">
+                <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-xs font-semibold text-muted-foreground">
+                  Rp
+                </span>
+                <Input
+                  id="ratePerTon"
+                  type="text"
+                  inputMode="decimal"
+                  value={formatCurrencyInput(ratePerTon)}
+                  onChange={(e) =>
+                    setRatePerTon(parseCurrencyInput(e.target.value))
+                  }
+                  placeholder="mis. 67.296"
+                  required
+                  className="pl-9 text-sm font-medium"
+                />
+              </div>
             </div>
 
             {/* Persentase Sangu Supir (%) */}
@@ -243,7 +386,7 @@ export function RateFormDialog({
                 htmlFor="sanguPercentage"
                 className="text-xs font-semibold"
               >
-                Sangu Supir (%)
+                Persentase Sangu (%)
               </Label>
               <div className="relative">
                 <Input
@@ -252,9 +395,9 @@ export function RateFormDialog({
                   step="any"
                   value={sanguPercentage}
                   onChange={(e) => setSanguPercentage(e.target.value)}
-                  placeholder="52"
+                  placeholder="mis. 52"
                   required
-                  className="pr-8 text-sm"
+                  className="pr-8 text-sm font-medium"
                 />
                 <span className="absolute top-1/2 right-2.5 -translate-y-1/2 text-xs font-semibold text-muted-foreground">
                   %
@@ -278,9 +421,8 @@ export function RateFormDialog({
                 step="any"
                 value={standardTonnage}
                 onChange={(e) => setStandardTonnage(e.target.value)}
-                placeholder="31.00"
-                required
-                className="text-sm"
+                placeholder="mis. 31.00"
+                className="text-sm font-medium"
               />
             </div>
 
@@ -292,15 +434,48 @@ export function RateFormDialog({
               >
                 Tarif Lebih Tonase (Rp/t)
               </Label>
+              <div className="relative">
+                <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-xs font-semibold text-muted-foreground">
+                  Rp
+                </span>
+                <Input
+                  id="additionalTonnageRate"
+                  type="text"
+                  inputMode="decimal"
+                  value={formatCurrencyInput(additionalTonnageRate)}
+                  onChange={(e) =>
+                    setAdditionalTonnageRate(parseCurrencyInput(e.target.value))
+                  }
+                  placeholder="mis. 25.000"
+                  className="pl-9 text-sm"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Acuan Uang Jalan (UJ Standar) */}
+          <div className="space-y-1.5">
+            <Label htmlFor="defaultSangu" className="text-xs font-semibold">
+              Acuan Uang Jalan / Sangu Standar (Rp)
+            </Label>
+            <div className="relative">
+              <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-xs font-semibold text-muted-foreground">
+                Rp
+              </span>
               <Input
-                id="additionalTonnageRate"
-                type="number"
-                step="any"
-                value={additionalTonnageRate}
-                onChange={(e) => setAdditionalTonnageRate(e.target.value)}
-                placeholder="25000"
-                required
-                className="text-sm"
+                id="defaultSangu"
+                type="text"
+                inputMode="decimal"
+                value={formatCurrencyInput(defaultSangu)}
+                onChange={(e) =>
+                  setDefaultSangu(parseCurrencyInput(e.target.value))
+                }
+                placeholder={
+                  estimatedSangu > 0
+                    ? `mis. ${formatCurrencyInput(estimatedSangu.toString())}`
+                    : "mis. 1.500.000 (opsional)"
+                }
+                className="pl-9 text-sm font-medium"
               />
             </div>
           </div>
@@ -309,10 +484,11 @@ export function RateFormDialog({
           <div className="rounded-lg border bg-muted/40 p-3">
             <div className="flex items-center justify-between text-xs">
               <span className="font-medium text-muted-foreground">
-                Estimasi Sangu Standar ({standardTonnage} Ton):
+                Estimasi Sangu Standar (
+                {standardTonnage ? `${standardTonnage} Ton` : "Basis 31 Ton"}):
               </span>
               <span className="font-bold text-primary">
-                {formatCurrency(estimatedSangu)}
+                {estimatedSangu > 0 ? formatCurrency(estimatedSangu) : "Rp -"}
               </span>
             </div>
           </div>
@@ -359,17 +535,23 @@ export function RateFormDialog({
             </div>
           )}
 
-          <div className="flex items-center justify-end gap-2 border-t pt-3">
+          <div className="flex items-center justify-end gap-2 border-t px-2 pt-3 sm:px-0">
             <Button
               type="button"
               variant="outline"
-              size="sm"
+              className="w-1/2 sm:w-36"
+              size="lg"
               onClick={() => setOpen(false)}
               disabled={isPending}
             >
               Batal
             </Button>
-            <Button type="submit" size="sm" disabled={isPending}>
+            <Button
+              type="submit"
+              className="w-1/2 sm:w-36"
+              size="lg"
+              disabled={isPending}
+            >
               {isPending
                 ? "Menyimpan..."
                 : mode === "create"

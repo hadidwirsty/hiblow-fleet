@@ -6,6 +6,7 @@ import type { RateReference } from "@/db/schema"
 
 export interface ListRateReferencesFilter {
   search?: string
+  originPlant?: string
   clientName?: string
   isActive?: boolean
   limit?: number
@@ -29,11 +30,16 @@ export async function listRateReferences(
     const term = `%${filter.search.trim()}%`
     conditions.push(
       or(
+        ilike(rateReferences.originPlant, term),
         ilike(rateReferences.city, term),
         ilike(rateReferences.destination, term),
         ilike(rateReferences.clientName, term)
       )
     )
+  }
+
+  if (filter.originPlant && filter.originPlant.trim()) {
+    conditions.push(eq(rateReferences.originPlant, filter.originPlant.trim()))
   }
 
   if (filter.clientName && filter.clientName.trim()) {
@@ -49,7 +55,7 @@ export async function listRateReferences(
     .from(rateReferences)
     .where(conditions.length > 0 ? and(...conditions) : undefined)
     .orderBy(
-      asc(rateReferences.clientName),
+      asc(rateReferences.originPlant),
       asc(rateReferences.city),
       asc(rateReferences.destination)
     )
@@ -95,4 +101,13 @@ export async function getDistinctClients(): Promise<string[]> {
     .orderBy(asc(rateReferences.clientName))
 
   return results.map((r) => r.clientName)
+}
+
+export async function getDistinctOriginPlants(): Promise<string[]> {
+  const results = await db
+    .selectDistinct({ originPlant: rateReferences.originPlant })
+    .from(rateReferences)
+    .orderBy(asc(rateReferences.originPlant))
+
+  return results.map((r) => r.originPlant)
 }

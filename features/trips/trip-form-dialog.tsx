@@ -8,6 +8,7 @@ import {
   RiCalculatorLine,
   RiInformationLine,
   RiLoaderLine,
+  RiRefreshLine,
   RiTruckLine,
 } from "@remixicon/react"
 import { useForm } from "react-hook-form"
@@ -49,11 +50,15 @@ export function TripFormDialog({ rateReferences }: TripFormDialogProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false)
 
   // Internal rate reference calculation states
+  const [selectedRate, setSelectedRate] =
+    React.useState<RateReferenceRecord | null>(null)
   const [selectedRateId, setSelectedRateId] = React.useState<string | null>(
     null
   )
   const [sanguPercentage, setSanguPercentage] = React.useState<number>(0.52)
   const [hasSpecialDeductions, setHasSpecialDeductions] =
+    React.useState<boolean>(false)
+  const [isSanguManuallyEdited, setIsSanguManuallyEdited] =
     React.useState<boolean>(false)
 
   // Get current date string YYYY-MM-DD
@@ -103,16 +108,42 @@ export function TripFormDialog({ rateReferences }: TripFormDialogProps) {
   const watchedTruckId = watch("truckId")
   const watchedRatePerTon = watch("ratePerTon")
   const watchedUnloadedTonnage = watch("unloadedTonnage")
+  const watchedSangu = watch("sangu")
   const watchedThirdPartyFee = watch("thirdPartyFee")
   const watchedMealAllowance = watch("mealAllowance")
   const watchedSavings = watch("savings")
   const watchedClaim = watch("claim")
   const watchedClaimDriver = watch("claimDriver")
 
-  // Live calculation effect
+  // Recommended sangu computation from reference/formula
+  const recommendedSangu = React.useMemo(() => {
+    if (
+      selectedRate?.defaultSangu &&
+      parseFloat(selectedRate.defaultSangu) > 0
+    ) {
+      return Math.round(parseFloat(selectedRate.defaultSangu))
+    }
+    const rateNum = parseFloat(watchedRatePerTon ?? "0") || 0
+    const tonnageNum = parseFloat(watchedUnloadedTonnage ?? "0") || 0
+    return calculateSangu({
+      ratePerTon: rateNum,
+      unloadedTonnage: tonnageNum,
+      sanguPercentage,
+    })
+  }, [selectedRate, watchedRatePerTon, watchedUnloadedTonnage, sanguPercentage])
+
+  // Sync recommended sangu to form when user has NOT manually edited sangu
+  React.useEffect(() => {
+    if (!isSanguManuallyEdited) {
+      setValue("sangu", recommendedSangu.toString())
+    }
+  }, [recommendedSangu, isSanguManuallyEdited, setValue])
+
+  // Live calculation effect for profit and deductions
   const liveCalc = React.useMemo(() => {
     const rateNum = parseFloat(watchedRatePerTon ?? "0") || 0
     const tonnageNum = parseFloat(watchedUnloadedTonnage ?? "0") || 0
+    const sanguNum = parseFloat(watchedSangu ?? "0") || 0
     const thirdPartyNum = parseFloat(watchedThirdPartyFee ?? "0") || 0
     const mealNum = parseFloat(watchedMealAllowance ?? "0") || 0
     const savingsNum = parseFloat(watchedSavings ?? "0") || 0
@@ -122,12 +153,6 @@ export function TripFormDialog({ rateReferences }: TripFormDialogProps) {
     const omset = calculateOmset({
       ratePerTon: rateNum,
       unloadedTonnage: tonnageNum,
-    })
-
-    const sangu = calculateSangu({
-      ratePerTon: rateNum,
-      unloadedTonnage: tonnageNum,
-      sanguPercentage,
     })
 
     let tax1Pct = 0
@@ -142,7 +167,7 @@ export function TripFormDialog({ rateReferences }: TripFormDialogProps) {
 
     const profitResult = calculateTripProfit({
       omset,
-      sangu,
+      sangu: sanguNum,
       thirdPartyFee: thirdPartyNum,
       tax1Pct,
       deduction2PctLju,
@@ -155,7 +180,7 @@ export function TripFormDialog({ rateReferences }: TripFormDialogProps) {
 
     return {
       omset,
-      sangu,
+      sangu: sanguNum,
       tax1Pct,
       deduction2PctLju,
       deduction5PctUjGrb,
@@ -164,19 +189,18 @@ export function TripFormDialog({ rateReferences }: TripFormDialogProps) {
   }, [
     watchedRatePerTon,
     watchedUnloadedTonnage,
+    watchedSangu,
     watchedThirdPartyFee,
     watchedMealAllowance,
     watchedSavings,
     watchedClaim,
     watchedClaimDriver,
-    sanguPercentage,
     hasSpecialDeductions,
   ])
 
   // Synchronize computed numbers with form values
   React.useEffect(() => {
     setValue("omset", liveCalc.omset.toFixed(2))
-    setValue("sangu", liveCalc.sangu.toFixed(2))
     setValue("profit", liveCalc.profit.toFixed(2))
     setValue("tax1Pct", liveCalc.tax1Pct.toFixed(2))
     setValue("deduction2PctLju", liveCalc.deduction2PctLju.toFixed(2))
@@ -185,6 +209,7 @@ export function TripFormDialog({ rateReferences }: TripFormDialogProps) {
 
   // Handle route selection from combobox
   function handleRouteSelect(rateRef: RateReferenceRecord) {
+    setSelectedRate(rateRef)
     setSelectedRateId(rateRef.id)
     setValue("rateReferenceId", rateRef.id)
     setValue("destinationCity", rateRef.city)
@@ -192,6 +217,26 @@ export function TripFormDialog({ rateReferences }: TripFormDialogProps) {
     setValue("ratePerTon", parseFloat(rateRef.ratePerTon).toString())
     setSanguPercentage(parseFloat(rateRef.sanguPercentage))
     setHasSpecialDeductions(rateRef.hasSpecialDeductions)
+
+    setIsSanguManuallyEdited(false)
+    let initialSangu = 0
+    if (rateRef.defaultSangu && parseFloat(rateRef.defaultSangu) > 0) {
+      initialSangu = Math.round(parseFloat(rateRef.defaultSangu))
+    } else {
+      const tonnageNum = parseFloat(watchedUnloadedTonnage ?? "0") || 31.0
+      initialSangu = calculateSangu({
+        ratePerTon: parseFloat(rateRef.ratePerTon) || 0,
+        unloadedTonnage: tonnageNum,
+        sanguPercentage: parseFloat(rateRef.sanguPercentage) || 0.52,
+      })
+    }
+    setValue("sangu", initialSangu.toString())
+  }
+
+  // Reset sangu to system recommendation
+  function handleResetSanguToRecommendation() {
+    setIsSanguManuallyEdited(false)
+    setValue("sangu", recommendedSangu.toString())
   }
 
   // Handle form submission
@@ -203,7 +248,9 @@ export function TripFormDialog({ rateReferences }: TripFormDialogProps) {
         toast.success("Surat jalan ritase berhasil disimpan ke database!")
         setOpen(false)
         reset()
+        setSelectedRate(null)
         setSelectedRateId(null)
+        setIsSanguManuallyEdited(false)
       } else {
         toast.error(res.error || "Gagal menyimpan ritase.")
       }
@@ -388,6 +435,77 @@ export function TripFormDialog({ rateReferences }: TripFormDialogProps) {
             </div>
           </div>
 
+          {/* Row 5: Sangu Supir / Uang Jalan (Fleksibel: Acuan Sistem / Penyesuaian Manual) */}
+          <div className="rounded-lg border border-border/80 bg-muted/20 p-3">
+            <div className="flex flex-wrap items-center justify-between gap-1 pb-1.5">
+              <div className="flex items-center gap-1.5">
+                <Label className="text-xs font-semibold">
+                  Sangu Supir / Uang Jalan (Rp){" "}
+                  <span className="text-destructive">*</span>
+                </Label>
+                {isSanguManuallyEdited ? (
+                  <Badge
+                    variant="outline"
+                    className="border-amber-500/40 bg-amber-500/10 text-[9px] font-medium text-amber-600 dark:text-amber-400"
+                  >
+                    Disesuaikan Manual
+                  </Badge>
+                ) : (
+                  <Badge
+                    variant="outline"
+                    className="border-emerald-500/40 bg-emerald-500/10 text-[9px] font-medium text-emerald-600 dark:text-emerald-400"
+                  >
+                    Acuan Sistem
+                  </Badge>
+                )}
+              </div>
+              {isSanguManuallyEdited && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleResetSanguToRecommendation}
+                  className="h-6 gap-1 px-2 text-[10px] text-muted-foreground hover:text-foreground"
+                  title="Kembalikan nilai sangu ke rekomendasi acuan rute"
+                >
+                  <RiRefreshLine className="size-3" />
+                  <span>
+                    Reset ke Acuan ({formatCurrency(recommendedSangu)})
+                  </span>
+                </Button>
+              )}
+            </div>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <div>
+                <Input
+                  type="number"
+                  step="1000"
+                  {...register("sangu", {
+                    onChange: () => {
+                      setIsSanguManuallyEdited(true)
+                    },
+                  })}
+                  className="h-9 font-mono text-xs font-semibold text-amber-600 dark:text-amber-400"
+                  placeholder="Contoh: 1531000"
+                />
+                {errors.sangu && (
+                  <p className="mt-1 text-[11px] text-destructive">
+                    {errors.sangu.message}
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center text-[11px] text-muted-foreground">
+                <span>
+                  {selectedRate?.defaultSangu &&
+                  parseFloat(selectedRate.defaultSangu) > 0
+                    ? `Standar UJ rute ini: ${formatCurrency(parseFloat(selectedRate.defaultSangu))}.`
+                    : `Estimasi acuan sangu: ${Math.round(sanguPercentage * 100)}% (basis maks 31T: ${formatCurrency(recommendedSangu)}).`}{" "}
+                  Dapat disesuaikan jika muatan &gt; 31 ton.
+                </span>
+              </div>
+            </div>
+          </div>
+
           {/* Live Calculation Preview Card */}
           <div className="space-y-2 rounded-xl border border-primary/20 bg-primary/5 p-3.5">
             <div className="flex items-center justify-between">
@@ -396,7 +514,10 @@ export function TripFormDialog({ rateReferences }: TripFormDialogProps) {
                 <span>Kalkulasi Otomatis (Live)</span>
               </div>
               <Badge variant="outline" className="py-0 text-[10px] font-normal">
-                Sangu {Math.round(sanguPercentage * 100)}% (Maks 31 Ton)
+                {selectedRate?.defaultSangu &&
+                parseFloat(selectedRate.defaultSangu) > 0
+                  ? "UJ Standar Pabrik"
+                  : `Sangu ${Math.round(sanguPercentage * 100)}% (Maks 31 Ton)`}
               </Badge>
             </div>
 
@@ -411,7 +532,7 @@ export function TripFormDialog({ rateReferences }: TripFormDialogProps) {
               </div>
               <div>
                 <span className="block text-[10px] text-muted-foreground">
-                  Sangu Supir
+                  Sangu Supir {isSanguManuallyEdited ? "(Manual)" : "(Acuan)"}
                 </span>
                 <span className="font-mono text-sm font-bold text-amber-600 dark:text-amber-400">
                   {formatCurrency(liveCalc.sangu)}
