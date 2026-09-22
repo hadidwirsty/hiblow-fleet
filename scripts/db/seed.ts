@@ -5,8 +5,8 @@ import dotenv from "dotenv"
 
 dotenv.config({ path: ".env.local" })
 
-import { db, pool } from "./index"
-import { rateReferences, trucks } from "./schema"
+import { db, pool } from "@/db"
+import { rateReferences, trucks } from "@/db/schema"
 
 async function seed() {
   console.log("🌱 Starting seed...")
@@ -32,7 +32,10 @@ async function seed() {
     .onConflictDoNothing()
 
   // 2. Seed rate references from extracted canonical Excel data
-  const ratesJsonPath = path.resolve(import.meta.dirname, "./data/rates.json")
+  const ratesJsonPath = path.resolve(
+    import.meta.dirname,
+    "../../db/data/rates.json"
+  )
   if (fs.existsSync(ratesJsonPath)) {
     console.log("🗺️ Seeding rate references from rates.json...")
     const ratesData = JSON.parse(fs.readFileSync(ratesJsonPath, "utf-8"))

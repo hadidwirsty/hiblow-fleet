@@ -5,7 +5,7 @@ import * as XLSX from "xlsx"
 
 dotenv.config({ path: ".env.local" })
 
-import { db, pool } from "../db/index"
+import { db, pool } from "@/db"
 import {
   expenses,
   profitShares,
@@ -13,7 +13,7 @@ import {
   rateReferences,
   trips,
   trucks,
-} from "../db/schema"
+} from "@/db/schema"
 
 const csvDir = path.resolve("./docs/csv")
 const historyJsonPath = path.resolve("./db/data/history.json")

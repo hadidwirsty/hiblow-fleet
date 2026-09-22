@@ -5,8 +5,8 @@ import dotenv from "dotenv"
 
 dotenv.config({ path: ".env.local" })
 
-import { db, pool } from "../db/index"
-import { rateReferences, trips } from "../db/schema"
+import { db, pool } from "@/db"
+import { rateReferences, trips } from "@/db/schema"
 import { eq, isNotNull } from "drizzle-orm"
 
 async function clearRates() {

@@ -2,8 +2,8 @@ import dotenv from "dotenv"
 
 dotenv.config({ path: ".env.local" })
 
-import { db, pool } from "./index"
-import { user, account, session, verification } from "./schema"
+import { db, pool } from "@/db"
+import { account, session, user, verification } from "@/db/schema"
 import { auth } from "@/lib/auth"
 
 async function seedUsers() {

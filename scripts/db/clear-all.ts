@@ -4,14 +4,14 @@ import dotenv from "dotenv"
 
 dotenv.config({ path: ".env.local" })
 
-import { db, pool } from "../db/index"
+import { db, pool } from "@/db"
 import {
   expenses,
   maintenanceReminders,
   profitShares,
   profitSharingPeriods,
   trips,
-} from "../db/schema"
+} from "@/db/schema"
 
 async function clearAllTransactionalData() {
   console.log("🧹 Memulai proses pembersihan data operasional & finansial...")

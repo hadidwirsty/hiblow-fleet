@@ -5,14 +5,14 @@ import dotenv from "dotenv"
 
 dotenv.config({ path: ".env.local" })
 
-import { db, pool } from "./index"
+import { db, pool } from "@/db"
 import {
   expenses,
   profitShares,
   profitSharingPeriods,
   trips,
   trucks,
-} from "./schema"
+} from "@/db/schema"
 
 interface RawTrip {
   truckId: string
@@ -90,7 +90,7 @@ async function importHistory() {
 
   const historyJsonPath = path.resolve(
     import.meta.dirname,
-    "./data/history.json"
+    "../../db/data/history.json"
   )
   if (!fs.existsSync(historyJsonPath)) {
     throw new Error(`Data file not found at ${historyJsonPath}`)
