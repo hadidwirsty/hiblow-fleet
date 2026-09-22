@@ -8,9 +8,7 @@ import {
   RiTruckLine,
 } from "@remixicon/react"
 
-import { ChartAreaInteractive } from "@/components/chart-area-interactive"
 import { DataTable } from "@/components/data-table"
-import { SectionCards } from "@/components/section-cards"
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import {
@@ -21,7 +19,9 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { prepareRouteChartData } from "@/domain/route-trend"
+import { DashboardKpiCards } from "@/features/dashboard/dashboard-kpi-cards"
 import { DashboardRouteChart } from "@/features/dashboard/dashboard-route-chart"
+import { DashboardTripChart } from "@/features/dashboard/dashboard-trip-chart"
 import {
   getDailyTripChart,
   getDashboardKPIs,
@@ -106,11 +106,11 @@ export default async function DashboardPage({
       </div>
 
       {/* 4 Metric Cards */}
-      <SectionCards kpis={kpis} truckBreakdown={truckBreakdown} />
+      <DashboardKpiCards kpis={kpis} truckBreakdown={truckBreakdown} />
 
       {/* Interactive Performance Chart */}
       <div className="px-4 lg:px-6">
-        <ChartAreaInteractive data={chartData} />
+        <DashboardTripChart data={chartData} />
       </div>
 
       {/* Top Routes Widget */}

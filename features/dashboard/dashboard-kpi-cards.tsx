@@ -15,12 +15,17 @@ import type {
   TruckBreakdown,
 } from "@/features/dashboard/dashboard.queries"
 
-export interface SectionCardsProps {
+export interface DashboardKpiCardsProps {
   kpis: DashboardKPIs
   truckBreakdown: TruckBreakdown[]
 }
 
-export function SectionCards({ kpis, truckBreakdown }: SectionCardsProps) {
+export type SectionCardsProps = DashboardKpiCardsProps
+
+export function DashboardKpiCards({
+  kpis,
+  truckBreakdown,
+}: DashboardKpiCardsProps) {
   // Omset calculation
   const omsetDiff = kpis.totalOmset - kpis.previousOmset
   const omsetPct =
@@ -241,3 +246,5 @@ export function SectionCards({ kpis, truckBreakdown }: SectionCardsProps) {
     </div>
   )
 }
+
+export { DashboardKpiCards as SectionCards }

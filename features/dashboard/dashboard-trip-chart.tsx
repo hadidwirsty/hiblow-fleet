@@ -20,9 +20,11 @@ import {
 import { cn } from "@/lib/utils"
 import type { ChartDataPoint } from "@/features/dashboard/dashboard.queries"
 
-export interface ChartAreaInteractiveProps {
+export interface DashboardTripChartProps {
   data: ChartDataPoint[]
 }
+
+export type ChartAreaInteractiveProps = DashboardTripChartProps
 
 const chartConfig = {
   trips: {
@@ -38,7 +40,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function ChartAreaInteractive({ data = [] }: ChartAreaInteractiveProps) {
+export function DashboardTripChart({ data = [] }: DashboardTripChartProps) {
   const isMobile = useIsMobile()
   const [selectedRange, setSelectedRange] = React.useState<string | null>(null)
   const timeRange = selectedRange ?? (isMobile ? "7d" : "30d")
@@ -239,3 +241,5 @@ export function ChartAreaInteractive({ data = [] }: ChartAreaInteractiveProps) {
     </Card>
   )
 }
+
+export { DashboardTripChart as ChartAreaInteractive }
