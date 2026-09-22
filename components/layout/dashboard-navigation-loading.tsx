@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from "react"
 import { usePathname, useSearchParams } from "next/navigation"
 
-import { GlobalLoadingOverlay } from "@/components/global-loading-overlay"
+import { GlobalLoadingOverlay } from "@/components/layout/global-loading-overlay"
 
 function DashboardNavigationLoadingContent() {
   const pathname = usePathname()

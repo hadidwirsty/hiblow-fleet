@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation"
 import type { CSSProperties, ReactNode } from "react"
 
-import { AppSidebar } from "@/components/app-sidebar"
-import { DashboardNavigationLoading } from "@/components/dashboard-navigation-loading"
-import { SiteHeader } from "@/components/site-header"
+import { AppSidebar } from "@/components/layout/app-sidebar"
+import { DashboardNavigationLoading } from "@/components/layout/dashboard-navigation-loading"
+import { SiteHeader } from "@/components/layout/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { isAdmin } from "@/lib/rbac"
 import { getCurrentSession } from "@/lib/session"

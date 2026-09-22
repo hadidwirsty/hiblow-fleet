@@ -7,7 +7,7 @@ import {
   RiTruckLine,
 } from "@remixicon/react"
 
-import { ModeToggle } from "@/components/mode-toggle"
+import { ModeToggle } from "@/components/layout/mode-toggle"
 import { LoginForm } from "@/features/auth/login-form"
 
 export const metadata: Metadata = {

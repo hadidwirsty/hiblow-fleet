@@ -20,7 +20,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { GlobalLoadingOverlay } from "@/components/global-loading-overlay"
+import { GlobalLoadingOverlay } from "@/components/layout/global-loading-overlay"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { LoginWelcomeDialog } from "@/features/auth/login-welcome-dialog"
