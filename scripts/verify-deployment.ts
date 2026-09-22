@@ -1,6 +1,6 @@
 import dotenv from "dotenv"
 
-import { validateDeploymentEnv } from "../domain/deployment/env-validator"
+import { validateDeploymentEnv } from "../lib/deployment/env-validator"
 
 dotenv.config({ path: ".env.local" })
 

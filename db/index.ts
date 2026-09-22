@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/node-postgres"
 import { Pool } from "pg"
 
-import { resolvePoolConfig } from "@/domain/database/pool-config"
+import { resolvePoolConfig } from "@/db/pool-config"
 import * as schema from "./schema"
 
 const connectionString =
