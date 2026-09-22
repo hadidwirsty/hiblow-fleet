@@ -83,28 +83,28 @@ hiblow-fleet/
 │   ├── layout.tsx                      # Root layout, ThemeProvider, Toaster, GlobalLoadingOverlay
 │   └── page.tsx                        # Root redirect -> /dashboard (atau /login / /profit-sharing)
 ├── components/                         # Shared & UI Components
+│   ├── layout/                         # Shell navigasi & layout aplikasi
+│   │   ├── app-sidebar.tsx             # Sidebar navigasi adaptif RBAC & branding logo
+│   │   ├── site-header.tsx             # Header atas (breadcrumb, theme toggle, user badge)
+│   │   ├── sidebar-nav-main.tsx        # Menu utama navigasi sidebar
+│   │   ├── sidebar-nav-documents.tsx   # Navigasi dokumen & referensi
+│   │   ├── sidebar-nav-secondary.tsx   # Navigasi sekunder sidebar
+│   │   ├── sidebar-nav-user.tsx        # User dropdown profile & logout
+│   │   ├── dashboard-navigation-loading.tsx # Indikator loading transisi navigasi dasbor
+│   │   ├── global-loading-overlay.tsx  # Overlay loading global dengan truck spinner
+│   │   ├── mode-toggle.tsx             # Dark / light switcher
+│   │   └── theme-provider.tsx          # Wrapper next-themes provider
 │   ├── ui/                             # shadcn component primitives
+│   │   ├── __tests__/
+│   │   │   └── responsive-dialog.test.ts # Test responsive dialog/drawer
 │   │   ├── avatar.tsx, badge.tsx, button.tsx, card.tsx, chart.tsx, checkbox.tsx
 │   │   ├── command.tsx, dialog.tsx, drawer.tsx, dropdown-menu.tsx, input-group.tsx
 │   │   ├── input.tsx, label.tsx, popover.tsx, progress.tsx, responsive-dialog.tsx
 │   │   ├── select.tsx, separator.tsx, sheet.tsx, sidebar.tsx, skeleton.tsx
 │   │   ├── sonner.tsx, table.tsx, tabs.tsx, textarea.tsx, toggle-group.tsx
 │   │   ├── toggle.tsx, tooltip.tsx, truck-spinner.tsx
-│   ├── app-sidebar.tsx                 # Sidebar navigasi adaptif RBAC & branding 3D logo
-│   ├── site-header.tsx                 # Header atas (breadcrumb, theme toggle, user badge)
-│   ├── data-table.tsx                  # Reusable TanStack data table
-│   ├── chart-area-interactive.tsx      # Grafik ritase harian 2 unit truk
-│   ├── section-cards.tsx               # 4 KPI cards dashboard
-│   ├── nav-main.tsx                    # Menu utama navigasi sidebar
-│   ├── nav-documents.tsx               # Navigasi dokumen & referensi
-│   ├── nav-secondary.tsx               # Navigasi sekunder sidebar
-│   ├── nav-user.tsx                    # User dropdown profile & logout
-│   ├── dashboard-navigation-loading.tsx# Indikator loading transisi navigasi dasbor
-│   ├── global-loading-overlay.tsx      # Overlay loading global dengan truck spinner
-│   ├── mode-toggle.tsx                 # Dark / light switcher
-│   └── theme-provider.tsx              # Wrapper next-themes provider
+│   └── data-table.tsx                  # Reusable TanStack data table
 ├── db/                                 # Database Layer (Drizzle ORM)
-│   ├── index.ts                        # Drizzle connection & pooled connection export
 │   ├── schema/                         # Schema definition per modul
 │   │   ├── index.ts                    # Re-export seluruh schema
 │   │   ├── trucks.ts                   # Master unit truk (W8187UA & H8133OF)
@@ -118,67 +118,97 @@ hiblow-fleet/
 │   ├── data/
 │   │   ├── rates.json                  # Data ekstraksi acuan 289 rute dari Excel
 │   │   └── history.json                # Data riwayat transaksi awal
-│   ├── seed.ts                         # Seeding trucks & rate references
-│   ├── seed-users.ts                   # Seeding user admin & partner (Hafidz, Hadid, Alfiah)
-│   └── import-history.ts               # Impor data historis transaksi dari Excel
-├── domain/                             # Pure Domain Engine (Zero I/O, 100% Testable)
+│   ├── __tests__/
+│   │   └── pool-config.test.ts         # Test resolver PostgreSQL pool connection
+│   ├── index.ts                        # Drizzle connection & pooled connection export
+│   └── pool-config.ts                  # Resolver config connection pool (Neon SSL vs Local)
+├── domain/                             # Pure Domain Engine (Zero I/O, 100% Pure Functions)
 │   ├── calculators/
+│   │   ├── __tests__/                  # Co-located calculator unit tests
+│   │   │   ├── omset.test.ts           # Test formula omset (rate * tonase)
+│   │   │   ├── sangu.test.ts           # Test formula sangu supir (pembulatan Rp 1.000)
+│   │   │   ├── trip-profit.test.ts     # Test laba bersih surat jalan & potongan khusus
+│   │   │   └── profit-sharing.test.ts  # Test laba tutup buku & dividen pemodal
 │   │   ├── omset.ts                    # Kalkulasi omset (rate * tonase)
 │   │   ├── sangu.ts                    # Kalkulasi sangu supir (pembulatan kelipatan Rp 1.000)
 │   │   ├── trip-profit.ts              # Kalkulasi laba bersih surat jalan & potongan khusus
-│   │   └── profit-sharing.ts           # Kalkulasi laba tutup buku & dividen pemodal
-│   ├── database/
-│   │   └── pool-config.ts              # Resolver config connection pool (Neon SSL vs Local)
-│   ├── deployment/
-│   │   └── env-validator.ts            # Validasi environment variable deployment
-│   ├── maintenance.ts                  # Logika status jatuh tempo pemeliharaan (overdue, due_soon, ok)
-│   ├── route-trend.ts                  # Transformasi data grafik top rute & truncate label
+│   │   ├── profit-sharing.ts           # Kalkulasi laba tutup buku & dividen pemodal
+│   │   └── index.ts
+│   ├── __tests__/                      # Co-located pure domain logic tests
+│   │   ├── expense-category.test.ts    # Test transformasi breakdown pengeluaran
+│   │   ├── investor-personalization.test.ts # Test ekstraksi dividen mitra
+│   │   ├── maintenance.test.ts         # Test logika status jatuh tempo servis
+│   │   └── route-trend.test.ts         # Test transformasi grafik top rute
 │   ├── expense-category.ts             # Transformasi breakdown pengeluaran & color tokens
 │   ├── investor-personalization.ts     # Ekstraksi dividen investor spesifik (extractMyShares)
-│   └── __tests__/                      # 35 file Vitest suite untuk domain logic, queries, actions, schema
-├── features/                           # Vertical Feature Slices
-│   ├── auth/                           # login-form.tsx, login-welcome-dialog.tsx
-│   ├── dashboard/                      # dashboard.queries.ts, dashboard-route-chart.tsx
-│   ├── trips/                          # trips.actions.ts, trips.queries.ts, trips.schema.ts,
-│   │                                   # trips.export.ts, trips-export-button.tsx, trips-table.tsx,
-│   │                                   # trip-form-dialog.tsx, trip-destination-combobox.tsx,
-│   │                                   # trip-fee-status-dialog.tsx, trip-mobile-card.tsx, trips-summary.tsx
-│   ├── expenses/                       # expenses.actions.ts, expenses.queries.ts, expenses.schema.ts,
-│   │                                   # expenses.export.ts, expenses-export-button.tsx, expenses-table.tsx,
-│   │                                   # expense-form-dialog.tsx, expenses-category-chart.tsx,
-│   │                                   # expense-mobile-card.tsx, expenses-summary.tsx
-│   ├── rates/                          # rates.actions.ts, rates.queries.ts, rates.schema.ts,
-│   │                                   # rates-table.tsx, rate-form-dialog.tsx, rate-mobile-card.tsx, rates-summary.tsx
-│   ├── profit-sharing/                 # profit-sharing.actions.ts, profit-sharing.queries.ts, profit-sharing.schema.ts,
-│   │                                   # profit-sharing.export.ts, period-wizard-dialog.tsx, period-card.tsx,
-│   │                                   # period-detail-sheet.tsx, partner-profit-sharing-view.tsx, profit-sharing-empty-state.tsx
-│   └── maintenance/                    # maintenance.actions.ts, maintenance.queries.ts, maintenance.schema.ts,
-│                                       # maintenance-reminders-widget.tsx
+│   ├── maintenance.ts                  # Logika status jatuh tempo pemeliharaan (overdue, due_soon, ok)
+│   └── route-trend.ts                  # Transformasi data grafik top rute & truncate label
+├── features/                           # Vertical Feature Slices (Co-located tests)
+│   ├── auth/
+│   │   ├── __tests__/                  # auth-login.test.ts
+│   │   ├── login-form.tsx
+│   │   └── login-welcome-dialog.tsx
+│   ├── dashboard/
+│   │   ├── __tests__/                  # dashboard-queries.test.ts
+│   │   ├── dashboard-kpi-cards.tsx     # 4 KPI cards ringkasan dasbor
+│   │   ├── dashboard-trip-chart.tsx    # Grafik area interaktif ritase harian 2 armada
+│   │   ├── dashboard-route-chart.tsx   # Grafik horizontal bar top rute
+│   │   └── dashboard.queries.ts
+│   ├── trips/
+│   │   ├── __tests__/                  # trips-queries.test.ts, trips-schema.test.ts,
+│   │   │                               # trips-export.test.ts, trips-fee-actions.test.ts,
+│   │   │                               # trip-mobile-card.test.ts, trip-form-calculations.test.ts
+│   │   ├── trips.actions.ts, trips.queries.ts, trips.schema.ts, trips.export.ts
+│   │   ├── trips-export-button.tsx, trips-table.tsx, trips-summary.tsx
+│   │   ├── trip-form-dialog.tsx, trip-destination-combobox.tsx, trip-fee-status-dialog.tsx, trip-mobile-card.tsx
+│   ├── expenses/
+│   │   ├── __tests__/                  # expenses-actions.test.ts, expenses-queries.test.ts,
+│   │   │                               # expenses-schema.test.ts, expenses-export.test.ts,
+│   │   │                               # expenses-summary.test.ts, expense-mobile-card.test.ts
+│   │   ├── expenses.actions.ts, expenses.queries.ts, expenses.schema.ts, expenses.export.ts
+│   │   ├── expenses-export-button.tsx, expenses-table.tsx, expenses-summary.tsx
+│   │   ├── expense-form-dialog.tsx, expenses-category-chart.tsx, expense-mobile-card.tsx
+│   ├── rates/
+│   │   ├── __tests__/                  # rates-actions.test.ts, rates-queries.test.ts,
+│   │   │                               # rates-schema.test.ts, rate-mobile-card.test.ts
+│   │   ├── rates.actions.ts, rates.queries.ts, rates.schema.ts
+│   │   ├── rates-table.tsx, rate-form-dialog.tsx, rate-mobile-card.tsx, rates-summary.tsx
+│   ├── profit-sharing/
+│   │   ├── __tests__/                  # profit-sharing-actions.test.ts, profit-sharing-queries.test.ts,
+│   │   │                               # profit-sharing-schema.test.ts, profit-sharing-export.test.ts
+│   │   ├── profit-sharing.actions.ts, profit-sharing.queries.ts, profit-sharing.schema.ts, profit-sharing.export.ts
+│   │   ├── partner-profit-sharing-view.tsx, period-card.tsx, period-detail-sheet.tsx, period-wizard-dialog.tsx, profit-sharing-empty-state.tsx
+│   └── maintenance/
+│       ├── __tests__/                  # maintenance-actions.test.ts
+│       ├── maintenance.actions.ts, maintenance.queries.ts, maintenance.schema.ts
+│       └── maintenance-reminders-widget.tsx
 ├── hooks/                              # Custom React Hooks (use-mobile.ts)
 ├── lib/                                # Shared Utilities & Server Helper
+│   ├── deployment/
+│   │   ├── __tests__/                  # env-validator.test.ts
+│   │   └── env-validator.ts            # Validasi environment variable deployment
+│   ├── export/                         # Helper export data: excel-builder.ts, csv-builder.ts, download.ts
+│   ├── __tests__/                      # csv-builder.test.ts, excel-builder.test.ts, rbac.test.ts, rbac-redirect.test.ts, utils.test.ts
 │   ├── auth.ts                         # Instance Better Auth server
 │   ├── auth-client.ts                  # Client Better Auth hook (useSession, signIn, signOut)
 │   ├── session.ts                      # Helper getCurrentSession() server-side
 │   ├── rbac.ts                         # Role checking (isAdmin, isPartner, assertAdmin, determineRedirectPath)
-│   ├── utils.ts                        # cn(), formatCurrency(), formatDate(), number helpers
-│   ├── export/                         # Helper export data: excel-builder.ts, csv-builder.ts, download.ts
-│   └── __tests__/                      # 4 file Vitest suite untuk lib (csv, excel, rbac, utils)
+│   └── utils.ts                        # cn(), formatCurrency(), formatDate(), number helpers
 ├── proxy.ts                            # Next.js request proxy / middleware untuk session check & role guard
 ├── public/                             # Aset statis (logo_dark.png, logo_light.png, background, icons)
-├── scripts/
-│   ├── sync-csv-to-database.ts         # Script sinkronisasi CSV data ke database
+├── scripts/                            # Runnable CLI & Maintenance Scripts
+│   ├── db/
+│   │   ├── seed.ts                     # Seeding trucks & rate references
+│   │   ├── seed-users.ts               # Seeding user admin & partner
+│   │   ├── import-history.ts           # Impor data historis transaksi dari Excel
+│   │   ├── sync-csv.ts                 # Sinkronisasi CSV data docs/csv ke database
+│   │   ├── clear-rates.ts              # Pengosongan master tarif
+│   │   └── clear-all.ts                # Pengosongan transaksi operasional
 │   └── verify-deployment.ts            # Script verifikasi environment variable sebelum deploy
 ├── docs/                               # Dokumentasi Blueprint, Specs, Plans, CSV, PDF & References
-│   ├── DEPLOYMENT_GUIDE.md             # Panduan deployment Vercel + Neon
-│   ├── csv/                            # 9 file CSV ekstraksi spreadsheet historis
-│   ├── plans/                          # 13 implementation plans
-│   ├── specs/                          # 3 architectural specifications
-│   ├── pdf/                            # 4 dokumen PDF ringkasan proyek
-│   └── references/
-│       └── PERHITUNGAN HIBLOW HW Trans.xlsx # File Excel master referensi bisnis
 ├── docker-compose.yml                  # PostgreSQL 17 lokal container
 ├── drizzle.config.ts                   # Drizzle Kit config
-├── vitest.config.ts                    # Vitest configuration
+├── vitest.config.ts                    # Vitest configuration (include: ["**/*.test.ts", "**/*.test.tsx"])
 └── package.json
 ```
 
@@ -302,7 +332,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
   ```bash
   pnpm typecheck
   ```
-- **Menjalankan Test Suite (Vitest - 39 Files, 171 Tests):**
+- **Menjalankan Test Suite (Vitest - 39 Files, 176 Tests):**
   ```bash
   pnpm test
   pnpm test:watch
