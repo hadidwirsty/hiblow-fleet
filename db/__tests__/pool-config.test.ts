@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { resolvePoolConfig } from "../database/pool-config"
+import { resolvePoolConfig } from "@/db/pool-config"
 
 describe("resolvePoolConfig", () => {
   it("enables SSL with rejectUnauthorized: false when connecting to Neon cloud", () => {

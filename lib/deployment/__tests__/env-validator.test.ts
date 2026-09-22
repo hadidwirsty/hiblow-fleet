@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { validateDeploymentEnv } from "../deployment/env-validator"
+import { validateDeploymentEnv } from "@/lib/deployment/env-validator"
 
 describe("validateDeploymentEnv", () => {
   const validEnv = {
