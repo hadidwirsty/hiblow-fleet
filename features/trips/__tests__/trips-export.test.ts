@@ -11,7 +11,7 @@ describe("trips.export", () => {
     {
       id: "trip-uuid-1",
       truckId: "W8187UA",
-      orderNumber: 105,
+      orderNumber: "105",
       orderDate: "2025-09-01",
       unloadingDate: "2025-09-02",
       rateReferenceId: null,
@@ -55,7 +55,7 @@ describe("trips.export", () => {
 
     expect(data.rows).toHaveLength(1)
     const row = data.rows[0]
-    expect(row[0]).toBe(105) // No order
+    expect(row[0]).toBe("105") // No order
     expect(row[1]).toBe("W 8187 UA") // Formatted plate
     expect(row[2]).toBe("2025-09-01") // Order date
     expect(row[3]).toBe("2025-09-02") // Unloading date

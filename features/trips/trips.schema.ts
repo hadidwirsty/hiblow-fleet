@@ -4,7 +4,9 @@ export const createTripSchema = z.object({
   truckId: z.enum(["W8187UA", "H8133OF"], {
     message: "Pilih unit truk yang valid (W8187UA / H8133OF)",
   }),
-  orderNumber: z.number().int().positive({ message: "Nomor order harus > 0" }),
+  orderNumber: z.coerce
+    .string()
+    .min(1, "Nomor surat jalan / order wajib diisi"),
   orderDate: z.string().min(1, "Tanggal order wajib diisi"),
   unloadingDate: z.string().optional().nullable(),
   rateReferenceId: z.string().uuid().optional().nullable(),
@@ -13,10 +15,19 @@ export const createTripSchema = z.object({
   ratePerTon: z
     .string()
     .refine((v) => parseFloat(v) > 0, "Tarif harus lebih dari 0"),
-  loadedTonnage: z.string().optional().nullable(),
+  loadedTonnage: z
+    .string()
+    .optional()
+    .nullable()
+    .refine((v) => !v || parseFloat(v) > 0, "Tonase muat harus lebih dari 0"),
   unloadedTonnage: z
     .string()
-    .refine((v) => parseFloat(v) > 0, "Tonase bongkar harus lebih dari 0"),
+    .optional()
+    .nullable()
+    .refine(
+      (v) => !v || parseFloat(v) > 0,
+      "Tonase bongkar harus lebih dari 0"
+    ),
   omset: z.string().min(1, "Omset harus terhitung"),
   sangu: z
     .string()
@@ -54,3 +65,9 @@ export const updateTripFeeStatusSchema = z.object({
 })
 
 export type UpdateTripFeeStatusInput = z.infer<typeof updateTripFeeStatusSchema>
+
+export const updateTripSchema = createTripSchema.extend({
+  id: z.string().uuid("Trip ID harus berupa UUID yang valid"),
+})
+
+export type UpdateTripInput = z.infer<typeof updateTripSchema>

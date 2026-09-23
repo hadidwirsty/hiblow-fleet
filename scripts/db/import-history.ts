@@ -16,7 +16,7 @@ import {
 
 interface RawTrip {
   truckId: string
-  orderNumber: number
+  orderNumber: string
   orderDate: string
   unloadingDate: string | null
   destinationCity: string
@@ -134,7 +134,10 @@ async function importHistory() {
   console.log(`📦 Importing ${rawData.trips.length} trips...`)
   const batchSize = 50
   for (let i = 0; i < rawData.trips.length; i += batchSize) {
-    const batch = rawData.trips.slice(i, i + batchSize)
+    const batch = rawData.trips.slice(i, i + batchSize).map((t) => ({
+      ...t,
+      orderNumber: String(t.orderNumber),
+    }))
     await db.insert(trips).values(batch)
   }
   console.log(`✅ Successfully imported ${rawData.trips.length} trips!`)

@@ -1,4 +1,5 @@
-import { RiCalendarLine } from "@remixicon/react"
+import type { Metadata } from "next"
+import { RiTruckLine } from "@remixicon/react"
 
 import { Badge } from "@/components/ui/badge"
 import {
@@ -7,8 +8,17 @@ import {
   listTrips,
 } from "@/features/trips/trips.queries"
 import { TripFormDialog } from "@/features/trips/trip-form-dialog"
+import { TripsExportButton } from "@/features/trips/trips-export-button"
 import { TripsSummary } from "@/features/trips/trips-summary"
 import { TripsTable } from "@/features/trips/trips-table"
+
+export const metadata: Metadata = {
+  title: "Pencatatan Ritase — HW Trans Fleet",
+  description:
+    "Rekapitulasi surat jalan semen curah hi-blow, tagihan omset, sangu supir, dan laba operasional armada HW Trans",
+}
+
+export const dynamic = "force-dynamic"
 
 interface TripsPageProps {
   searchParams: Promise<{
@@ -43,17 +53,16 @@ export default async function TripsPage({ searchParams }: TripsPageProps) {
 
   return (
     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-      {/* Page Title & Action Controls Bar */}
+      {/* Page Header */}
       <div className="flex flex-col gap-4 px-4 sm:flex-row sm:items-center sm:justify-between lg:px-6">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
+            <div className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <RiTruckLine className="size-4" />
+            </div>
             <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
               Pencatatan Ritase
             </h1>
-            <span className="hidden items-center gap-1 rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground sm:inline-flex">
-              <RiCalendarLine className="size-3" />
-              Juni 2026
-            </span>
             <Badge variant="outline" className="text-xs font-normal">
               {tripsData.length} Surat Jalan
             </Badge>
@@ -64,18 +73,38 @@ export default async function TripsPage({ searchParams }: TripsPageProps) {
           </p>
         </div>
 
-        {/* Modal Dialog Form Tambah Ritase Baru */}
-        <div className="flex w-full items-center gap-2.5 sm:w-auto">
+        {/* Action Controls Group: Ekspor & Tambah Ritase */}
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-2.5">
           <TripFormDialog rateReferences={rateRefs} />
+          <TripsExportButton trips={tripsData} />
         </div>
       </div>
 
-      {/* KPI Summary Cards */}
-      <TripsSummary summary={summary} />
+      {/* Main Content Area */}
+      <div className="space-y-6 px-4 lg:px-6">
+        {/* KPI Metric Cards */}
+        <TripsSummary summary={summary} />
 
-      {/* Interactive Trips Table */}
-      <div className="px-4 lg:px-6">
-        <TripsTable trips={tripsData} initialFilter={filter} />
+        {/* Trips Data Table Section */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-semibold tracking-tight text-foreground">
+                Daftar Surat Jalan & Ritase
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                Gunakan pencarian untuk menyaring nomor surat jalan, kota, atau
+                nama tujuan bongkar
+              </p>
+            </div>
+          </div>
+
+          <TripsTable
+            trips={tripsData}
+            rateReferences={rateRefs}
+            initialFilter={filter}
+          />
+        </div>
       </div>
     </div>
   )

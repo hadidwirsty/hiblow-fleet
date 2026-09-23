@@ -66,4 +66,39 @@ describe("createTripSchema", () => {
     })
     expect(result.success).toBe(true)
   })
+
+  it("accepts alphanumeric orderNumber like 7911-ZLF-2014002386", () => {
+    const result = createTripSchema.safeParse({
+      truckId: "W8187UA",
+      orderNumber: "7911-ZLF-2014002386",
+      orderDate: "2025-06-10",
+      destinationCity: "Tuban",
+      destinationName: "SI Tuban",
+      ratePerTon: "95000.00",
+      unloadedTonnage: "31.00",
+      omset: "2945000.00",
+      sangu: "1531000.00",
+      profit: "1414000.00",
+    })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.orderNumber).toBe("7911-ZLF-2014002386")
+    }
+  })
+
+  it("rejects empty orderNumber", () => {
+    const result = createTripSchema.safeParse({
+      truckId: "W8187UA",
+      orderNumber: "",
+      orderDate: "2025-06-10",
+      destinationCity: "Tuban",
+      destinationName: "SI Tuban",
+      ratePerTon: "95000.00",
+      unloadedTonnage: "31.00",
+      omset: "2945000.00",
+      sangu: "1531000.00",
+      profit: "1414000.00",
+    })
+    expect(result.success).toBe(false)
+  })
 })

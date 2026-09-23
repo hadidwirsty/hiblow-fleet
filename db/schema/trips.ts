@@ -1,6 +1,5 @@
 import {
   date,
-  integer,
   numeric,
   pgTable,
   text,
@@ -17,7 +16,7 @@ export const trips = pgTable("trips", {
   truckId: varchar("truck_id", { length: 20 })
     .references(() => trucks.id)
     .notNull(),
-  orderNumber: integer("order_number").notNull(),
+  orderNumber: varchar("order_number", { length: 100 }).notNull(),
   orderDate: date("order_date").notNull(),
   unloadingDate: date("unloading_date"), // Kunci pengakuan periode bagi hasil
   rateReferenceId: uuid("rate_reference_id").references(

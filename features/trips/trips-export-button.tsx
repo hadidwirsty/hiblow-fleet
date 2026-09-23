@@ -39,9 +39,9 @@ export function TripsExportButton({ trips, filter }: TripsExportButtonProps) {
       const blob = buildExcelWorkbookBlob({ sheets: [sheetData] })
       const filename = getTripsExportFilename(filter, "xlsx")
       triggerBlobDownload(blob, filename)
-      toast.success(`Laporan ritase berhasil diunduh (${filename})`)
+      toast.success(`Data ritase berhasil diunduh (${filename})`)
     } catch {
-      toast.error("Gagal mengekspor laporan ritase ke Excel")
+      toast.error("Gagal mengekspor data ritase ke Excel")
     } finally {
       setIsExporting(false)
     }
@@ -58,9 +58,9 @@ export function TripsExportButton({ trips, filter }: TripsExportButtonProps) {
       })
       const filename = getTripsExportFilename(filter, "csv")
       triggerTextDownload(csv, filename)
-      toast.success(`Laporan ritase berhasil diunduh (${filename})`)
+      toast.success(`Data ritase berhasil diunduh (${filename})`)
     } catch {
-      toast.error("Gagal mengekspor laporan ritase ke CSV")
+      toast.error("Gagal mengekspor data ritase ke CSV")
     } finally {
       setIsExporting(false)
     }
@@ -74,10 +74,10 @@ export function TripsExportButton({ trips, filter }: TripsExportButtonProps) {
             variant="outline"
             size="sm"
             disabled={!hasData || isExporting}
-            className="h-8 gap-1.5 px-2.5 text-xs shadow-xs"
+            className="h-9 w-full gap-1.5 px-3.5 text-xs font-medium shadow-xs sm:w-auto"
           >
-            <RiDownloadLine className="size-3.5 text-muted-foreground" />
-            <span>Export Data</span>
+            <RiDownloadLine className="size-4 text-muted-foreground" />
+            <span>Ekspor Data</span>
           </Button>
         }
       />
@@ -87,14 +87,14 @@ export function TripsExportButton({ trips, filter }: TripsExportButtonProps) {
           className="flex cursor-pointer items-center gap-2 text-xs"
         >
           <RiFileExcelLine className="size-4 text-emerald-600 dark:text-emerald-400" />
-          <span>Download Excel (.xlsx)</span>
+          <span>Unduh Excel (.xlsx)</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={handleExportCsv}
           className="flex cursor-pointer items-center gap-2 text-xs"
         >
           <RiFileLine className="size-4 text-sky-600 dark:text-sky-400" />
-          <span>Download CSV (.csv)</span>
+          <span>Unduh CSV (.csv)</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

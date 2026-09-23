@@ -185,15 +185,15 @@ export function RateFormDialog({
 
     const derivedClientName =
       clientName ||
-      (originPlant.includes("SBI")
-        ? "SBI"
-        : originPlant.includes("Grobogan") || originPlant.includes("Indocement")
-          ? "Indocement Grobogan"
+      (originPlant.includes("SBI") ||
+      originPlant.toLowerCase().includes("solusi bangun")
+        ? "Solusi Bangun Indonesia (SBI) - Tuban"
+        : originPlant.includes("Grobogan") ||
+            originPlant.toLowerCase().includes("indocement")
+          ? "Indocement"
           : originPlant.includes("Rembang")
-            ? "SI Rembang"
-            : originPlant
-              ? originPlant.split("-")[0].trim()
-              : "SI")
+            ? "Semen Indonesia - Rembang"
+            : "Semen Indonesia - Tuban")
 
     const cleanDefaultSangu = defaultSangu
       ? defaultSangu.endsWith(".")

@@ -1,7 +1,7 @@
 # Project Context: hiblow-fleet
 
 > **Authoritative Context Memory Document**  
-> Terakhir diperbarui via `/scaffold-onboard`: 2026-09-18  
+> Terakhir diperbarui via `/scaffold-onboard`: 2026-09-23  
 > Dokumen ini adalah *single source of truth* (sumber kebenaran tunggal) mengenai tech stack, arsitektur sistem, aturan domain bisnis & formula finansial, skema database, konvensi kode, serta workflow operasional proyek `hiblow-fleet`. Seluruh AI agent dan engineer wajib mematuhi standar yang terdokumentasi di sini.
 
 ---
@@ -10,7 +10,7 @@
 
 - **Nama Proyek:** `hiblow-fleet`
 - **Domain:** Aplikasi Manajemen Operasional Armada & Rekapitulasi Finansial Truk Tronton Tangki Semen Curah (*HI-Blow Truck*).
-- **Latar Belakang Bisnis:** Menggantikan pencatatan manual spreadsheet Excel (`PERHITUNGAN HIBLOW HW Trans.xlsx`) yang dikelola oleh Hadya Wiran Trans (HW Trans) untuk melacak ritase surat jalan, pengeluaran operasional armada, sangu supir, insentif rit, komisi pihak ketiga (*third party DO fee*), jadwal pemeliharaan (servis, KIR, STNK), serta pembagian laba bagi hasil (*profit sharing*) bulanan kepada pemodal/investor.
+- **Latar Belakang Bisnis:** Menggantikan pencatatan manual spreadsheet Excel (`PERHITUNGAN HIBLOW HW Trans.xlsx`) yang dikelola oleh Hadya Wiran Trans (HW Trans) untuk melacak ritase surat jalan, pengeluaran operasional armada, sangu supir (uang jalan riil), insentif rit, komisi pihak ketiga (*third party DO fee*), jadwal pemeliharaan (servis, KIR, STNK), serta pembagian laba bagi hasil (*profit sharing*) bulanan kepada pemodal/investor.
 - **Armada (Static Fleet):**
   - Unit 1: `W8187UA` (Hino 500 Tronton Hi-Blow)
   - Unit 2: `H8133OF` (Hino 500 Tronton Hi-Blow)
@@ -38,8 +38,9 @@
   - **Tailwind CSS v4** (`@tailwindcss/postcss: ^4`, `tw-animate-css: ^1.4.0`, `tailwind-merge: ^3.6.0`, `clsx: ^2.1.1`)
   - **Palette Warna:** Emerald Theme (`emerald-600` / `emerald-500` accents) dengan dukungan Dark Mode & Light Mode adaptif.
   - **Base UI & Radix Primitives:** `@base-ui/react: ^1.7.0`
-  - **Komponen:** `shadcn/ui` (Button, Input, InputGroup, Card, Badge, Dialog, ResponsiveDialog, Drawer, Sheet, Sidebar, Table, Tabs, Popover, Command, Checkbox, Progress, Skeleton, Tooltip, dll.)
-  - **Animasi Khusus:** `TruckSpinner` (`components/ui/truck-spinner.tsx`), `GlobalLoadingOverlay` (`components/global-loading-overlay.tsx`), `DashboardNavigationLoading` (`components/dashboard-navigation-loading.tsx`), `LoginWelcomeDialog` (`features/auth/login-welcome-dialog.tsx`).
+  - **Komponen:** `shadcn/ui` (Button, Input, InputGroup, Card, Badge, Dialog, ResponsiveDialog, Drawer, Sheet, Sidebar, Table, Tabs, Popover, Command, Checkbox, Progress, Skeleton, Tooltip, Breadcrumb, Empty, dll.)
+  - **Komponen Shell & Layout:** Terpusat di `components/layout/` (`AppSidebar`, `SiteHeader`, `SidebarNavMain`, `SidebarNavDocuments`, `SidebarNavSecondary`, `SidebarNavUser`, `GlobalLoadingOverlay`, `DashboardNavigationLoading`, `ModeToggle`, `ThemeProvider`).
+  - **Animasi Khusus:** `TruckSpinner` (`components/ui/truck-spinner.tsx`), `GlobalLoadingOverlay` (`components/layout/global-loading-overlay.tsx`), `DashboardNavigationLoading` (`components/layout/dashboard-navigation-loading.tsx`), `LoginWelcomeDialog` (`features/auth/login-welcome-dialog.tsx`).
   - **Ikon:** `@remixicon/react: ^4.9.0` (Remix Icon modern)
   - **Charts:** `recharts: 3.8.0` (Area interactive chart & horizontal bar/donut breakdown)
   - **Notifikasi Toast:** `sonner: ^2.0.8`
@@ -52,7 +53,7 @@
   - **Data Table:** `@tanstack/react-table: ^9.2.4`
   - **Drag and Drop:** `@dnd-kit/core: ^6.3.1`, `@dnd-kit/sortable: ^10.0.0`, `@dnd-kit/modifiers: ^9.0.0`, `@dnd-kit/utilities: ^3.2.2`
 - **Spreadsheet / File Export:** `xlsx: ^0.18.5` + custom CSV builder & Excel builder (`lib/export/`)
-- **Testing Engine:** **Vitest 4.1.11** + `@vitest/coverage-v8: ^4.1.11` (Node environment, path alias `@/*` didukung, 100% pure domain & queries test parity — 39 file test suite, 171 passed tests)
+- **Testing Engine:** **Vitest 4.1.11** + `@vitest/coverage-v8: ^4.1.11` (Node environment, path alias `@/*` didukung, 100% pure domain & queries test parity — **39 file test suite, 176 passed tests**).
 
 ---
 
@@ -83,7 +84,7 @@ hiblow-fleet/
 │   ├── layout.tsx                      # Root layout, ThemeProvider, Toaster, GlobalLoadingOverlay
 │   └── page.tsx                        # Root redirect -> /dashboard (atau /login / /profit-sharing)
 ├── components/                         # Shared & UI Components
-│   ├── layout/                         # Shell navigasi & layout aplikasi
+│   ├── layout/                         # Shell navigasi & layout aplikasi terisolasi
 │   │   ├── app-sidebar.tsx             # Sidebar navigasi adaptif RBAC & branding logo
 │   │   ├── site-header.tsx             # Header atas (breadcrumb, theme toggle, user badge)
 │   │   ├── sidebar-nav-main.tsx        # Menu utama navigasi sidebar
@@ -97,18 +98,18 @@ hiblow-fleet/
 │   ├── ui/                             # shadcn component primitives
 │   │   ├── __tests__/
 │   │   │   └── responsive-dialog.test.ts # Test responsive dialog/drawer
-│   │   ├── avatar.tsx, badge.tsx, button.tsx, card.tsx, chart.tsx, checkbox.tsx
-│   │   ├── command.tsx, dialog.tsx, drawer.tsx, dropdown-menu.tsx, input-group.tsx
-│   │   ├── input.tsx, label.tsx, popover.tsx, progress.tsx, responsive-dialog.tsx
-│   │   ├── select.tsx, separator.tsx, sheet.tsx, sidebar.tsx, skeleton.tsx
-│   │   ├── sonner.tsx, table.tsx, tabs.tsx, textarea.tsx, toggle-group.tsx
-│   │   ├── toggle.tsx, tooltip.tsx, truck-spinner.tsx
+│   │   ├── avatar.tsx, badge.tsx, breadcrumb.tsx, button.tsx, card.tsx, chart.tsx
+│   │   ├── checkbox.tsx, command.tsx, dialog.tsx, drawer.tsx, dropdown-menu.tsx
+│   │   ├── empty.tsx, input-group.tsx, input.tsx, label.tsx, popover.tsx
+│   │   ├── progress.tsx, responsive-dialog.tsx, select.tsx, separator.tsx
+│   │   ├── sheet.tsx, sidebar.tsx, skeleton.tsx, sonner.tsx, table.tsx
+│   │   ├── tabs.tsx, textarea.tsx, toggle-group.tsx, toggle.tsx, tooltip.tsx, truck-spinner.tsx
 │   └── data-table.tsx                  # Reusable TanStack data table
 ├── db/                                 # Database Layer (Drizzle ORM)
 │   ├── schema/                         # Schema definition per modul
 │   │   ├── index.ts                    # Re-export seluruh schema
 │   │   ├── trucks.ts                   # Master unit truk (W8187UA & H8133OF)
-│   │   ├── rate-references.ts          # Master tarif & rute semen (289 rute)
+│   │   ├── rate-references.ts          # Master tarif & rute semen (289 rute, origin_plant, default_sangu)
 │   │   ├── trips.ts                    # Transaksi surat jalan ritase & kalkulasi
 │   │   ├── expenses.ts                 # Transaksi pengeluaran & kategori biaya
 │   │   ├── profit-sharing.ts           # Periode tutup buku & distribusi pemodal
@@ -124,7 +125,7 @@ hiblow-fleet/
 │   └── pool-config.ts                  # Resolver config connection pool (Neon SSL vs Local)
 ├── domain/                             # Pure Domain Engine (Zero I/O, 100% Pure Functions)
 │   ├── calculators/
-│   │   ├── __tests__/                  # Co-located calculator unit tests
+│   │   ├── __tests__/                  # Co-located calculator unit tests (4 files)
 │   │   │   ├── omset.test.ts           # Test formula omset (rate * tonase)
 │   │   │   ├── sangu.test.ts           # Test formula sangu supir (pembulatan Rp 1.000)
 │   │   │   ├── trip-profit.test.ts     # Test laba bersih surat jalan & potongan khusus
@@ -134,7 +135,7 @@ hiblow-fleet/
 │   │   ├── trip-profit.ts              # Kalkulasi laba bersih surat jalan & potongan khusus
 │   │   ├── profit-sharing.ts           # Kalkulasi laba tutup buku & dividen pemodal
 │   │   └── index.ts
-│   ├── __tests__/                      # Co-located pure domain logic tests
+│   ├── __tests__/                      # Co-located pure domain logic tests (4 files)
 │   │   ├── expense-category.test.ts    # Test transformasi breakdown pengeluaran
 │   │   ├── investor-personalization.test.ts # Test ekstraksi dividen mitra
 │   │   ├── maintenance.test.ts         # Test logika status jatuh tempo servis
@@ -198,7 +199,7 @@ hiblow-fleet/
 ├── public/                             # Aset statis (logo_dark.png, logo_light.png, background, icons)
 ├── scripts/                            # Runnable CLI & Maintenance Scripts
 │   ├── db/
-│   │   ├── seed.ts                     # Seeding trucks & rate references
+│   │   ├── seed.ts                     # Seeding trucks & 289 rate references
 │   │   ├── seed-users.ts               # Seeding user admin & partner
 │   │   ├── import-history.ts           # Impor data historis transaksi dari Excel
 │   │   ├── sync-csv.ts                 # Sinkronisasi CSV data docs/csv ke database
@@ -219,18 +220,33 @@ hiblow-fleet/
 Sumber acuan absolut: Workbook Excel `docs/references/PERHITUNGAN HIBLOW HW Trans.xlsx` (Sheet `SI Tarif`, `SBI Tarif`, `Indocement Grobogan Tarif`, `Masuk W8187UA`, `Keluar W8187UA`, `Masuk H8133OF`, `Keluar H8133OF`, `Bagi Hasil`).
 
 ### 4.1 Modul Referensi Tarif (`rate_references`)
-- Menampung master rute pabrik: `SI` (Semen Indonesia Tuban), `SBI` (Semen Bima / Solusi Bangun Indonesia Rembang), dan `Indocement Grobogan`.
-- Menyimpan `rate_per_ton` (tarif dasar per ton), `standard_tonnage` (default 31.00 ton), `sangu_percentage` (rasio sangu supir terhadap omset, misal 0.52 = 52%), dan `has_special_deductions` (true untuk rute Grobogan / PT LJU).
+- **Pabrik Asal Muat (`originPlant`):** Menampung asal pabrik semen dengan 4 pabrik acuan utama:
+  1. `Semen Indonesia (SI) - Tuban`
+  2. `Semen Indonesia (SI) - Rembang`
+  3. `Solusi Bangun Indonesia (SBI) - Tuban`
+  4. `Indocement - Grobogan`
+  *(Sistem mendukung penambahan pabrik asal baru secara fleksibel).*
+- **Format Standar Tampilan Rute:**  
+  `[Pabrik Asal] -> [Kota Tujuan] - [Tujuan Bongkar (Proyek / Batching Plant)]`
+- **Parameter Tarif:**
+  - `rate_per_ton`: Tarif dasar pengangkutan per ton.
+  - `standard_tonnage`: Default 31.00 ton.
+  - `sangu_percentage`: Rasio sangu supir terhadap omset (contoh: 0.52 = 52%).
+  - `default_sangu`: Acuan nominal uang sangu standar untuk rute tersebut.
+  - `has_special_deductions`: Bernilai `true` khusus rute Grobogan / PT LJU.
 
 ### 4.2 Modul Ritase Surat Jalan (`trips`)
 - **Omset (Pendapatan Kotor Ritase):**
   $$\text{Omset} = \text{rate\_per\_ton} \times \text{unloaded\_tonnage}$$
   *(Dibulatkan ke 2 desimal)*
-- **Sangu Supir (Driver Allowance):**
-  $$\text{base\_tonnage} = \min(\text{unloaded\_tonnage}, \text{standard\_tonnage} \ (\text{default } 31.0))$$
-  $$\text{raw\_sangu} = \text{base\_tonnage} \times \text{sangu\_percentage} \times \text{rate\_per\_ton}$$
-  $$\text{sangu} = \operatorname{ROUND}(\text{raw\_sangu} / 1000) \times 1000$$
-  *(Dibulatkan ke kelipatan Rp 1.000 terdekat sesuai aturan pembulatan Excel `ROUND(..., -3)`)*
+- **Sangu Supir (Uang Jalan / Driver Allowance):**
+  - **Estimasi Default Rekomendasi:**
+    $$\text{base\_tonnage} = \min(\text{unloaded\_tonnage}, \text{standard\_tonnage} \ (\text{default } 31.0))$$
+    $$\text{raw\_sangu} = \text{base\_tonnage} \times \text{sangu\_percentage} \times \text{rate\_per\_ton}$$
+    $$\text{rekomendasi\_sangu} = \operatorname{ROUND}(\text{raw\_sangu} / 1000) \times 1000$$
+    *(Dibulatkan ke kelipatan Rp 1.000 terdekat sesuai rumus Excel `ROUND(..., -3)`)*
+  - **Fleksibilitas Uang Sangu (UJ Riil):** Nominal sangu supir pada formulir pencatatan ritase **tidak dikunci (editable)**. Sistem memberikan rekomendasi otomatis saat rute dipilih, namun admin dapat mengubah atau mengetikkan manual nominal UJ riil (misal saat tonase riil > 31 ton atau rute khusus). Nilai tersimpan resmi ke transaksi.
+  - **Kebijakan Biaya Tol (All-in):** Biaya tol sudah termasuk di dalam uang jalan / sangu supir. Tidak ada potongan tol terpisah yang mengurangi laba perusahaan.
 - **Potongan Khusus Rute Grobogan / PT LJU (`hasSpecialDeductions = true`):**
   - Pajak PPh 1%: $\text{tax1Pct} = \text{omset} \times 0.01$
   - Potongan 2% LJU: $\text{deduction2PctLju} = \text{omset} \times 0.02$
@@ -290,7 +306,7 @@ Sumber acuan absolut: Workbook Excel `docs/references/PERHITUNGAN HIBLOW HW Tran
 | Nama Tabel | Deskripsi & Relasi |
 |---|---|
 | `trucks` | Master armada: `id` (PK: `'W8187UA'`, `'H8133OF'`), `plate_number`, `brand_model`, `is_active`, `created_at`. |
-| `rate_references` | Master tarif rute: `id` (UUID), `client_name`, `city`, `destination`, `rate_per_ton`, `standard_tonnage`, `sangu_percentage`, `additional_tonnage_rate`, `has_special_deductions`, `is_active`. |
+| `rate_references` | Master tarif rute: `id` (UUID), `origin_plant`, `client_name`, `city`, `destination`, `rate_per_ton`, `standard_tonnage`, `sangu_percentage`, `default_sangu`, `additional_tonnage_rate`, `has_special_deductions`, `is_active`. |
 | `trips` | Transaksi surat jalan ritase: `id` (UUID), `truck_id` (FK `trucks`), `order_number`, `order_date`, `unloading_date`, `destination_city`, `destination_name`, `rate_per_ton`, `unloaded_tonnage`, `omset`, `sangu`, `profit`, dll. |
 | `expenses` | Pengeluaran truk: `id` (UUID), `truck_id` (FK `trucks`), `expense_date`, `category`, `description`, `amount`, `admin_fee`, `location`, `repair_notes`. |
 | `profit_sharing_periods` | Periode tutup buku: `id` (UUID), `title`, `start_date`, `end_date`, `total_income`, `total_expenses`, `gross_balance`, `manager_commission_rate`, `manager_commission_amount`, `distributable_profit`, `fleet_valuation`, `manager_profit`, `manager_take_home`, `status` (`'draft'` \| `'finalized'`). |
@@ -349,12 +365,14 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
   pnpm db:migrate     # Menjalankan migrasi SQL ke database
   pnpm db:studio      # Buka GUI Drizzle Studio inspector
   ```
-- **Seeding & Sinkronisasi Data:**
+- **Seeding & Sinkronisasi Data (Terpusat di `scripts/db/`):**
   ```bash
-  pnpm db:seed           # Seed unit truk W8187UA/H8133OF & 289 referensi tarif
+  pnpm db:seed           # Seed unit truk W8187UA/H8133OF & 289 referensi tarif (dengan originPlant & defaultSangu)
   pnpm run db:seed-users # Seed user awal: hafidz@hiblow.fleet, hadid@hiblow.fleet, alfiah@hiblow.fleet
   pnpm run db:import-history # Impor riwayat transaksi Excel ke database
   pnpm run db:sync-csv   # Sinkronisasi CSV data docs/csv ke database
+  pnpm run db:clear-rates # Pengosongan master tarif
+  pnpm run db:clear-all   # Pengosongan seluruh transaksi operasional
   ```
 - **Verifikasi Kesiapan Deployment & Build:**
   ```bash

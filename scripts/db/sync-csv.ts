@@ -199,7 +199,7 @@ function parseTripsFromCSV(fileName: string, truckId: string) {
   )
 
   return tripRows.map((r) => {
-    const orderNumber = Number(r[0])
+    const orderNumber = String(r[0])
     const orderDate = parseIndoDate(r[1]) || "2026-08-01"
     const unloadingDate = parseIndoDate(r[2])
     const destinationCity = String(r[3] || "").trim()

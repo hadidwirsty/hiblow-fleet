@@ -29,6 +29,40 @@ interface TripDestinationComboboxProps {
   disabled?: boolean
 }
 
+export function getPlantOriginInfo(
+  originPlant?: string | null,
+  clientName?: string | null
+): { fullName: string; badgeName: string } {
+  const combined = `${originPlant ?? ""} ${clientName ?? ""}`.toLowerCase()
+
+  if (combined.includes("sbi") || combined.includes("solusi bangun")) {
+    return {
+      fullName: "Solusi Bangun Indonesia (SBI) - Tuban",
+      badgeName: "Solusi Bangun Indonesia (SBI) - Tuban",
+    }
+  }
+
+  if (combined.includes("indocement") || combined.includes("grobogan")) {
+    return {
+      fullName: "Indocement - Grobogan",
+      badgeName: "Indocement",
+    }
+  }
+
+  if (combined.includes("rembang")) {
+    return {
+      fullName: "Semen Indonesia (SI) - Rembang",
+      badgeName: "Semen Indonesia - Rembang",
+    }
+  }
+
+  // Default SI Tuban
+  return {
+    fullName: "Semen Indonesia (SI) - Tuban",
+    badgeName: "Semen Indonesia - Tuban",
+  }
+}
+
 export function TripDestinationCombobox({
   rateReferences,
   selectedId,
@@ -42,6 +76,14 @@ export function TripDestinationCombobox({
     [rateReferences, selectedId]
   )
 
+  const selectedPlantInfo = React.useMemo(
+    () =>
+      selectedRef
+        ? getPlantOriginInfo(selectedRef.originPlant, selectedRef.clientName)
+        : null,
+    [selectedRef]
+  )
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
@@ -52,13 +94,11 @@ export function TripDestinationCombobox({
         )}
       >
         <span className="truncate">
-          {selectedRef ? (
+          {selectedRef && selectedPlantInfo ? (
             <span className="flex items-center gap-1.5 truncate">
-              {selectedRef.originPlant && (
-                <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-foreground">
-                  {selectedRef.originPlant}
-                </span>
-              )}
+              <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-foreground">
+                {selectedPlantInfo.fullName}
+              </span>
               <span className="text-muted-foreground">→</span>
               <span className="font-semibold text-foreground">
                 {selectedRef.city}
@@ -76,7 +116,7 @@ export function TripDestinationCombobox({
       </PopoverTrigger>
 
       <PopoverContent
-        className="w-136 max-w-[95vw] p-0 shadow-lg"
+        className="w-(--anchor-width) max-w-[95vw] min-w-[320px] p-0 shadow-lg"
         align="start"
       >
         <Command>
@@ -97,57 +137,119 @@ export function TripDestinationCombobox({
                 const defaultSanguNum = rate.defaultSangu
                   ? parseFloat(rate.defaultSangu)
                   : 0
+                const additionalRateNum = rate.additionalTonnageRate
+                  ? parseFloat(rate.additionalTonnageRate)
+                  : 0
+                const plantInfo = getPlantOriginInfo(
+                  rate.originPlant,
+                  rate.clientName
+                )
 
                 return (
                   <CommandItem
                     key={rate.id}
-                    value={`${rate.originPlant ?? ""} ${rate.city} ${rate.destination} ${rate.clientName}`}
+                    value={`${plantInfo.fullName} ${rate.city} ${rate.destination} ${plantInfo.badgeName}`}
                     onSelect={() => {
                       onSelect(rate)
                       setOpen(false)
                     }}
                     className="flex cursor-pointer items-center justify-between gap-2 rounded-md p-2 text-xs hover:bg-accent"
                   >
-                    <div className="flex min-w-0 flex-col">
-                      <div className="flex items-center gap-1.5 truncate font-medium">
-                        {rate.originPlant && (
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      {/* Desktop / Tablet layout (sm:block hidden) */}
+                      <div className="hidden sm:block">
+                        <div className="flex items-center gap-1.5 truncate font-medium">
                           <span className="shrink-0 font-semibold text-primary">
-                            {rate.originPlant}
+                            {plantInfo.fullName}
                           </span>
-                        )}
-                        <span className="text-[10px] text-muted-foreground">
-                          →
-                        </span>
-                        <span className="font-semibold text-foreground">
-                          {rate.city}
-                        </span>
-                        <span className="text-muted-foreground">-</span>
-                        <span className="truncate">{rate.destination}</span>
+                          <span className="shrink-0 text-[10px] text-muted-foreground">
+                            →
+                          </span>
+                          <span className="shrink-0 font-semibold text-foreground">
+                            {rate.city}
+                          </span>
+                          <span className="shrink-0 text-muted-foreground">
+                            -
+                          </span>
+                          <span className="truncate">{rate.destination}</span>
+                        </div>
+                        <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+                          <Badge
+                            variant="outline"
+                            className="h-4 px-1 py-0 text-[9px] font-normal"
+                          >
+                            {plantInfo.badgeName}
+                          </Badge>
+                          <span>{formatCurrency(rateNum)}/ton</span>
+                          {defaultSanguNum > 0 ? (
+                            <span className="font-medium text-emerald-600 dark:text-emerald-400">
+                              • UJ Acuan: {formatCurrency(defaultSanguNum)}
+                            </span>
+                          ) : (
+                            <span>
+                              • Sangu{" "}
+                              {Math.round(
+                                parseFloat(rate.sanguPercentage) * 100
+                              )}
+                              %
+                            </span>
+                          )}
+                          {additionalRateNum > 0 && (
+                            <span className="font-medium text-sky-600 dark:text-sky-400">
+                              • Lebih Tonase:{" "}
+                              {formatCurrency(additionalRateNum)}/t
+                            </span>
+                          )}
+                          {rate.hasSpecialDeductions && (
+                            <span className="font-medium text-amber-600 dark:text-amber-400">
+                              • Pot. LJU
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-                        <Badge
-                          variant="outline"
-                          className="h-4 px-1 py-0 text-[9px] font-normal"
-                        >
-                          {rate.clientName}
-                        </Badge>
-                        <span>{formatCurrency(rateNum)}/ton</span>
-                        {defaultSanguNum > 0 ? (
-                          <span className="font-medium text-emerald-600 dark:text-emerald-400">
-                            • UJ Acuan: {formatCurrency(defaultSanguNum)}
+
+                      {/* Mobile layout (< sm: flex-col) - jelas & tidak terpotong */}
+                      <div className="flex flex-col gap-0.5 sm:hidden">
+                        <div className="flex items-center justify-between gap-1 text-[11px]">
+                          <span className="truncate font-semibold text-primary">
+                            {plantInfo.fullName}
                           </span>
-                        ) : (
-                          <span>
-                            • Sangu{" "}
-                            {Math.round(parseFloat(rate.sanguPercentage) * 100)}
-                            %
+                          <span className="shrink-0 font-mono font-medium text-foreground">
+                            {formatCurrency(rateNum)}/ton
                           </span>
-                        )}
-                        {rate.hasSpecialDeductions && (
-                          <span className="font-medium text-amber-600 dark:text-amber-400">
-                            • Pot. LJU
+                        </div>
+                        <div className="text-xs font-semibold text-foreground">
+                          <span>{rate.city}</span>
+                          <span className="mx-1 text-muted-foreground">→</span>
+                          <span className="font-normal text-muted-foreground">
+                            {rate.destination}
                           </span>
-                        )}
+                        </div>
+                        <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[10.5px] text-muted-foreground">
+                          {defaultSanguNum > 0 ? (
+                            <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                              UJ Acuan: {formatCurrency(defaultSanguNum)}
+                            </span>
+                          ) : (
+                            <span>
+                              Sangu:{" "}
+                              {Math.round(
+                                parseFloat(rate.sanguPercentage) * 100
+                              )}
+                              %
+                            </span>
+                          )}
+                          {additionalRateNum > 0 && (
+                            <span className="font-medium text-sky-600 dark:text-sky-400">
+                              • Lebih: {formatCurrency(additionalRateNum)}/t
+                            </span>
+                          )}
+                          {rate.hasSpecialDeductions && (
+                            <span className="font-medium text-amber-600 dark:text-amber-400">
+                              • Pot. LJU
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                     {isSelected && (

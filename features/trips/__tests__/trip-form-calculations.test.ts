@@ -131,4 +131,55 @@ describe("Trip form live calculation integration", () => {
     expect(omset).toBe(3410000)
     expect(profitResult.profit).toBe(3410000 - 1650000)
   })
+
+  it("handles non-Indocement fixed third-party fee of Rp 100.000 (SILOG - Mas Wawan)", () => {
+    const ratePerTon = 95000
+    const unloadedTonnage = 31.0
+    const sangu = 1531000
+    const omset = calculateOmset({ ratePerTon, unloadedTonnage })
+    const thirdPartyFee = 100000 // Fixed for non-Indocement
+
+    const profitResult = calculateTripProfit({
+      omset,
+      sangu,
+      thirdPartyFee,
+    })
+
+    expect(omset).toBe(2945000)
+    // Profit = Omset - Sangu - Biaya Pihak Ketiga (100.000)
+    expect(profitResult.profit).toBe(2945000 - 1531000 - 100000)
+  })
+
+  it("handles Indocement third-party fee of 5% omset when funded by third party", () => {
+    const ratePerTon = 110000
+    const unloadedTonnage = 31.0
+    const sangu = 1705000
+    const omset = calculateOmset({ ratePerTon, unloadedTonnage }) // 3.410.000
+    const fee5Pct = Math.round(omset * 0.05) // 170.500
+
+    const profitResult = calculateTripProfit({
+      omset,
+      sangu,
+      thirdPartyFee: fee5Pct,
+    })
+
+    expect(fee5Pct).toBe(170500)
+    expect(profitResult.profit).toBe(3410000 - 1705000 - 170500)
+  })
+
+  it("handles Indocement self-funded trip with Rp 0 third-party fee", () => {
+    const ratePerTon = 110000
+    const unloadedTonnage = 31.0
+    const sangu = 1705000
+    const omset = calculateOmset({ ratePerTon, unloadedTonnage })
+    const thirdPartyFee = 0 // Modal sendiri
+
+    const profitResult = calculateTripProfit({
+      omset,
+      sangu,
+      thirdPartyFee,
+    })
+
+    expect(profitResult.profit).toBe(3410000 - 1705000)
+  })
 })
