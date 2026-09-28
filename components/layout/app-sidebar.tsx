@@ -157,7 +157,7 @@ export function AppSidebar({
                 >
                   <div className="relative flex size-12 shrink-0 items-center justify-center transition-transform duration-200 group-hover/brand:scale-105">
                     <Image
-                      src="/images/logo_dark.png"
+                      src="/images/logo-dark-new.png"
                       alt="Logo Hadya Wiran Trans"
                       width={52}
                       height={52}
@@ -165,7 +165,7 @@ export function AppSidebar({
                       className="hidden size-full object-contain dark:block"
                     />
                     <Image
-                      src="/images/logo_light.png"
+                      src="/images/logo-light-new.png"
                       alt="Logo Hadya Wiran Trans"
                       width={52}
                       height={52}

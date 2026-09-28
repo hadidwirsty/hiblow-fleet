@@ -79,14 +79,14 @@ export default function LoginPage() {
         <div className="relative z-10 flex items-center justify-between">
           <div className="flex items-center gap-3 rounded-full border border-slate-300/80 bg-white/80 px-4 py-2 text-slate-900 shadow-md dark:border-white/15 dark:bg-black/50 dark:text-white">
             <Image
-              src="/images/logo_dark.png"
+              src="/images/logo-dark-new.png"
               alt="Logo HW Trans"
               width={36}
               height={36}
               className="hidden size-7 dark:block"
             />
             <Image
-              src="/images/logo_light.png"
+              src="/images/logo-light-new.png"
               alt="Logo HW Trans"
               width={36}
               height={36}
@@ -174,14 +174,14 @@ export default function LoginPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 lg:hidden">
             <Image
-              src="/images/logo_dark.png"
+              src="/images/logo-dark-new.png"
               alt="Logo HW Trans"
               width={36}
               height={36}
               className="hidden size-7 dark:block"
             />
             <Image
-              src="/images/logo_light.png"
+              src="/images/logo-light-new.png"
               alt="Logo HW Trans"
               width={36}
               height={36}
