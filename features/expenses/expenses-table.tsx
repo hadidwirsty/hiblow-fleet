@@ -9,7 +9,6 @@ import {
   RiDeleteBinLine,
   RiEditLine,
   RiFilterOffLine,
-  RiLoaderLine,
   RiMapPinLine,
   RiReceiptLine,
 } from "@remixicon/react"
@@ -702,11 +701,10 @@ export function ExpensesTable({ expenses, initialFilter }: ExpensesTableProps) {
               variant="destructive"
               size="sm"
               onClick={handleDeleteConfirm}
-              disabled={isDeleting}
-              className="gap-1.5"
+              loading={isDeleting}
+              loadingText="Menghapus"
             >
-              {isDeleting && <RiLoaderLine className="size-3.5 animate-spin" />}
-              <span>Hapus Pengeluaran</span>
+              Hapus Pengeluaran
             </Button>
           </DialogFooter>
         </DialogContent>

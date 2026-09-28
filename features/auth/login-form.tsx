@@ -8,7 +8,6 @@ import {
   RiLockLine,
   RiMailLine,
   RiShieldCheckLine,
-  RiTruckLine,
 } from "@remixicon/react"
 import { z } from "zod"
 
@@ -99,7 +98,7 @@ export function LoginForm() {
         <CardHeader className="pb-4 text-center">
           <div className="mx-auto flex size-24 items-center justify-center sm:size-32">
             <Image
-              src="/images/logo_dark.png"
+              src="/images/logo-dark-new.png"
               alt="Logo Armada HW Trans"
               width={140}
               height={140}
@@ -107,7 +106,7 @@ export function LoginForm() {
               className="hidden size-full object-contain dark:block"
             />
             <Image
-              src="/images/logo_light.png"
+              src="/images/logo-light-new.png"
               alt="Logo Armada HW Trans"
               width={140}
               height={140}
@@ -214,41 +213,11 @@ export function LoginForm() {
 
             <Button
               type="submit"
-              className="relative h-10 w-full overflow-hidden font-medium shadow-md shadow-primary/20 transition-all hover:shadow-lg"
-              disabled={isPending}
+              className="h-10 w-full font-medium shadow-md shadow-primary/20 transition-all hover:shadow-lg"
+              loading={isPending}
+              loadingText="Memproses"
             >
-              {isPending ? (
-                <div className="relative flex w-full items-center justify-center">
-                  <div className="pointer-events-none absolute inset-x-0 -bottom-2 h-px border-b border-dashed border-primary-foreground/30" />
-
-                  <div className="animate-truck-drive pointer-events-none absolute inset-y-0 flex items-center">
-                    <div className="animate-truck-rumble">
-                      <RiTruckLine className="size-4.5 text-primary-foreground drop-shadow-xs" />
-                    </div>
-                  </div>
-
-                  <span className="relative z-10 inline-flex items-center text-xs font-semibold tracking-wider">
-                    <span>Memproses</span>
-                    <span className="ml-0.5 inline-flex">
-                      <span
-                        className="inline-block animate-bounce"
-                        style={{ animationDelay: "-0.32s" }}
-                      >
-                        .
-                      </span>
-                      <span
-                        className="inline-block animate-bounce"
-                        style={{ animationDelay: "-0.16s" }}
-                      >
-                        .
-                      </span>
-                      <span className="inline-block animate-bounce">.</span>
-                    </span>
-                  </span>
-                </div>
-              ) : (
-                "Masuk"
-              )}
+              Masuk
             </Button>
           </form>
 

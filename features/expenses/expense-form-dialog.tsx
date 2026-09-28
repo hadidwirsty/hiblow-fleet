@@ -7,7 +7,6 @@ import {
   RiAddLine,
   RiEditLine,
   RiInformationLine,
-  RiLoaderLine,
   RiReceiptLine,
 } from "@remixicon/react"
 import { useForm } from "react-hook-form"
@@ -397,15 +396,10 @@ export function ExpenseFormDialog({
             <Button
               type="submit"
               size="sm"
-              disabled={isSubmitting}
-              className="gap-1.5"
+              loading={isSubmitting}
+              loadingText="Menyimpan"
             >
-              {isSubmitting && (
-                <RiLoaderLine className="size-3.5 animate-spin" />
-              )}
-              <span>
-                {isEditMode ? "Simpan Perubahan" : "Simpan Pengeluaran"}
-              </span>
+              {isEditMode ? "Simpan Perubahan" : "Simpan Pengeluaran"}
             </Button>
           </div>
         </form>

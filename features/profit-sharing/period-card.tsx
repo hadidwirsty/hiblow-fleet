@@ -222,9 +222,10 @@ export function PeriodCard({
               variant="destructive"
               size="sm"
               onClick={handleDelete}
-              disabled={isDeleting}
+              loading={isDeleting}
+              loadingText="Menghapus"
             >
-              {isDeleting ? "Menghapus..." : "Ya, Hapus Periode"}
+              Ya, Hapus Periode
             </Button>
           </DialogFooter>
         </DialogContent>

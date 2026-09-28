@@ -431,17 +431,18 @@ export function PeriodDetailSheet({
               size="sm"
               className="gap-1.5 text-xs"
               onClick={handleToggleStatus}
-              disabled={isUpdatingStatus}
+              loading={isUpdatingStatus}
+              loadingText="Memperbarui"
             >
               {isFinalized ? (
                 <>
                   <RiLockUnlockLine className="size-3.5" />
-                  Buka Kunci (Kembalikan ke Draft)
+                  Buka Kunci (Kembalikan ke Draf)
                 </>
               ) : (
                 <>
                   <RiLockLine className="size-3.5" />
-                  Kunci Periode (Finalize)
+                  Kunci Periode (Finalisasi)
                 </>
               )}
             </Button>

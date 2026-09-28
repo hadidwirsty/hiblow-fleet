@@ -550,13 +550,10 @@ export function RateFormDialog({
               type="submit"
               className="w-1/2 sm:w-36"
               size="lg"
-              disabled={isPending}
+              loading={isPending}
+              loadingText="Menyimpan"
             >
-              {isPending
-                ? "Menyimpan..."
-                : mode === "create"
-                  ? "Simpan Rute"
-                  : "Simpan Perubahan"}
+              {mode === "create" ? "Simpan Rute" : "Simpan Perubahan"}
             </Button>
           </div>
         </form>

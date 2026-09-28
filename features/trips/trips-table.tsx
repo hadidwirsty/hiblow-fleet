@@ -845,9 +845,10 @@ export function TripsTable({
                 variant="destructive"
                 className="h-10 w-full rounded-xl text-xs font-semibold shadow-xs"
                 onClick={handleDeleteTrip}
-                disabled={isDeleting}
+                loading={isDeleting}
+                loadingText="Menghapus"
               >
-                {isDeleting ? "Menghapus..." : "Hapus"}
+                Hapus
               </Button>
             </div>
           </div>

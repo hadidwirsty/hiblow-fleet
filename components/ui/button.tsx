@@ -1,4 +1,5 @@
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
+import { RiTruckLine } from "@remixicon/react"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
@@ -40,18 +41,68 @@ const buttonVariants = cva(
   }
 )
 
+export interface ButtonProps
+  extends ButtonPrimitive.Props, VariantProps<typeof buttonVariants> {
+  loading?: boolean
+  loadingText?: string
+}
+
+export function ButtonTruckLoading({ text = "Memproses" }: { text?: string }) {
+  const cleanText = text.replace(/\.+$/, "")
+  return (
+    <div className="relative flex w-full items-center justify-center">
+      <div className="pointer-events-none absolute inset-x-0 -bottom-1 h-px border-b border-dashed border-current/30" />
+
+      <div className="animate-truck-drive pointer-events-none absolute inset-y-0 flex items-center">
+        <div className="animate-truck-rumble">
+          <RiTruckLine className="size-4 text-current drop-shadow-xs" />
+        </div>
+      </div>
+
+      <span className="relative z-10 inline-flex items-center text-xs font-semibold tracking-wider">
+        <span>{cleanText}</span>
+        <span className="ml-0.5 inline-flex">
+          <span
+            className="inline-block animate-bounce"
+            style={{ animationDelay: "-0.32s" }}
+          >
+            .
+          </span>
+          <span
+            className="inline-block animate-bounce"
+            style={{ animationDelay: "-0.16s" }}
+          >
+            .
+          </span>
+          <span className="inline-block animate-bounce">.</span>
+        </span>
+      </span>
+    </div>
+  )
+}
+
 function Button({
   className,
   variant = "default",
   size = "default",
+  loading = false,
+  loadingText = "Memproses",
+  disabled,
+  children,
   ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+}: ButtonProps) {
   return (
     <ButtonPrimitive
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(
+        buttonVariants({ variant, size, className }),
+        loading && "relative overflow-hidden"
+      )}
+      disabled={disabled || loading}
       {...props}
-    />
+    >
+      {loading ? <ButtonTruckLoading text={loadingText} /> : children}
+    </ButtonPrimitive>
   )
 }
 

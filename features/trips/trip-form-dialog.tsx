@@ -7,7 +7,6 @@ import {
   RiAddLine,
   RiCalculatorLine,
   RiInformationLine,
-  RiLoaderLine,
   RiRefreshLine,
   RiTruckLine,
 } from "@remixicon/react"
@@ -1316,20 +1315,12 @@ export function TripFormDialog({
             </Button>
             <Button
               type="submit"
-              className="w-1/2 gap-1.5 sm:w-36"
+              className="w-1/2 sm:w-36"
               size="lg"
-              disabled={isSubmitting}
+              loading={isSubmitting}
+              loadingText="Menyimpan"
             >
-              {isSubmitting ? (
-                <>
-                  <RiLoaderLine className="size-4 animate-spin" />
-                  <span>Menyimpan...</span>
-                </>
-              ) : (
-                <span>
-                  {mode === "create" ? "Simpan Ritase" : "Simpan Perubahan"}
-                </span>
-              )}
+              {mode === "create" ? "Simpan Ritase" : "Simpan Perubahan"}
             </Button>
           </div>
         </form>

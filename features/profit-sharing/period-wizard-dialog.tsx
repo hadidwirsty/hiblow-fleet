@@ -10,7 +10,6 @@ import {
   RiDeleteBinLine,
   RiHandCoinLine,
   RiInformationLine,
-  RiLoaderLine,
   RiMoneyDollarCircleLine,
   RiUserAddLine,
 } from "@remixicon/react"
@@ -707,19 +706,11 @@ export function PeriodWizardDialog({
                   type="button"
                   className="gap-1.5"
                   onClick={handleProceedToStep2}
-                  disabled={isLoading}
+                  loading={isLoading}
+                  loadingText="Menarik Data"
                 >
-                  {isLoading ? (
-                    <>
-                      <RiLoaderLine className="size-4 animate-spin" />
-                      Menarik Data...
-                    </>
-                  ) : (
-                    <>
-                      Lanjut ke Pemodal
-                      <RiArrowRightLine className="size-4" />
-                    </>
-                  )}
+                  Lanjut ke Pemodal
+                  <RiArrowRightLine className="size-4" />
                 </Button>
               </>
             ) : (
@@ -738,19 +729,11 @@ export function PeriodWizardDialog({
                   type="button"
                   className="gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700"
                   onClick={handleSavePeriod}
-                  disabled={isSubmitting}
+                  loading={isSubmitting}
+                  loadingText="Menyimpan Tutup Buku"
                 >
-                  {isSubmitting ? (
-                    <>
-                      <RiLoaderLine className="size-4 animate-spin" />
-                      Menyimpan Tutup Buku...
-                    </>
-                  ) : (
-                    <>
-                      <RiCheckLine className="size-4" />
-                      Simpan & Tutup Buku
-                    </>
-                  )}
+                  <RiCheckLine className="size-4" />
+                  Simpan & Tutup Buku
                 </Button>
               </>
             )}
