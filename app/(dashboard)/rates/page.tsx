@@ -13,9 +13,9 @@ import { RatesSummary } from "@/features/rates/rates-summary"
 import { RatesTable } from "@/features/rates/rates-table"
 
 export const metadata: Metadata = {
-  title: "Referensi Tarif Pabrik — HW Trans Fleet",
+  title: "Referensi Tarif Pabrik",
   description:
-    "Master acuan tarif per ton dan nominal sangu supir untuk 289 rute pabrik semen curah HW Trans",
+    "Master acuan tarif per ton dan nominal sangu supir untuk rute pabrik semen curah HW Trans",
 }
 
 export const dynamic = "force-dynamic"

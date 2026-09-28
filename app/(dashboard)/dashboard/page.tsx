@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import {
   RiArrowRightLine,
@@ -39,6 +40,12 @@ interface DashboardPageProps {
     month?: string
     year?: string
   }>
+}
+
+export const metadata: Metadata = {
+  title: "Dasbor Operasional",
+  description:
+    "Ikhtisar performa armada hi-blow dan efisiensi finansial HW Trans",
 }
 
 export default async function DashboardPage({

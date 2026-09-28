@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import {
   RiCoinsLine,
   RiHandCoinLine,
@@ -20,6 +21,12 @@ import { getCurrentSession } from "@/lib/session"
 import { formatCurrency } from "@/lib/utils"
 
 export const dynamic = "force-dynamic"
+
+export const metadata: Metadata = {
+  title: "Bagi Hasil Pemodal",
+  description:
+    "Kalkulator dan rekapitulasi tutup buku bagi hasil laba bersih armada HW Trans untuk investor",
+}
 
 export default async function ProfitSharingPage() {
   const session = await getCurrentSession()

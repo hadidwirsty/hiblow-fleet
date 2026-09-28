@@ -13,7 +13,7 @@ import { TripsSummary } from "@/features/trips/trips-summary"
 import { TripsTable } from "@/features/trips/trips-table"
 
 export const metadata: Metadata = {
-  title: "Pencatatan Ritase — HW Trans Fleet",
+  title: "Pencatatan Ritase",
   description:
     "Rekapitulasi surat jalan semen curah hi-blow, tagihan omset, sangu supir, dan laba operasional armada HW Trans",
 }

@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { RiCalendarLine } from "@remixicon/react"
 
 import { Badge } from "@/components/ui/badge"
@@ -30,6 +31,12 @@ interface ExpensesPageProps {
     year?: string
     category?: string
   }>
+}
+
+export const metadata: Metadata = {
+  title: "Pengeluaran Truk",
+  description:
+    "Buku catatan beban operasional, servis bengkel, onderdil, BBM, dan biaya perbankan armada HW Trans",
 }
 
 export default async function ExpensesPage({

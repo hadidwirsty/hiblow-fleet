@@ -11,7 +11,7 @@ import { ModeToggle } from "@/components/layout/mode-toggle"
 import { LoginForm } from "@/features/auth/login-form"
 
 export const metadata: Metadata = {
-  title: "Masuk — HW Trans Fleet",
+  title: "Masuk",
   description: "Masuk ke sistem manajemen armada dan keuangan HW Trans",
 }
 
