@@ -15,13 +15,13 @@ import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 
 const ROUTE_NAMES: Record<string, string> = {
-  dashboard: "Dasbor",
-  trips: "Manajemen Ritase",
+  dashboard: "Dasbor Operasional",
+  trips: "Pencatatan Ritase",
   new: "Tambah Ritase",
   expenses: "Pengeluaran Truk",
   "profit-sharing": "Bagi Hasil Pemodal",
-  rates: "Referensi Tarif",
-  trucks: "Monitoring Armada",
+  rates: "Referensi Tarif Pabrik",
+  trucks: "Pemantauan Armada",
 }
 
 export function SiteHeader() {

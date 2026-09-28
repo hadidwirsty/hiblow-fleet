@@ -36,12 +36,12 @@ const data = {
   },
   navMain: [
     {
-      title: "Dasbor",
+      title: "Dasbor Operasional",
       url: "/dashboard",
       icon: <RiDashboardLine className="size-4" />,
     },
     {
-      title: "Manajemen Ritase",
+      title: "Pencatatan Ritase",
       url: "/trips",
       icon: <RiTruckLine className="size-4" />,
     },
@@ -56,7 +56,7 @@ const data = {
       icon: <RiHandCoinLine className="size-4" />,
     },
     {
-      title: "Referensi Tarif",
+      title: "Referensi Tarif Pabrik",
       url: "/rates",
       icon: <RiTable2 className="size-4" />,
     },
