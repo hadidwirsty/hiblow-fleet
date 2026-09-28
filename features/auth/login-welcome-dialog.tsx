@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { RiCheckboxCircleLine, RiTruckLine } from "@remixicon/react"
 
@@ -26,16 +26,25 @@ export function LoginWelcomeDialog({
 }: LoginWelcomeDialogProps) {
   const router = useRouter()
   const [progress, setProgress] = useState(0)
+  const isNavigatingRef = useRef(false)
 
   useEffect(() => {
-    if (!open || !redirectUrl) return
+    if (!open || !redirectUrl) {
+      isNavigatingRef.current = false
+      return
+    }
 
-    const resetTimer = setTimeout(() => {
-      setProgress(0)
-    }, 0)
+    // Prefetch halaman tujuan di background selagi animasi berjalan
+    try {
+      router.prefetch(redirectUrl)
+    } catch {
+      // Abaikan jika prefetch gagal di lingkungan tertentu
+    }
+
+    isNavigatingRef.current = false
 
     const startTime = Date.now()
-    const duration = 1500
+    const duration = 1400
 
     const interval = setInterval(() => {
       const elapsed = Date.now() - startTime
@@ -45,22 +54,30 @@ export function LoginWelcomeDialog({
 
       if (progressPercent >= 100) {
         clearInterval(interval)
-        setTimeout(() => {
-          onOpenChange?.(false)
-          router.replace(redirectUrl)
-          router.refresh()
-        }, 250)
+
+        if (!isNavigatingRef.current) {
+          isNavigatingRef.current = true
+          // Berpindah halaman terlebih dahulu tanpa menutup modal di halaman login.
+          // Modal tetap terbuka menutupi form login hingga halaman tujuan sepenuhnya aktif.
+          window.location.replace(redirectUrl)
+        }
       }
     }, 20)
 
     return () => {
-      clearTimeout(resetTimer)
       clearInterval(interval)
+      setProgress(0)
     }
-  }, [open, redirectUrl, router, onOpenChange])
+  }, [open, redirectUrl, router])
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (isNavigatingRef.current) return
+        onOpenChange?.(nextOpen)
+      }}
+    >
       <DialogContent
         showCloseButton={false}
         className="border-border/80 bg-card/95 p-6 shadow-2xl backdrop-blur-xl sm:max-w-md"
