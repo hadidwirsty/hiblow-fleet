@@ -1,6 +1,9 @@
 import type { Metadata } from "next"
 import { Geist_Mono, Inter } from "next/font/google"
 
+import ModalDelete from "@/components/dialogs/modal-delete"
+import ModalInactive from "@/components/dialogs/modal-inactive"
+import ModalSuccess from "@/components/dialogs/modal-success"
 import { ThemeProvider } from "@/components/layout/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -63,6 +66,9 @@ export default function RootLayout({
         <ThemeProvider>
           <TooltipProvider>
             {children}
+            <ModalDelete />
+            <ModalInactive />
+            <ModalSuccess />
             <Toaster position="top-right" richColors />
           </TooltipProvider>
         </ThemeProvider>
