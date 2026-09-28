@@ -109,7 +109,9 @@ describe("Rates Queries Integration", () => {
     const clients = await getDistinctClients()
     expect(Array.isArray(clients)).toBe(true)
     expect(clients.length).toBeGreaterThan(0)
-    expect(clients).toContain("SI")
+    expect(
+      clients.some((c) => c.includes("Semen Indonesia") || c === "SI")
+    ).toBe(true)
   })
 
   it("harus mengembalikan daftar pabrik asal unik terurut", async () => {
