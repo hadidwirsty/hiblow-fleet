@@ -16,6 +16,7 @@ import {
   createRateReference,
   updateRateReference,
 } from "@/features/rates/rates.actions"
+import { useUIStore } from "@/stores/theme"
 import { formatCurrency } from "@/lib/utils"
 
 function parseCurrencyInput(value: string): string {
@@ -98,6 +99,8 @@ export function RateFormDialog({
   const isControlled = controlledOpen !== undefined
   const open = isControlled ? controlledOpen : internalOpen
   const setOpen = isControlled ? setControlledOpen! : setInternalOpen
+
+  const { setModalSuccess } = useUIStore()
 
   const [originPlant, setOriginPlant] = useState(rate?.originPlant ?? "")
   const [clientName, setClientName] = useState(rate?.clientName ?? "")
@@ -230,6 +233,12 @@ export function RateFormDialog({
           setSanguPercentage("52")
           setDefaultSangu("")
           setAdditionalTonnageRate("25000")
+          setModalSuccess({
+            open: true,
+            title: "Rute Berhasil Ditambahkan",
+            message: `Referensi tarif rute ${destination} (${city}) berhasil disimpan ke sistem.`,
+            actionMessage: "Selesai",
+          })
         } else {
           setError(res.error)
         }
@@ -252,6 +261,12 @@ export function RateFormDialog({
         if (res.success) {
           toast.success("Referensi tarif rute berhasil diperbarui")
           setOpen(false)
+          setModalSuccess({
+            open: true,
+            title: "Perubahan Rute Tersimpan",
+            message: `Referensi tarif rute ${destination} (${city}) berhasil diperbarui.`,
+            actionMessage: "Selesai",
+          })
         } else {
           setError(res.error)
         }

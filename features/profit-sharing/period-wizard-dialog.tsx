@@ -39,6 +39,7 @@ import {
   DEFAULT_MANAGER_COMMISSION_RATE,
   DEFAULT_PARTNERS,
 } from "./profit-sharing.schema"
+import { useUIStore } from "@/stores/theme"
 
 interface PeriodWizardDialogProps {
   open?: boolean
@@ -98,6 +99,8 @@ export function PeriodWizardDialog({
   const setOpen = isControlled
     ? (val: boolean) => controlledOnOpenChange?.(val)
     : setInternalOpen
+
+  const { setModalSuccess } = useUIStore()
 
   const [step, setStep] = React.useState<1 | 2>(1)
   const [isLoading, setIsLoading] = React.useState(false)
@@ -257,6 +260,12 @@ export function PeriodWizardDialog({
       }
 
       toast.success("Periode bagi hasil berhasil disimpan!")
+      setModalSuccess({
+        open: true,
+        title: "Tutup Buku Berhasil Disimpan",
+        message: `Periode bagi hasil "${title}" berhasil dihitung dan disimpan ke sistem.`,
+        actionMessage: "Selesai",
+      })
       setOpen(false)
       setStep(1)
     } catch {

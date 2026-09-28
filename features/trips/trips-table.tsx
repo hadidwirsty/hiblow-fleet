@@ -20,13 +20,7 @@ import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -70,6 +64,7 @@ import { deleteTrip } from "@/features/trips/trips.actions"
 import { TripFormDialog } from "@/features/trips/trip-form-dialog"
 import { TripMobileCard } from "@/features/trips/trip-mobile-card"
 import { filterTrips, isDoFeePaid } from "@/features/trips/trips.filter"
+import { useUIStore } from "@/stores/theme"
 import { formatCurrency, formatDateIndonesian } from "@/lib/utils"
 
 export type TripRecord = typeof trips.$inferSelect
@@ -144,26 +139,30 @@ export function TripsTable({
 
   // Dialog state
   const [editingTrip, setEditingTrip] = useState<TripRecord | null>(null)
-  const [deletingTrip, setDeletingTrip] = useState<TripRecord | null>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
 
-  const handleDeleteTrip = async () => {
-    if (!deletingTrip) return
-    setIsDeleting(true)
-    try {
-      const res = await deleteTrip(deletingTrip.id)
-      if (res.success) {
-        toast.success("Surat jalan ritase berhasil dihapus!")
-        setDeletingTrip(null)
-      } else {
-        toast.error(res.error || "Gagal menghapus ritase.")
-      }
-    } catch {
-      toast.error("Terjadi kendala jaringan saat menghapus ritase.")
-    } finally {
-      setIsDeleting(false)
-    }
+  const { setModalDelete, setModalSuccess } = useUIStore()
+
+  const handlePromptDelete = (trip: TripRecord) => {
+    const driverInfo = getDriverAndTruck(trip.truckId)
+    setModalDelete({
+      open: true,
+      title: "Konfirmasi Hapus Surat Jalan",
+      message: `Apakah Anda yakin ingin menghapus surat jalan order #${trip.orderNumber} (${driverInfo.driver} - ${formatPlateNumber(trip.truckId)}) tujuan ${trip.destinationCity}? Tindakan ini tidak dapat dibatalkan.`,
+      action: async () => {
+        const res = await deleteTrip(trip.id)
+        if (res.success) {
+          setModalSuccess({
+            open: true,
+            title: "Surat Jalan Dihapus",
+            message: `Surat jalan order #${trip.orderNumber} berhasil dihapus dari sistem.`,
+            actionMessage: "Tutup",
+          })
+        } else {
+          toast.error(res.error || "Gagal menghapus ritase.")
+        }
+      },
+    })
   }
 
   const isFiltered =
@@ -424,7 +423,7 @@ export function TripsTable({
                 trip={trip}
                 originPlant={originPlant}
                 onEdit={setEditingTrip}
-                onDelete={setDeletingTrip}
+                onDelete={handlePromptDelete}
               />
             )
           })
@@ -702,7 +701,7 @@ export function TripsTable({
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
                                 className="cursor-pointer gap-2 text-xs text-destructive focus:text-destructive"
-                                onClick={() => setDeletingTrip(trip)}
+                                onClick={() => handlePromptDelete(trip)}
                               >
                                 <RiDeleteBinLine className="size-3.5" />
                                 <span>Hapus Ritase</span>
@@ -793,67 +792,6 @@ export function TripsTable({
           showTrigger={false}
         />
       )}
-
-      {/* Confirm Delete Dialog (Redesigned matching standard warning modal) */}
-      <Dialog
-        open={!!deletingTrip}
-        onOpenChange={(isOpen) => !isOpen && setDeletingTrip(null)}
-      >
-        <DialogContent className="p-6 sm:max-w-md">
-          <div className="flex flex-col items-center text-center">
-            {/* Lingkaran Kuning / Amber Besar dengan Tanda Seru */}
-            <div className="mb-4 flex size-20 items-center justify-center rounded-full bg-amber-500 shadow-md">
-              <span className="font-sans text-3xl leading-none font-extrabold text-white">
-                !
-              </span>
-            </div>
-
-            <DialogHeader className="items-center space-y-2 text-center">
-              <DialogTitle className="text-lg font-bold text-foreground">
-                Konfirmasi Hapus Surat Jalan
-              </DialogTitle>
-              <DialogDescription className="max-w-xs text-xs leading-relaxed text-muted-foreground">
-                Apakah Anda yakin ingin menghapus surat jalan order{" "}
-                <strong className="text-foreground">
-                  #{deletingTrip?.orderNumber}
-                </strong>{" "}
-                (
-                {deletingTrip
-                  ? `${getDriverAndTruck(deletingTrip.truckId).driver} - ${formatPlateNumber(deletingTrip.truckId)}`
-                  : ""}
-                ) tujuan{" "}
-                <strong className="text-foreground">
-                  {deletingTrip?.destinationCity}
-                </strong>
-                ? Tindakan ini tidak dapat dibatalkan.
-              </DialogDescription>
-            </DialogHeader>
-
-            {/* 2 Tombol Sejajar Berdampingan */}
-            <div className="mt-6 grid w-full grid-cols-2 gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                className="h-10 w-full rounded-xl border-border/80 text-xs font-medium hover:bg-muted"
-                onClick={() => setDeletingTrip(null)}
-                disabled={isDeleting}
-              >
-                Batal
-              </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                className="h-10 w-full rounded-xl text-xs font-semibold shadow-xs"
-                onClick={handleDeleteTrip}
-                loading={isDeleting}
-                loadingText="Menghapus"
-              >
-                Hapus
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* Modal Tambah Ritase Baru dari Empty State */}
       <TripFormDialog

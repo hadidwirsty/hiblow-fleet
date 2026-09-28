@@ -17,14 +17,7 @@ import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -64,6 +57,7 @@ import {
   toggleRateReferenceStatus,
 } from "@/features/rates/rates.actions"
 import { RateFormDialog } from "@/features/rates/rate-form-dialog"
+import { useUIStore } from "@/stores/theme"
 import { RateMobileCard } from "@/features/rates/rate-mobile-card"
 import { formatCurrency } from "@/lib/utils"
 
@@ -94,8 +88,6 @@ export function RatesTable({
   // Dialog action state
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingRate, setEditingRate] = useState<RateReference | null>(null)
-  const [deletingRate, setDeletingRate] = useState<RateReference | null>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
 
   const isFiltered =
     Boolean(search.trim()) ||
@@ -143,39 +135,75 @@ export function RatesTable({
     return filteredRates.slice(start, start + pageSize)
   }, [filteredRates, currentPage, pageSize])
 
-  const handleToggleStatus = async (rate: RateReference) => {
-    try {
-      const res = await toggleRateReferenceStatus(rate.id, !rate.isActive)
-      if (res.success) {
-        toast.success(
-          rate.isActive
-            ? `Rute ${rate.destination} dinonaktifkan`
-            : `Rute ${rate.destination} diaktifkan kembali`
-        )
-      } else {
-        toast.error(res.error)
-      }
-    } catch {
-      toast.error("Gagal mengubah status rute")
+  const { setModalDelete, setModalInactive, setModalSuccess } = useUIStore()
+
+  const handleToggleStatus = (rate: RateReference) => {
+    if (rate.isActive) {
+      setModalInactive({
+        open: true,
+        title: "Nonaktifkan Referensi Rute?",
+        message: `Apakah Anda yakin ingin menonaktifkan rute tujuan "${rate.destination}" di kota ${rate.city}? Rute ini tidak akan muncul pada pilihan pencatatan ritase baru.`,
+        actionMessage: "Nonaktifkan",
+        action: async () => {
+          try {
+            const res = await toggleRateReferenceStatus(rate.id, false)
+            if (res.success) {
+              setModalSuccess({
+                open: true,
+                title: "Rute Dinonaktifkan",
+                message: `Referensi rute ${rate.destination} telah dinonaktifkan.`,
+                actionMessage: "Selesai",
+              })
+            } else {
+              toast.error(res.error || "Gagal menonaktifkan rute")
+            }
+          } catch {
+            toast.error("Gagal mengubah status rute")
+          }
+        },
+      })
+      return
     }
+
+    // Aktifkan kembali rute yang sedang tidak aktif
+    void (async () => {
+      try {
+        const res = await toggleRateReferenceStatus(rate.id, true)
+        if (res.success) {
+          setModalSuccess({
+            open: true,
+            title: "Rute Diaktifkan Kembali",
+            message: `Referensi rute ${rate.destination} kini aktif dan dapat digunakan kembali.`,
+            actionMessage: "Selesai",
+          })
+        } else {
+          toast.error(res.error || "Gagal mengaktifkan rute")
+        }
+      } catch {
+        toast.error("Gagal mengubah status rute")
+      }
+    })()
   }
 
-  const handleDelete = async () => {
-    if (!deletingRate) return
-    setIsDeleting(true)
-    try {
-      const res = await deleteRateReference(deletingRate.id)
-      if (res.success) {
-        toast.success(`Rute ${deletingRate.destination} berhasil dihapus`)
-        setDeletingRate(null)
-      } else {
-        toast.error(res.error)
-      }
-    } catch {
-      toast.error("Gagal menghapus rute")
-    } finally {
-      setIsDeleting(false)
-    }
+  const promptDeleteRate = (rate: RateReference) => {
+    setModalDelete({
+      open: true,
+      title: "Hapus Referensi Rute",
+      message: `Apakah Anda yakin ingin menghapus rute tujuan "${rate.destination}" di kota ${rate.city}? Tindakan ini tidak dapat dibatalkan.`,
+      action: async () => {
+        const res = await deleteRateReference(rate.id)
+        if (res.success) {
+          setModalSuccess({
+            open: true,
+            title: "Rute Berhasil Dihapus",
+            message: `Referensi rute ${rate.destination} telah dihapus dari sistem.`,
+            actionMessage: "Tutup",
+          })
+        } else {
+          toast.error(res.error || "Gagal menghapus rute")
+        }
+      },
+    })
   }
 
   return (
@@ -369,7 +397,7 @@ export function RatesTable({
               rate={rate}
               onEdit={setEditingRate}
               onToggleStatus={handleToggleStatus}
-              onDelete={setDeletingRate}
+              onDelete={promptDeleteRate}
             />
           ))
         )}
@@ -575,7 +603,7 @@ export function RatesTable({
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
                                 className="cursor-pointer gap-2 text-xs text-destructive focus:text-destructive"
-                                onClick={() => setDeletingRate(rate)}
+                                onClick={() => promptDeleteRate(rate)}
                               >
                                 <RiDeleteBinLine className="size-3.5" />
                                 <span>Hapus Rute</span>
@@ -652,46 +680,6 @@ export function RatesTable({
           distinctOriginPlants={distinctOriginPlants}
         />
       )}
-
-      {/* Confirm Delete Dialog */}
-      <Dialog
-        open={!!deletingRate}
-        onOpenChange={(isOpen) => !isOpen && setDeletingRate(null)}
-      >
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-base text-destructive">
-              <RiDeleteBinLine className="size-5" />
-              Hapus Referensi Rute?
-            </DialogTitle>
-            <DialogDescription className="text-xs">
-              Apakah Anda yakin ingin menghapus rute tujuan{" "}
-              <strong>&ldquo;{deletingRate?.destination}&rdquo;</strong> di kota{" "}
-              <strong>{deletingRate?.city}</strong>? Tindakan ini tidak dapat
-              dibatalkan.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setDeletingRate(null)}
-              disabled={isDeleting}
-            >
-              Batal
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={handleDelete}
-              loading={isDeleting}
-              loadingText="Menghapus"
-            >
-              Ya, Hapus Rute
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

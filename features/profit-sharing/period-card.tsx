@@ -15,14 +15,7 @@ import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { useUIStore } from "@/stores/theme"
 import { formatCurrency, formatDateIndonesian } from "@/lib/utils"
 
 import { PeriodDetailSheet } from "./period-detail-sheet"
@@ -41,29 +34,36 @@ export function PeriodCard({
   myPayoutAmount,
 }: PeriodCardProps) {
   const [isDetailOpen, setIsDetailOpen] = React.useState(false)
-  const [isDeleteOpen, setIsDeleteOpen] = React.useState(false)
-  const [isDeleting, setIsDeleting] = React.useState(false)
+  const { setModalDelete, setModalSuccess } = useUIStore()
 
   const isFinalized = period.status === "finalized"
   const grossBalance = parseFloat(period.grossBalance)
   const distributableProfit = parseFloat(period.distributableProfit)
   const managerTakeHome = parseFloat(period.managerTakeHome)
 
-  const handleDelete = async () => {
-    setIsDeleting(true)
-    try {
-      const res = await deleteProfitSharingPeriod(period.id)
-      if (res.success) {
-        toast.success("Periode bagi hasil berhasil dihapus")
-        setIsDeleteOpen(false)
-      } else {
-        toast.error(res.error)
-      }
-    } catch {
-      toast.error("Terjadi kesalahan saat menghapus periode")
-    } finally {
-      setIsDeleting(false)
-    }
+  const promptDeletePeriod = () => {
+    setModalDelete({
+      open: true,
+      title: "Hapus Periode Bagi Hasil",
+      message: `Periode "${period.title}" beserta seluruh rincian dividen pemodal di dalamnya akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.`,
+      action: async () => {
+        try {
+          const res = await deleteProfitSharingPeriod(period.id)
+          if (res.success) {
+            setModalSuccess({
+              open: true,
+              title: "Periode Berhasil Dihapus",
+              message: `Periode "${period.title}" telah dihapus dari sistem.`,
+              actionMessage: "Tutup",
+            })
+          } else {
+            toast.error(res.error || "Gagal menghapus periode")
+          }
+        } catch {
+          toast.error("Terjadi kesalahan saat menghapus periode")
+        }
+      },
+    })
   }
 
   return (
@@ -179,7 +179,7 @@ export function PeriodCard({
               variant="ghost"
               size="icon"
               className="size-8 shrink-0 text-muted-foreground hover:text-destructive"
-              onClick={() => setIsDeleteOpen(true)}
+              onClick={promptDeletePeriod}
               title="Hapus periode"
             >
               <RiDeleteBinLine className="size-4" />
@@ -194,42 +194,6 @@ export function PeriodCard({
         open={isDetailOpen}
         onOpenChange={setIsDetailOpen}
       />
-
-      {/* Confirm Delete Dialog */}
-      <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-destructive">
-              <RiDeleteBinLine className="size-5" />
-              Hapus Periode Bagi Hasil?
-            </DialogTitle>
-            <DialogDescription className="text-xs">
-              Periode <strong>&ldquo;{period.title}&rdquo;</strong> beserta
-              seluruh rincian dividen pemodal di dalamnya akan dihapus secara
-              permanen. Tindakan ini tidak dapat dibatalkan.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsDeleteOpen(false)}
-              disabled={isDeleting}
-            >
-              Batal
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={handleDelete}
-              loading={isDeleting}
-              loadingText="Menghapus"
-            >
-              Ya, Hapus Periode
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   )
 }

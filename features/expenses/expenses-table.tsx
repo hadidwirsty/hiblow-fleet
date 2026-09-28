@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import {
-  RiAlertLine,
   RiArrowLeftSLine,
   RiArrowRightSLine,
   RiDeleteBinLine,
@@ -25,14 +24,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { useUIStore } from "@/stores/theme"
 import {
   Select,
   SelectContent,
@@ -166,13 +158,11 @@ export function ExpensesTable({ expenses, initialFilter }: ExpensesTableProps) {
   const [currentPage, setCurrentPage] = useState(1)
   const pageSize = 20
 
+  const { setModalDelete, setModalSuccess } = useUIStore()
+
   // Editing state
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-
-  // Deleting state
-  const [deletingExpense, setDeletingExpense] = useState<Expense | null>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
 
   // Current filters from URL query params
   const currentTruckId =
@@ -212,28 +202,38 @@ export function ExpensesTable({ expenses, initialFilter }: ExpensesTableProps) {
     })
   }
 
-  // Handle delete action
-  async function handleDeleteConfirm() {
-    if (!deletingExpense) return
-    try {
-      setIsDeleting(true)
-      const result = await deleteExpense(deletingExpense.id)
-      if (!result.success) {
-        toast.error(result.error)
-        return
-      }
-      toast.success("Catatan pengeluaran berhasil dihapus")
-      setDeletingExpense(null)
-      startTransition(() => {
-        router.refresh()
-      })
-    } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Gagal menghapus pengeluaran"
-      )
-    } finally {
-      setIsDeleting(false)
-    }
+  // Handle delete action via global modal
+  const promptDeleteExpense = (item: Expense) => {
+    const totalAmount =
+      (parseFloat(String(item.amount)) || 0) +
+      (parseFloat(String(item.adminFee ?? "0")) || 0)
+    setModalDelete({
+      open: true,
+      title: "Hapus Catatan Pengeluaran",
+      message: `Apakah Anda yakin ingin menghapus pengeluaran "${item.description}" (${formatPlateNumber(item.truckId)} - ${formatCurrency(totalAmount)})? Tindakan ini tidak dapat dibatalkan.`,
+      action: async () => {
+        try {
+          const result = await deleteExpense(item.id)
+          if (!result.success) {
+            toast.error(result.error || "Gagal menghapus pengeluaran")
+            return
+          }
+          setModalSuccess({
+            open: true,
+            title: "Pengeluaran Berhasil Dihapus",
+            message: `Catatan pengeluaran "${item.description}" telah dihapus dari sistem.`,
+            actionMessage: "Tutup",
+          })
+          startTransition(() => {
+            router.refresh()
+          })
+        } catch (err) {
+          toast.error(
+            err instanceof Error ? err.message : "Gagal menghapus pengeluaran"
+          )
+        }
+      },
+    })
   }
 
   // Pagination calculations
@@ -398,7 +398,7 @@ export function ExpensesTable({ expenses, initialFilter }: ExpensesTableProps) {
                     setEditingExpense(expense)
                     setIsEditDialogOpen(true)
                   }}
-                  onDelete={setDeletingExpense}
+                  onDelete={promptDeleteExpense}
                 />
               ))
             )}
@@ -553,7 +553,7 @@ export function ExpensesTable({ expenses, initialFilter }: ExpensesTableProps) {
                               variant="ghost"
                               size="icon-xs"
                               className="text-muted-foreground hover:text-destructive"
-                              onClick={() => setDeletingExpense(item)}
+                              onClick={() => promptDeleteExpense(item)}
                               title="Hapus Pengeluaran"
                             >
                               <RiDeleteBinLine className="size-3.5" />
@@ -622,93 +622,6 @@ export function ExpensesTable({ expenses, initialFilter }: ExpensesTableProps) {
           if (!open) setEditingExpense(null)
         }}
       />
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={!!deletingExpense}
-        onOpenChange={(open) => {
-          if (!open) setDeletingExpense(null)
-        }}
-      >
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <div className="flex items-center gap-2.5">
-              <div className="flex size-9 items-center justify-center rounded-lg bg-destructive/10 text-destructive">
-                <RiAlertLine className="size-5" />
-              </div>
-              <div>
-                <DialogTitle className="text-base font-semibold">
-                  Hapus Catatan Pengeluaran?
-                </DialogTitle>
-                <DialogDescription className="text-xs text-muted-foreground">
-                  Tindakan ini tidak dapat dibatalkan. Catatan beban ini akan
-                  dihapus dari database armada.
-                </DialogDescription>
-              </div>
-            </div>
-          </DialogHeader>
-
-          {deletingExpense && (
-            <div className="rounded-lg border border-border bg-muted/40 p-3 text-xs">
-              <div className="flex justify-between py-0.5">
-                <span className="text-muted-foreground">Tanggal:</span>
-                <span className="font-medium text-foreground">
-                  {formatDateIndonesian(deletingExpense.expenseDate)}
-                </span>
-              </div>
-              <div className="flex justify-between py-0.5">
-                <span className="text-muted-foreground">Armada:</span>
-                <span className="font-medium text-foreground">
-                  {formatPlateNumber(deletingExpense.truckId)}
-                </span>
-              </div>
-              <div className="flex justify-between py-0.5">
-                <span className="text-muted-foreground">Kategori:</span>
-                <span className="font-medium text-foreground">
-                  {deletingExpense.category}
-                </span>
-              </div>
-              <div className="flex justify-between py-0.5">
-                <span className="text-muted-foreground">Deskripsi:</span>
-                <span className="font-medium text-foreground">
-                  {deletingExpense.description}
-                </span>
-              </div>
-              <div className="mt-1 flex justify-between border-t border-border/70 pt-1.5 font-bold">
-                <span>Total Beban:</span>
-                <span className="text-rose-600 dark:text-rose-400">
-                  {formatCurrency(
-                    (parseFloat(String(deletingExpense.amount)) || 0) +
-                      (parseFloat(String(deletingExpense.adminFee ?? "0")) || 0)
-                  )}
-                </span>
-              </div>
-            </div>
-          )}
-
-          <DialogFooter className="gap-2 sm:justify-end">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setDeletingExpense(null)}
-              disabled={isDeleting}
-            >
-              Batal
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              size="sm"
-              onClick={handleDeleteConfirm}
-              loading={isDeleting}
-              loadingText="Menghapus"
-            >
-              Hapus Pengeluaran
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   )
 }

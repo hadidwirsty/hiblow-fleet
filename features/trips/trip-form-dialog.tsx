@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { useUIStore } from "@/stores/theme"
 import {
   Popover,
   PopoverContent,
@@ -97,6 +98,7 @@ export function TripFormDialog({
     [isControlled, controlledOnOpenChange]
   )
   const [isSubmitting, setIsSubmitting] = React.useState(false)
+  const { setModalSuccess } = useUIStore()
 
   const [orderDateOpen, setOrderDateOpen] = React.useState(false)
   const [unloadingDateOpen, setUnloadingDateOpen] = React.useState(false)
@@ -475,6 +477,12 @@ export function TripFormDialog({
           setSelectedRate(null)
           setSelectedRateId(null)
           setIsSanguManuallyEdited(false)
+          setModalSuccess({
+            open: true,
+            title: "Ritase Berhasil Dicatat",
+            message: `Surat jalan ritase order #${payload.orderNumber} berhasil disimpan ke sistem.`,
+            actionMessage: "Selesai",
+          })
         } else {
           toast.error(res.error || "Gagal menyimpan ritase.")
         }
@@ -490,6 +498,12 @@ export function TripFormDialog({
         if (res.success) {
           toast.success("Surat jalan ritase berhasil diperbarui!")
           setOpen(false)
+          setModalSuccess({
+            open: true,
+            title: "Perubahan Tersimpan",
+            message: `Data surat jalan ritase order #${payload.orderNumber} berhasil diperbarui.`,
+            actionMessage: "Selesai",
+          })
         } else {
           toast.error(res.error || "Gagal memperbarui ritase.")
         }

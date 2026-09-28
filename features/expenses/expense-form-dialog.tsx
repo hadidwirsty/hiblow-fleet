@@ -26,6 +26,8 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { createExpense, updateExpense } from "./expenses.actions"
 import { createExpenseSchema, EXPENSE_CATEGORIES } from "./expenses.schema"
+import { useUIStore } from "@/stores/theme"
+import { formatCurrency } from "@/lib/utils"
 
 import type { Expense } from "@/db/schema"
 import type { ExpenseCategory } from "./expenses.schema"
@@ -50,6 +52,8 @@ export function ExpenseFormDialog({
   const setOpen = isControlled
     ? (val: boolean) => controlledOnOpenChange?.(val)
     : setInternalOpen
+
+  const { setModalSuccess } = useUIStore()
 
   const [isSubmitting, setIsSubmitting] = React.useState(false)
 
@@ -133,6 +137,12 @@ export function ExpenseFormDialog({
           return
         }
         toast.success("Catatan pengeluaran berhasil diperbarui!")
+        setModalSuccess({
+          open: true,
+          title: "Pengeluaran Berhasil Diperbarui",
+          message: `Catatan pengeluaran "${data.description}" berhasil diperbarui.`,
+          actionMessage: "Selesai",
+        })
       } else {
         const result = await createExpense(data)
         if (!result.success) {
@@ -140,6 +150,15 @@ export function ExpenseFormDialog({
           return
         }
         toast.success("Pengeluaran baru berhasil dicatat!")
+        const totalAmount =
+          (parseFloat(data.amount) || 0) +
+          (parseFloat(data.adminFee ?? "0") || 0)
+        setModalSuccess({
+          open: true,
+          title: "Pengeluaran Berhasil Dicatat",
+          message: `Catatan pengeluaran "${data.description}" sebesar ${formatCurrency(totalAmount)} berhasil disimpan.`,
+          actionMessage: "Selesai",
+        })
       }
 
       setOpen(false)
