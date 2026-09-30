@@ -151,7 +151,6 @@ export async function deleteRateReference(id: string) {
       }
     }
 
-    // Periksa apakah tarif sudah digunakan pada transaksi ritase
     const usedInTrips = await db
       .select({ id: trips.id })
       .from(trips)

@@ -7,6 +7,7 @@ import {
   RiCloseLine,
   RiDeleteBinLine,
   RiEditLine,
+  RiEyeLine,
   RiFilterLine,
   RiMoreLine,
   RiPercentLine,
@@ -51,15 +52,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import type { RateReference } from "@/db/schema"
 import {
   deleteRateReference,
   toggleRateReferenceStatus,
 } from "@/features/rates/rates.actions"
+import { RateDetailSheet } from "@/features/rates/rate-detail-sheet"
 import { RateFormDialog } from "@/features/rates/rate-form-dialog"
-import { useUIStore } from "@/stores/theme"
 import { RateMobileCard } from "@/features/rates/rate-mobile-card"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, formatPercentage } from "@/lib/utils"
+import { useUIStore } from "@/stores/theme"
+import type { RateReference } from "@/db/schema"
 
 interface RatesTableProps {
   rates: RateReference[]
@@ -88,6 +90,8 @@ export function RatesTable({
   // Dialog action state
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingRate, setEditingRate] = useState<RateReference | null>(null)
+  const [selectedDetailRate, setSelectedDetailRate] =
+    useState<RateReference | null>(null)
 
   const isFiltered =
     Boolean(search.trim()) ||
@@ -104,15 +108,12 @@ export function RatesTable({
   // Filtered dataset
   const filteredRates = useMemo(() => {
     return rates.filter((rate) => {
-      // 1. Search filter (city, destination, clientName, originPlant)
+      // 1. Search filter: Hanya kota tujuan dan tujuan bongkar (pabrik telah tercakup pada filter dropdown)
       if (search.trim()) {
         const query = search.toLowerCase()
         const matchCity = rate.city.toLowerCase().includes(query)
         const matchDest = rate.destination.toLowerCase().includes(query)
-        const matchClient = rate.clientName.toLowerCase().includes(query)
-        const matchOrigin = rate.originPlant?.toLowerCase().includes(query)
-        if (!matchCity && !matchDest && !matchClient && !matchOrigin)
-          return false
+        if (!matchCity && !matchDest) return false
       }
 
       // 2. Client filter
@@ -134,6 +135,10 @@ export function RatesTable({
     const start = (currentPage - 1) * pageSize
     return filteredRates.slice(start, start + pageSize)
   }, [filteredRates, currentPage, pageSize])
+
+  const startIndex =
+    filteredRates.length === 0 ? 0 : (currentPage - 1) * pageSize + 1
+  const endIndex = Math.min(currentPage * pageSize, filteredRates.length)
 
   const { setModalDelete, setModalInactive, setModalSuccess } = useUIStore()
 
@@ -207,137 +212,124 @@ export function RatesTable({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="w-full min-w-0 space-y-4">
       {/* Search & Filter Toolbar Terpadu */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative flex-1 sm:max-w-md md:max-w-lg">
-          <RiSearchLine className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+      <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+        {/* Search Bar Instan (Tinggi h-10 setara pembungkus filter) */}
+        <div className="relative w-full xl:max-w-md xl:shrink-0">
+          <RiSearchLine className="absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}
             onChange={(e) => {
               setSearch(e.target.value)
               setCurrentPage(1)
             }}
-            placeholder="Cari kota, tujuan, atau pabrik..."
-            className="h-9 w-full rounded-lg border-border/70 bg-card/60 pl-9 text-xs shadow-2xs focus-visible:ring-1"
+            placeholder="Cari kota tujuan atau tujuan bongkar..."
+            className="h-10 w-full rounded-xl border-border/70 bg-card/60 pl-9.5 text-xs shadow-2xs focus-visible:ring-1"
           />
         </div>
 
-        {/* Filter Group: Dibungkus Menjadi Satu Kontainer */}
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex w-full items-center gap-1.5 rounded-xl border border-border/80 bg-muted/40 p-1 shadow-2xs sm:w-auto">
-            <div className="hidden items-center gap-1 px-2 text-xs font-medium text-muted-foreground sm:flex">
-              <RiFilterLine className="size-3.5" />
-              <span>Filter:</span>
-            </div>
-
-            {/* Filter Klien */}
-            <Select
-              value={selectedClient}
-              onValueChange={(val) => {
-                if (val) {
-                  setSelectedClient(val)
-                  setCurrentPage(1)
-                }
-              }}
-            >
-              <SelectTrigger className="h-7.5 min-w-0 flex-1 rounded-lg border-border/60 bg-background px-2.5 text-xs font-medium text-foreground shadow-2xs hover:bg-accent/50 sm:w-40 sm:flex-none">
-                <SelectValue>
-                  {selectedClient === "ALL" ? "Semua Pabrik" : selectedClient}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL" className="text-xs font-medium">
-                  Semua Pabrik
-                </SelectItem>
-                {distinctClients.map((client) => (
-                  <SelectItem key={client} value={client} className="text-xs">
-                    {client}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* Filter Status */}
-            <Select
-              value={selectedStatus}
-              onValueChange={(val) => {
-                if (val) {
-                  setSelectedStatus(val)
-                  setCurrentPage(1)
-                }
-              }}
-            >
-              <SelectTrigger className="h-7.5 min-w-0 flex-1 rounded-lg border-border/60 bg-background px-2.5 text-xs font-medium text-foreground shadow-2xs hover:bg-accent/50 sm:w-32 sm:flex-none">
-                <SelectValue>
-                  {selectedStatus === "ALL"
-                    ? "Semua Status"
-                    : selectedStatus === "ACTIVE"
-                      ? "Aktif"
-                      : "Non-Aktif"}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL" className="text-xs font-medium">
-                  Semua Status
-                </SelectItem>
-                <SelectItem value="ACTIVE" className="text-xs">
-                  Aktif
-                </SelectItem>
-                <SelectItem value="INACTIVE" className="text-xs">
-                  Non-Aktif
-                </SelectItem>
-              </SelectContent>
-            </Select>
-
-            {/* Page Size: Hanya Tampil Selain di Mobile (Tablet & Desktop) */}
-            <div className="hidden sm:block">
-              <Select
-                value={pageSize.toString()}
-                onValueChange={(val) => {
-                  if (val) {
-                    setPageSize(Number(val))
-                    setCurrentPage(1)
-                  }
-                }}
+        {/* Filter Group: Kapsul Terpadu Responsif (Tinggi h-10 di tablet & desktop) */}
+        <div className="flex w-full flex-col gap-2 rounded-xl border border-border/80 bg-muted/40 p-2.5 shadow-2xs sm:h-10 sm:w-full sm:flex-row sm:items-center sm:gap-2 sm:px-2 sm:py-0 xl:h-10 xl:w-auto xl:shrink-0">
+          {/* Header Filter di Mobile */}
+          <div className="flex items-center justify-between px-0.5 text-xs font-semibold text-muted-foreground sm:hidden">
+            <span className="flex items-center gap-1.5">
+              <RiFilterLine className="size-3.5 text-primary" />
+              <span>Filter Data:</span>
+            </span>
+            {isFiltered && (
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                className="flex cursor-pointer items-center gap-1 text-[11px] font-medium text-destructive hover:underline"
               >
-                <SelectTrigger className="h-7.5 w-28 rounded-lg border-border/60 bg-background px-2.5 text-xs font-medium text-foreground shadow-2xs hover:bg-accent/50">
-                  <SelectValue>{pageSize} Baris</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="10" className="text-xs font-medium">
-                    10 Baris
-                  </SelectItem>
-                  <SelectItem value="25" className="text-xs font-medium">
-                    25 Baris
-                  </SelectItem>
-                  <SelectItem value="50" className="text-xs font-medium">
-                    50 Baris
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Reset Button saat filter aktif */}
-            {(Boolean(search.trim()) ||
-              selectedClient !== "ALL" ||
-              selectedStatus !== "ALL") && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setSearch("")
-                  setSelectedClient("ALL")
-                  setSelectedStatus("ALL")
-                  setCurrentPage(1)
-                }}
-                className="h-7.5 shrink-0 px-2 text-xs text-muted-foreground hover:text-foreground"
-              >
-                <RiCloseLine className="size-3.5" />
-                <span className="hidden sm:inline">Reset</span>
-              </Button>
+                <RiCloseLine className="size-3" />
+                <span>Reset Filter</span>
+              </button>
             )}
           </div>
+
+          {/* Label Filter di Tablet & Desktop */}
+          <div className="hidden shrink-0 items-center gap-1.5 px-1 text-xs font-medium text-muted-foreground sm:flex">
+            <RiFilterLine className="size-3.5 text-primary" />
+            <span>Filter:</span>
+          </div>
+
+          {/* 1. Filter Pabrik */}
+          <Select
+            value={selectedClient}
+            onValueChange={(val) => {
+              if (val) {
+                setSelectedClient(val)
+                setCurrentPage(1)
+              }
+            }}
+          >
+            <SelectTrigger className="h-8.5 w-full rounded-lg border-border/60 bg-background px-2.5 text-xs font-medium text-foreground shadow-2xs hover:bg-accent/50 sm:h-7.5 sm:min-w-0 sm:flex-1 xl:w-56 xl:flex-none">
+              <SelectValue>
+                {selectedClient === "ALL" ? "Semua Pabrik" : selectedClient}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent
+              align="start"
+              alignItemWithTrigger={false}
+              className="w-auto max-w-[calc(100vw-2rem)] min-w-56 sm:min-w-70"
+            >
+              <SelectItem value="ALL" className="text-xs font-medium">
+                Semua Pabrik
+              </SelectItem>
+              {distinctClients.map((client) => (
+                <SelectItem key={client} value={client} className="text-xs">
+                  {client}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* 2. Filter Status */}
+          <Select
+            value={selectedStatus}
+            onValueChange={(val) => {
+              if (val) {
+                setSelectedStatus(val)
+                setCurrentPage(1)
+              }
+            }}
+          >
+            <SelectTrigger className="h-8.5 w-full rounded-lg border-border/60 bg-background px-2.5 text-xs font-medium text-foreground shadow-2xs hover:bg-accent/50 sm:h-7.5 sm:min-w-0 sm:flex-1 xl:w-36 xl:flex-none">
+              <SelectValue>
+                {selectedStatus === "ALL"
+                  ? "Semua Status"
+                  : selectedStatus === "ACTIVE"
+                    ? "Aktif"
+                    : "Nonaktif"}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent align="start" alignItemWithTrigger={false}>
+              <SelectItem value="ALL" className="text-xs font-medium">
+                Semua Status
+              </SelectItem>
+              <SelectItem value="ACTIVE" className="text-xs">
+                Aktif
+              </SelectItem>
+              <SelectItem value="INACTIVE" className="text-xs">
+                Nonaktif
+              </SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Reset Button di Tablet & Desktop */}
+          {isFiltered && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleResetFilters}
+              className="hidden h-7.5 shrink-0 px-2 text-xs text-muted-foreground hover:text-foreground sm:inline-flex"
+            >
+              <RiCloseLine className="size-3.5" />
+              <span>Reset</span>
+            </Button>
+          )}
         </div>
       </div>
 
@@ -363,29 +355,29 @@ export function RatesTable({
               </EmptyTitle>
               <EmptyDescription>
                 {isFiltered
-                  ? "Tidak ada referensi tarif yang sesuai dengan pencarian atau filter aktif."
-                  : "Daftar referensi tarif pabrik masih kosong. Mulai tambahkan rute pertama Anda."}
+                  ? "Tidak ada data rute tarif yang sesuai dengan pencarian atau filter aktif Anda."
+                  : "Daftar referensi tarif pabrik masih kosong. Mulai daftarkan rute pertama Anda."}
               </EmptyDescription>
             </EmptyHeader>
-            <EmptyContent>
+            <EmptyContent className="mt-3 w-full max-w-xs">
               {isFiltered ? (
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="default"
                   onClick={handleResetFilters}
-                  className="gap-1.5"
+                  className="h-10 gap-2 px-5 text-sm font-medium shadow-xs"
                 >
-                  <RiCloseLine className="size-3.5" />
+                  <RiCloseLine className="size-4" />
                   <span>Reset Filter</span>
                 </Button>
               ) : (
                 <Button
-                  size="sm"
+                  size="default"
                   onClick={() => setIsCreateOpen(true)}
-                  className="gap-1.5"
+                  className="h-10 gap-2 px-6 text-sm font-medium shadow-xs transition-all hover:shadow-sm"
                 >
-                  <RiAddLine className="size-4" />
-                  <span>Tambah Tarif Baru</span>
+                  <RiAddLine className="size-4.5" />
+                  <span>Tambah Tarif</span>
                 </Button>
               )}
             </EmptyContent>
@@ -395,6 +387,7 @@ export function RatesTable({
             <RateMobileCard
               key={rate.id}
               rate={rate}
+              onViewDetail={setSelectedDetailRate}
               onEdit={setEditingRate}
               onToggleStatus={handleToggleStatus}
               onDelete={promptDeleteRate}
@@ -404,43 +397,53 @@ export function RatesTable({
       </div>
 
       {/* Desktop Table Container (>= md) */}
-      <div className="hidden overflow-hidden rounded-xl border bg-card shadow-xs md:block">
-        <div className="overflow-x-auto">
+      <div className="hidden w-full max-w-full min-w-0 overflow-hidden rounded-xl border bg-card shadow-xs md:block">
+        <div className="w-full overflow-x-auto">
           <Table>
             <TableHeader className="bg-muted/40">
               <TableRow>
-                <TableHead className="w-12 text-center text-xs">No</TableHead>
-                <TableHead className="text-xs font-semibold">
+                <TableHead className="w-12 py-3 text-center text-xs font-semibold whitespace-nowrap text-foreground">
+                  No
+                </TableHead>
+                <TableHead className="min-w-44 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
                   Pabrik Asal
                 </TableHead>
-                <TableHead className="text-xs font-semibold">
+                <TableHead className="min-w-32 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
                   Kota Tujuan
                 </TableHead>
-                <TableHead className="min-w-45 text-xs font-semibold">
+                <TableHead className="min-w-48 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
                   Tujuan Bongkar (Proyek / BP)
                 </TableHead>
-                <TableHead className="text-right text-xs font-semibold">
+                <TableHead className="min-w-32 py-3 text-right text-xs font-semibold whitespace-nowrap text-foreground">
                   Tarif OA / Ton
                 </TableHead>
-                <TableHead className="text-right text-xs font-semibold">
+                <TableHead className="min-w-32 py-3 text-right text-xs font-semibold whitespace-nowrap text-foreground">
+                  Est. Jumlah
+                </TableHead>
+                <TableHead className="min-w-24 py-3 text-right text-xs font-semibold whitespace-nowrap text-foreground">
                   % Sangu
                 </TableHead>
-                <TableHead className="text-right text-xs font-semibold">
-                  Acuan UJ (31t)
+                <TableHead className="min-w-32 py-3 text-right text-xs font-semibold whitespace-nowrap text-foreground">
+                  Sangu Supir
                 </TableHead>
-                <TableHead className="text-center text-xs font-semibold">
+                <TableHead className="min-w-32 py-3 text-right text-xs font-semibold whitespace-nowrap text-foreground">
+                  Est. Profit
+                </TableHead>
+                <TableHead className="min-w-24 py-3 text-center text-xs font-semibold whitespace-nowrap text-foreground">
                   Potongan
                 </TableHead>
-                <TableHead className="text-center text-xs font-semibold">
+                <TableHead className="min-w-24 py-3 text-center text-xs font-semibold whitespace-nowrap text-foreground">
                   Status
                 </TableHead>
-                <TableHead className="w-12 text-center text-xs">Aksi</TableHead>
+                <TableHead className="w-16 py-3 text-center text-xs font-semibold whitespace-nowrap text-foreground">
+                  Aksi
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedRates.length === 0 ? (
                 <TableRow className="hover:bg-transparent">
-                  <TableCell colSpan={10} className="p-0">
+                  <TableCell colSpan={12} className="p-0">
                     <Empty className="w-full border-0 py-20 sm:py-24 md:py-28 lg:py-32">
                       <EmptyMedia
                         variant="icon"
@@ -482,7 +485,7 @@ export function RatesTable({
                             className="h-10 gap-2 px-6 text-sm font-medium shadow-xs transition-all hover:shadow-sm"
                           >
                             <RiAddLine className="size-4.5" />
-                            <span>Tambah Tarif Baru</span>
+                            <span>Tambah Tarif</span>
                           </Button>
                         )}
                       </EmptyContent>
@@ -493,9 +496,27 @@ export function RatesTable({
                 paginatedRates.map((rate, idx) => {
                   const numRate = parseFloat(rate.ratePerTon)
                   const numPct = parseFloat(rate.sanguPercentage)
-                  const numTon = parseFloat(rate.standardTonnage)
-                  const estimatedSangu =
-                    Math.round((numRate * numTon * numPct) / 1000) * 1000
+                  const numTon = parseFloat(rate.standardTonnage || "31")
+                  const rowJumlah = Math.round(numRate * numTon)
+                  const formulaSangu = Math.round(rowJumlah * numPct)
+
+                  const parsedDefaultSangu = rate.defaultSangu
+                    ? parseFloat(rate.defaultSangu)
+                    : 0
+                  const isLegacyThousandRounding =
+                    parsedDefaultSangu > 0 &&
+                    formulaSangu > 0 &&
+                    Math.abs(
+                      parsedDefaultSangu -
+                        Math.round(formulaSangu / 1000) * 1000
+                    ) === 0 &&
+                    Math.abs(parsedDefaultSangu - formulaSangu) < 1000
+
+                  const rowSangu =
+                    parsedDefaultSangu > 0 && !isLegacyThousandRounding
+                      ? parsedDefaultSangu
+                      : formulaSangu
+                  const rowProfit = rowJumlah - rowSangu
                   const rowNumber = (currentPage - 1) * pageSize + idx + 1
 
                   return (
@@ -503,10 +524,10 @@ export function RatesTable({
                       key={rate.id}
                       className="text-xs hover:bg-muted/30"
                     >
-                      <TableCell className="text-center font-mono text-muted-foreground">
+                      <TableCell className="text-center font-mono whitespace-nowrap text-muted-foreground">
                         {rowNumber}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-left whitespace-nowrap">
                         <Badge
                           variant="outline"
                           className="border-primary/20 bg-primary/5 text-[11px] font-semibold text-primary"
@@ -514,24 +535,36 @@ export function RatesTable({
                           {rate.originPlant || rate.clientName}
                         </Badge>
                       </TableCell>
-                      <TableCell className="font-semibold text-foreground">
+                      <TableCell className="text-left font-semibold whitespace-nowrap text-foreground">
                         {rate.city}
                       </TableCell>
-                      <TableCell className="font-medium text-foreground">
+                      <TableCell className="text-left font-medium whitespace-nowrap text-foreground">
                         {rate.destination}
                       </TableCell>
-                      <TableCell className="text-right font-mono font-medium">
+                      <TableCell className="text-right font-mono font-medium whitespace-nowrap text-foreground">
                         {formatCurrency(numRate)}
                       </TableCell>
-                      <TableCell className="text-right font-mono text-muted-foreground">
-                        {(numPct * 100).toFixed(1)}%
+                      <TableCell className="text-right font-mono font-medium whitespace-nowrap text-foreground">
+                        {formatCurrency(rowJumlah)}
                       </TableCell>
-                      <TableCell className="text-right font-mono font-semibold text-primary">
-                        {rate.defaultSangu
-                          ? formatCurrency(parseFloat(rate.defaultSangu))
-                          : formatCurrency(estimatedSangu)}
+                      <TableCell className="text-right font-mono whitespace-nowrap text-muted-foreground">
+                        {formatPercentage(rate.sanguPercentage)}
                       </TableCell>
-                      <TableCell className="text-center">
+                      <TableCell className="text-right font-mono font-semibold whitespace-nowrap text-primary">
+                        {formatCurrency(rowSangu)}
+                      </TableCell>
+                      <TableCell
+                        className={`text-right font-mono font-semibold whitespace-nowrap ${
+                          rowProfit > 0
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : rowProfit < 0
+                              ? "text-destructive"
+                              : "text-muted-foreground"
+                        }`}
+                      >
+                        {formatCurrency(rowProfit)}
+                      </TableCell>
+                      <TableCell className="text-center whitespace-nowrap">
                         {rate.hasSpecialDeductions ? (
                           <Badge
                             variant="secondary"
@@ -544,7 +577,7 @@ export function RatesTable({
                           <span className="text-muted-foreground/50">-</span>
                         )}
                       </TableCell>
-                      <TableCell className="text-center">
+                      <TableCell className="text-center whitespace-nowrap">
                         <Badge
                           variant={rate.isActive ? "default" : "outline"}
                           className={`text-[10px] ${
@@ -556,7 +589,7 @@ export function RatesTable({
                           {rate.isActive ? "Aktif" : "Nonaktif"}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-center">
+                      <TableCell className="text-center whitespace-nowrap">
                         <DropdownMenu>
                           <DropdownMenuTrigger
                             render={
@@ -577,6 +610,13 @@ export function RatesTable({
                             </DropdownMenuGroup>
                             <DropdownMenuSeparator />
                             <DropdownMenuGroup>
+                              <DropdownMenuItem
+                                className="cursor-pointer gap-2 text-xs"
+                                onClick={() => setSelectedDetailRate(rate)}
+                              >
+                                <RiEyeLine className="size-3.5" />
+                                <span>Lihat Detail</span>
+                              </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="cursor-pointer gap-2 text-xs"
                                 onClick={() => setEditingRate(rate)}
@@ -624,34 +664,57 @@ export function RatesTable({
       {/* Pagination Footer (Mobile & Desktop) */}
       <div className="flex flex-col items-center justify-between gap-3 rounded-xl border bg-card p-3 text-xs text-muted-foreground shadow-xs sm:flex-row sm:px-4">
         <div>
-          Menampilkan{" "}
-          <strong>
-            {filteredRates.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}
-          </strong>{" "}
-          -{" "}
-          <strong>
-            {Math.min(currentPage * pageSize, filteredRates.length)}
-          </strong>{" "}
-          dari <strong>{filteredRates.length}</strong> rute
+          Menampilkan <strong>{startIndex}</strong> -{" "}
+          <strong>{endIndex}</strong> dari{" "}
+          <strong>{filteredRates.length}</strong> rute
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Pilihan Jumlah Baris per Halaman (Hanya Tampil di Tablet & Desktop) */}
+          <div className="hidden items-center gap-1.5 sm:flex">
+            <span className="text-[11px] text-muted-foreground">Baris:</span>
+            <Select
+              value={pageSize.toString()}
+              onValueChange={(val) => {
+                if (val) {
+                  setPageSize(Number(val))
+                  setCurrentPage(1)
+                }
+              }}
+            >
+              <SelectTrigger className="h-7.5 w-24 rounded-lg border-border/60 bg-background px-2 text-xs font-medium text-foreground shadow-2xs hover:bg-accent/50">
+                <SelectValue>{pageSize} Baris</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10" className="text-xs font-medium">
+                  10 Baris
+                </SelectItem>
+                <SelectItem value="25" className="text-xs font-medium">
+                  25 Baris
+                </SelectItem>
+                <SelectItem value="50" className="text-xs font-medium">
+                  50 Baris
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <Button
             variant="outline"
             size="sm"
-            className="h-7 px-2.5 text-xs"
+            className="h-7.5 px-2.5 text-xs"
             disabled={currentPage <= 1}
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
           >
             Sebelumnya
           </Button>
-          <span className="px-2 font-medium text-foreground">
+          <span className="px-1 text-xs font-medium text-foreground">
             {currentPage} / {totalPages}
           </span>
           <Button
             variant="outline"
             size="sm"
-            className="h-7 px-2.5 text-xs"
+            className="h-7.5 px-2.5 text-xs"
             disabled={currentPage >= totalPages}
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
           >
@@ -665,7 +728,6 @@ export function RatesTable({
         mode="create"
         open={isCreateOpen}
         onOpenChange={setIsCreateOpen}
-        distinctClients={distinctClients}
         distinctOriginPlants={distinctOriginPlants}
       />
 
@@ -676,10 +738,21 @@ export function RatesTable({
           rate={editingRate}
           open={!!editingRate}
           onOpenChange={(isOpen) => !isOpen && setEditingRate(null)}
-          distinctClients={distinctClients}
           distinctOriginPlants={distinctOriginPlants}
         />
       )}
+
+      {/* Drawer Rincian Detail Referensi Tarif Pabrik */}
+      <RateDetailSheet
+        rate={selectedDetailRate}
+        open={!!selectedDetailRate}
+        onOpenChange={(isOpen) => !isOpen && setSelectedDetailRate(null)}
+        onEdit={(r) => {
+          setSelectedDetailRate(null)
+          setEditingRate(r)
+        }}
+        onToggleStatus={handleToggleStatus}
+      />
     </div>
   )
 }

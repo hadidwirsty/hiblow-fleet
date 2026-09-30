@@ -140,6 +140,41 @@ export const rateReferenceFilterSchema = z.object({
   offset: z.number().int().nonnegative().optional(),
 })
 
+export const rateFormSchema = z.object({
+  originPlant: z.string().trim().min(1, "Pabrik asal wajib dipilih"),
+  clientName: z.string().trim().min(1, "Nama pabrik/klien tidak boleh kosong"),
+  city: z.string().trim().min(1, "Nama kota tujuan wajib diisi"),
+  destination: z.string().trim().min(1, "Tujuan bongkar wajib diisi"),
+  ratePerTon: z
+    .string()
+    .min(1, "Tarif per ton wajib diisi")
+    .refine((val) => {
+      const num = parseFloat(val)
+      return !isNaN(num) && num > 0
+    }, "Tarif per ton harus lebih dari 0"),
+  standardTonnage: z
+    .string()
+    .min(1, "Tonase standar wajib diisi")
+    .refine((val) => {
+      const num = parseFloat(val)
+      return !isNaN(num) && num > 0
+    }, "Tonase standar harus lebih dari 0"),
+  sanguPercentage: z
+    .string()
+    .min(1, "Persentase sangu wajib diisi")
+    .refine((val) => {
+      const sanitized = val.replace(",", ".").trim()
+      const num = parseFloat(sanitized)
+      return !isNaN(num) && num > 0 && num <= 100
+    }, "Persentase sangu harus antara 0% dan 100%"),
+  defaultSangu: z.string().optional(),
+  additionalTonnageRate: z.string().optional(),
+  useAdditionalPercentage: z.boolean(),
+  additionalPercentage: z.string().optional(),
+  hasSpecialDeductions: z.boolean(),
+  isActive: z.boolean(),
+})
+
 export type CreateRateReferenceInput = z.input<typeof createRateReferenceSchema>
 export type CreateRateReferenceOutput = z.infer<
   typeof createRateReferenceSchema
@@ -149,3 +184,4 @@ export type UpdateRateReferenceOutput = z.infer<
   typeof updateRateReferenceSchema
 >
 export type RateReferenceFilter = z.infer<typeof rateReferenceFilterSchema>
+export type RateFormValues = z.infer<typeof rateFormSchema>

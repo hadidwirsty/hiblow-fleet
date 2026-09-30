@@ -9,6 +9,7 @@ import {
   listRateReferences,
 } from "@/features/rates/rates.queries"
 import { RateFormDialog } from "@/features/rates/rate-form-dialog"
+import { RatesExportButton } from "@/features/rates/rates-export-button"
 import { RatesSummary } from "@/features/rates/rates-summary"
 import { RatesTable } from "@/features/rates/rates-table"
 
@@ -30,7 +31,7 @@ export default async function RatesPage() {
     ])
 
   return (
-    <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+    <div className="flex w-full min-w-0 flex-col gap-4 py-4 md:gap-6 md:py-6">
       {/* Page Header */}
       <div className="flex flex-col gap-4 px-4 sm:flex-row sm:items-center sm:justify-between lg:px-6">
         <div className="space-y-1">
@@ -51,29 +52,28 @@ export default async function RatesPage() {
           </p>
         </div>
 
-        {/* CTA Button: Tambah Rute Baru */}
-        <div className="flex w-full items-center gap-2.5 sm:w-auto">
-          <RateFormDialog
-            distinctClients={distinctClients}
-            distinctOriginPlants={distinctOriginPlants}
-          />
+        {/* Action Controls Group: Ekspor & Tambah Tarif */}
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-2.5">
+          <RateFormDialog distinctOriginPlants={distinctOriginPlants} />
+          <RatesExportButton rates={rates} />
         </div>
       </div>
 
       {/* Main Content Area */}
-      <div className="space-y-6 px-4 lg:px-6">
+      <div className="w-full min-w-0 space-y-6 px-4 lg:px-6">
         {/* KPI Metric Cards */}
         <RatesSummary summary={summary} />
 
         {/* Rates Data Table */}
-        <div className="space-y-3">
+        <div className="w-full min-w-0 space-y-3">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-base font-semibold tracking-tight text-foreground">
                 Daftar Rute & Tarif
               </h2>
               <p className="text-xs text-muted-foreground">
-                Gunakan pencarian untuk menyaring kota atau nama pabrik tujuan
+                Gunakan pencarian untuk menyaring kota tujuan atau tujuan
+                bongkar
               </p>
             </div>
           </div>
