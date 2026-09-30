@@ -1,13 +1,8 @@
 import { describe, expect, it } from "vitest"
+import { formatPlateNumber } from "@/domain/trucks"
 
 describe("TripMobileCard logic and formatters", () => {
   it("formats plate numbers correctly", () => {
-    const formatPlateNumber = (truckId: string) => {
-      if (truckId === "W8187UA") return "W 8187 UA"
-      if (truckId === "H8133OF") return "H 8133 OF"
-      return truckId
-    }
-
     expect(formatPlateNumber("W8187UA")).toBe("W 8187 UA")
     expect(formatPlateNumber("H8133OF")).toBe("H 8133 OF")
     expect(formatPlateNumber("B1234XYZ")).toBe("B1234XYZ")

@@ -14,6 +14,7 @@ import {
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
+import { formatPlateNumber } from "@/domain/trucks"
 import { Button } from "@/components/ui/button"
 import { ExpensesExportButton } from "@/features/expenses/expenses-export-button"
 import {
@@ -74,12 +75,6 @@ const MONTH_NAMES = [
   { value: "11", label: "November" },
   { value: "12", label: "Desember" },
 ]
-
-function formatPlateNumber(truckId: string): string {
-  if (truckId === "W8187UA") return "W 8187 UA"
-  if (truckId === "H8133OF") return "H 8133 OF"
-  return truckId
-}
 
 function getCategoryBadge(category: string) {
   switch (category) {

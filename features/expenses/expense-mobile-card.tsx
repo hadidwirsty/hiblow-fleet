@@ -11,19 +11,14 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { formatCurrency, formatDateIndonesian } from "@/lib/utils"
+import { formatPlateNumber } from "@/domain/trucks"
 import type { ExpenseRecord } from "@/features/expenses/expenses-table"
+import { formatCurrency, formatDateIndonesian } from "@/lib/utils"
 
 interface ExpenseMobileCardProps {
   expense: ExpenseRecord
   onEdit?: (expense: ExpenseRecord) => void
   onDelete?: (expense: ExpenseRecord) => void
-}
-
-function formatPlateNumber(truckId: string): string {
-  if (truckId === "W8187UA") return "W 8187 UA"
-  if (truckId === "H8133OF") return "H 8133 OF"
-  return truckId
 }
 
 function getCategoryBadge(category: string) {
