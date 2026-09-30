@@ -4,12 +4,14 @@ import {
   RiCalendarLine,
   RiDeleteBinLine,
   RiEditLine,
+  RiEyeLine,
   RiFlightLandLine,
   RiFlightTakeoffLine,
   RiMapPinLine,
 } from "@remixicon/react"
 
 import { Badge } from "@/components/ui/badge"
+import { formatPlateNumber, getDriverName } from "@/domain/trucks"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import type { TripRecord } from "@/features/trips/trips-table"
@@ -22,23 +24,13 @@ interface TripMobileCardProps {
   onEdit?: (trip: TripRecord) => void
   onDelete?: (trip: TripRecord) => void
   onEditFee?: (trip: TripRecord) => void
-}
-
-function formatPlateNumber(truckId: string): string {
-  if (truckId === "W8187UA") return "W 8187 UA"
-  if (truckId === "H8133OF") return "H 8133 OF"
-  return truckId
-}
-
-function getDriverName(truckId: string): string {
-  if (truckId === "W8187UA") return "Triyono"
-  if (truckId === "H8133OF") return "Khoirul"
-  return "Supir"
+  onViewDetail?: (trip: TripRecord) => void
 }
 
 export function TripMobileCard({
   trip,
   originPlant = "-",
+  onViewDetail,
   onEdit,
   onDelete,
 }: TripMobileCardProps) {
@@ -235,8 +227,20 @@ export function TripMobileCard({
         )}
 
         {/* Action Buttons */}
-        {(onEdit || onDelete) && (
-          <div className="flex items-center justify-end gap-1.5 border-t border-border/60 pt-2.5">
+        {(onViewDetail || onEdit || onDelete) && (
+          <div className="flex flex-wrap items-center justify-end gap-1.5 border-t border-border/60 pt-2.5">
+            {onViewDetail && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => onViewDetail(trip)}
+                className="h-7 gap-1 px-2.5 text-[11px]"
+              >
+                <RiEyeLine className="size-3" />
+                <span>Detail</span>
+              </Button>
+            )}
             {onEdit && (
               <Button
                 type="button"

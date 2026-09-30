@@ -10,6 +10,7 @@ import {
   RiCloseLine,
   RiDeleteBinLine,
   RiEditLine,
+  RiEyeLine,
   RiFilterLine,
   RiMoreLine,
   RiSearchLine,
@@ -18,6 +19,7 @@ import {
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
+import { formatPlateNumber, getDriverAndTruck } from "@/domain/trucks"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 
@@ -61,6 +63,7 @@ import {
 } from "@/components/ui/table"
 import type { RateReference, trips } from "@/db/schema"
 import { deleteTrip } from "@/features/trips/trips.actions"
+import { TripDetailSheet } from "@/features/trips/trip-detail-sheet"
 import { TripFormDialog } from "@/features/trips/trip-form-dialog"
 import { TripMobileCard } from "@/features/trips/trip-mobile-card"
 import { filterTrips, isDoFeePaid } from "@/features/trips/trips.filter"
@@ -77,18 +80,6 @@ interface TripsTableProps {
     month?: number
     year?: number
   }
-}
-
-function formatPlateNumber(truckId: string): string {
-  if (truckId === "W8187UA") return "W 8187 UA"
-  if (truckId === "H8133OF") return "H 8133 OF"
-  return truckId
-}
-
-function getDriverAndTruck(truckId: string): { driver: string; plate: string } {
-  if (truckId === "W8187UA") return { driver: "Triyono", plate: "W 8187 UA" }
-  if (truckId === "H8133OF") return { driver: "Khoirul", plate: "H 8133 OF" }
-  return { driver: "Supir", plate: truckId }
 }
 
 function formatDateRangeLabel(range?: DateRange): string {
@@ -139,6 +130,8 @@ export function TripsTable({
 
   // Dialog state
   const [editingTrip, setEditingTrip] = useState<TripRecord | null>(null)
+  const [selectedDetailTrip, setSelectedDetailTrip] =
+    useState<TripRecord | null>(null)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
 
   const { setModalDelete, setModalSuccess } = useUIStore()
@@ -408,7 +401,7 @@ export function TripsTable({
                   className="h-10 gap-2 px-6 text-sm font-medium shadow-xs transition-all hover:shadow-sm"
                 >
                   <RiAddLine className="size-4.5" />
-                  <span>Tambah Ritase Baru</span>
+                  <span>Tambah Pencatatan Ritase</span>
                 </Button>
               )}
             </EmptyContent>
@@ -422,6 +415,7 @@ export function TripsTable({
                 key={trip.id}
                 trip={trip}
                 originPlant={originPlant}
+                onViewDetail={setSelectedDetailTrip}
                 onEdit={setEditingTrip}
                 onDelete={handlePromptDelete}
               />
@@ -525,7 +519,7 @@ export function TripsTable({
                             className="h-10 gap-2 px-6 text-sm font-medium shadow-xs transition-all hover:shadow-sm"
                           >
                             <RiAddLine className="size-4.5" />
-                            <span>Tambah Ritase Baru</span>
+                            <span>Tambah Pencatatan Ritase</span>
                           </Button>
                         )}
                       </EmptyContent>
@@ -693,6 +687,13 @@ export function TripsTable({
                             <DropdownMenuGroup>
                               <DropdownMenuItem
                                 className="cursor-pointer gap-2 text-xs"
+                                onClick={() => setSelectedDetailTrip(trip)}
+                              >
+                                <RiEyeLine className="size-3.5" />
+                                <span>Lihat Detail</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="cursor-pointer gap-2 text-xs"
                                 onClick={() => setEditingTrip(trip)}
                               >
                                 <RiEditLine className="size-3.5" />
@@ -793,12 +794,29 @@ export function TripsTable({
         />
       )}
 
-      {/* Modal Tambah Ritase Baru dari Empty State */}
+      {/* Modal Tambah Pencatatan Ritase dari Empty State */}
       <TripFormDialog
         rateReferences={rateReferences}
         open={isCreateOpen}
         onOpenChange={setIsCreateOpen}
         showTrigger={false}
+      />
+
+      {/* Drawer Rincian Detail Surat Jalan Ritase */}
+      <TripDetailSheet
+        trip={selectedDetailTrip}
+        open={!!selectedDetailTrip}
+        onOpenChange={(isOpen) => !isOpen && setSelectedDetailTrip(null)}
+        originPlant={
+          selectedDetailTrip
+            ? rateMap.get(selectedDetailTrip.rateReferenceId ?? "")
+                ?.originPlant || "-"
+            : "-"
+        }
+        onEdit={(t) => {
+          setSelectedDetailTrip(null)
+          setEditingTrip(t)
+        }}
       />
     </div>
   )
