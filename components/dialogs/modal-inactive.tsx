@@ -82,7 +82,7 @@ export default function ModalInactive() {
           <Button
             type="button"
             onClick={handleClose}
-            className="h-10 w-full rounded-full font-medium transition-all duration-200"
+            className="h-10 w-full font-medium transition-all duration-200"
             variant="outline"
             disabled={isPending}
           >
@@ -91,7 +91,7 @@ export default function ModalInactive() {
           <Button
             type="button"
             onClick={handleAction}
-            className="h-10 w-full rounded-full font-medium transition-all duration-200"
+            className="h-10 w-full font-medium transition-all duration-200"
             variant="destructive"
             loading={isPending}
             loadingText="Menonaktifkan"

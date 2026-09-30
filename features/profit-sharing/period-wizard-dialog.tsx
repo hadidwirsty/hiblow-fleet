@@ -286,7 +286,7 @@ export function PeriodWizardDialog({
               className="h-9 w-full gap-1.5 px-4 font-medium shadow-sm sm:w-auto"
             >
               <RiAddLine className="size-4" />
-              <span>Tutup Buku Baru</span>
+              <span>Tutup Buku</span>
             </Button>
           )}
         </div>

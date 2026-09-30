@@ -525,7 +525,7 @@ export function TripFormDialog({
           className="h-9 w-full gap-1.5 px-4 font-medium shadow-sm sm:w-auto"
         >
           <RiAddLine className="size-4" />
-          <span>Tambah Ritase Baru</span>
+          <span>Tambah Pencatatan Ritase</span>
         </Button>
       )}
 
@@ -538,7 +538,9 @@ export function TripFormDialog({
               <RiTruckLine className="size-4" />
             </div>
             <span>
-              {mode === "create" ? "Tambah Ritase Baru" : "Edit Ritase"}
+              {mode === "create"
+                ? "Tambah Pencatatan Ritase Baru"
+                : "Edit Pencatatan Ritase"}
             </span>
           </div>
         }
@@ -1316,11 +1318,11 @@ export function TripFormDialog({
           </div>
 
           {/* Footer: Tombol Batal & Simpan */}
-          <div className="flex items-center justify-end gap-2 border-t px-2 pt-3 sm:px-0">
+          <div className="flex items-center justify-end gap-2 border-t px-2 pt-3">
             <Button
               type="button"
               variant="outline"
-              className="w-1/2 sm:w-36"
+              className="w-1/2"
               size="lg"
               onClick={() => setOpen(false)}
               disabled={isSubmitting}
@@ -1329,7 +1331,7 @@ export function TripFormDialog({
             </Button>
             <Button
               type="submit"
-              className="w-1/2 sm:w-36"
+              className="w-1/2"
               size="lg"
               loading={isSubmitting}
               loadingText="Menyimpan"

@@ -74,7 +74,7 @@ export default function ModalSuccess() {
             type="button"
             onClick={handleAction}
             variant={modalSuccess.actionVariant || "outline"}
-            className="h-10 w-full rounded-full font-medium transition-all duration-200"
+            className="h-10 w-full font-medium transition-all duration-200"
           >
             {modalSuccess.actionMessage || "Tutup"}
           </Button>

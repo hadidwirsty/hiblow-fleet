@@ -185,7 +185,7 @@ export function ExpenseFormDialog({
               className="h-9 w-full gap-1.5 px-4 font-medium shadow-sm sm:w-auto"
             >
               <RiAddLine className="size-4" />
-              <span>Tambah Pengeluaran Baru</span>
+              <span>Tambah Pengeluaran Truk</span>
             </Button>
           )}
         </div>
