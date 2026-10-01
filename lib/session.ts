@@ -13,6 +13,18 @@ export async function getCurrentSession() {
 }
 
 /**
+ * Get default href based on user role and authentication status.
+ */
+export async function getDefaultHref(): Promise<string> {
+  const session = await getCurrentSession()
+  return session?.user?.role === "admin"
+    ? "/dashboard"
+    : session?.user
+      ? "/profit-sharing"
+      : "/"
+}
+
+/**
  * Requires an active session. Throws UNAUTHORIZED if not logged in.
  */
 export async function requireSession() {
