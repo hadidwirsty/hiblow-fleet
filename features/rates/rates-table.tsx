@@ -3,13 +3,13 @@
 import { useMemo, useState } from "react"
 import {
   RiAddLine,
+  RiArrowDownSLine,
   RiCheckLine,
   RiCloseLine,
   RiDeleteBinLine,
   RiEditLine,
   RiEyeLine,
   RiFilterLine,
-  RiMoreLine,
   RiPercentLine,
   RiRouteLine,
   RiSearchLine,
@@ -398,267 +398,262 @@ export function RatesTable({
 
       {/* Desktop Table Container (>= md) */}
       <div className="hidden w-full max-w-full min-w-0 overflow-hidden rounded-xl border bg-card shadow-xs md:block">
-        <div className="w-full overflow-x-auto">
-          <Table>
-            <TableHeader className="bg-muted/40">
-              <TableRow>
-                <TableHead className="w-12 py-3 text-center text-xs font-semibold whitespace-nowrap text-foreground">
-                  No
-                </TableHead>
-                <TableHead className="min-w-44 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
-                  Pabrik Asal
-                </TableHead>
-                <TableHead className="min-w-32 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
-                  Kota Tujuan
-                </TableHead>
-                <TableHead className="min-w-48 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
-                  Tujuan Bongkar (Proyek / BP)
-                </TableHead>
-                <TableHead className="min-w-32 py-3 text-right text-xs font-semibold whitespace-nowrap text-foreground">
-                  Tarif OA / Ton
-                </TableHead>
-                <TableHead className="min-w-32 py-3 text-right text-xs font-semibold whitespace-nowrap text-foreground">
-                  Est. Jumlah
-                </TableHead>
-                <TableHead className="min-w-24 py-3 text-right text-xs font-semibold whitespace-nowrap text-foreground">
-                  % Sangu
-                </TableHead>
-                <TableHead className="min-w-32 py-3 text-right text-xs font-semibold whitespace-nowrap text-foreground">
-                  Sangu Supir
-                </TableHead>
-                <TableHead className="min-w-32 py-3 text-right text-xs font-semibold whitespace-nowrap text-foreground">
-                  Est. Profit
-                </TableHead>
-                <TableHead className="min-w-24 py-3 text-center text-xs font-semibold whitespace-nowrap text-foreground">
-                  Potongan
-                </TableHead>
-                <TableHead className="min-w-24 py-3 text-center text-xs font-semibold whitespace-nowrap text-foreground">
-                  Status
-                </TableHead>
-                <TableHead className="w-16 py-3 text-center text-xs font-semibold whitespace-nowrap text-foreground">
-                  Aksi
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedRates.length === 0 ? (
-                <TableRow className="hover:bg-transparent">
-                  <TableCell colSpan={12} className="p-0">
-                    <Empty className="w-full border-0 py-20 sm:py-24 md:py-28 lg:py-32">
-                      <EmptyMedia
-                        variant="icon"
-                        className="mb-3 size-12 rounded-2xl bg-primary/10 text-primary md:size-14"
-                      >
-                        {isFiltered ? (
-                          <RiSearchLine className="size-6 text-primary md:size-7" />
-                        ) : (
-                          <RiRouteLine className="size-6 text-primary md:size-7" />
-                        )}
-                      </EmptyMedia>
-                      <EmptyHeader className="max-w-md gap-2.5 sm:max-w-lg md:max-w-xl lg:max-w-2xl">
-                        <EmptyTitle className="text-base font-semibold sm:text-lg md:text-xl">
-                          {isFiltered
-                            ? "Tidak Ada Rute yang Cocok"
-                            : "Belum Ada Referensi Tarif"}
-                        </EmptyTitle>
-                        <EmptyDescription className="text-xs leading-relaxed text-muted-foreground sm:text-sm md:text-base">
-                          {isFiltered
-                            ? "Tidak ada referensi tarif yang sesuai dengan kata kunci pencarian atau kombinasi filter aktif Anda. Silakan ubah kata kunci atau klik tombol reset di bawah."
-                            : "Daftar referensi tarif pabrik saat ini masih kosong. Mulai daftarkan rute baru beserta acuan tarif ongkos angkut (OA) dan uang jalan supir."}
-                        </EmptyDescription>
-                      </EmptyHeader>
-                      <EmptyContent className="mt-3 w-full max-w-xs sm:max-w-sm md:max-w-md">
-                        {isFiltered ? (
-                          <Button
-                            variant="outline"
-                            size="default"
-                            onClick={handleResetFilters}
-                            className="h-10 gap-2 px-5 text-sm font-medium shadow-xs"
-                          >
-                            <RiCloseLine className="size-4" />
-                            <span>Reset Filter</span>
-                          </Button>
-                        ) : (
-                          <Button
-                            size="default"
-                            onClick={() => setIsCreateOpen(true)}
-                            className="h-10 gap-2 px-6 text-sm font-medium shadow-xs transition-all hover:shadow-sm"
-                          >
-                            <RiAddLine className="size-4.5" />
-                            <span>Tambah Tarif</span>
-                          </Button>
-                        )}
-                      </EmptyContent>
-                    </Empty>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                paginatedRates.map((rate, idx) => {
-                  const numRate = parseFloat(rate.ratePerTon)
-                  const numPct = parseFloat(rate.sanguPercentage)
-                  const numTon = parseFloat(rate.standardTonnage || "31")
-                  const rowJumlah = Math.round(numRate * numTon)
-                  const formulaSangu = Math.round(rowJumlah * numPct)
-
-                  const parsedDefaultSangu = rate.defaultSangu
-                    ? parseFloat(rate.defaultSangu)
-                    : 0
-                  const isLegacyThousandRounding =
-                    parsedDefaultSangu > 0 &&
-                    formulaSangu > 0 &&
-                    Math.abs(
-                      parsedDefaultSangu -
-                        Math.round(formulaSangu / 1000) * 1000
-                    ) === 0 &&
-                    Math.abs(parsedDefaultSangu - formulaSangu) < 1000
-
-                  const rowSangu =
-                    parsedDefaultSangu > 0 && !isLegacyThousandRounding
-                      ? parsedDefaultSangu
-                      : formulaSangu
-                  const rowProfit = rowJumlah - rowSangu
-                  const rowNumber = (currentPage - 1) * pageSize + idx + 1
-
-                  return (
-                    <TableRow
-                      key={rate.id}
-                      className="text-xs hover:bg-muted/30"
+        <Table containerClassName="max-h-[calc(100vh-14rem)]">
+          <TableHeader>
+            <TableRow className="border-border hover:bg-muted/95">
+              <TableHead className="w-12 py-3 text-center text-xs font-semibold whitespace-nowrap text-foreground">
+                No
+              </TableHead>
+              <TableHead className="min-w-44 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
+                Pabrik Asal
+              </TableHead>
+              <TableHead className="min-w-32 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
+                Kota Tujuan
+              </TableHead>
+              <TableHead className="min-w-48 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
+                Tujuan Bongkar (Proyek / BP)
+              </TableHead>
+              <TableHead className="min-w-32 py-3 text-right text-xs font-semibold whitespace-nowrap text-foreground">
+                Tarif OA / Ton
+              </TableHead>
+              <TableHead className="min-w-32 py-3 text-right text-xs font-semibold whitespace-nowrap text-foreground">
+                Est. Jumlah
+              </TableHead>
+              <TableHead className="min-w-24 py-3 text-right text-xs font-semibold whitespace-nowrap text-foreground">
+                % Sangu
+              </TableHead>
+              <TableHead className="min-w-32 py-3 text-right text-xs font-semibold whitespace-nowrap text-foreground">
+                Sangu Supir
+              </TableHead>
+              <TableHead className="min-w-32 py-3 text-right text-xs font-semibold whitespace-nowrap text-foreground">
+                Est. Profit
+              </TableHead>
+              <TableHead className="min-w-24 py-3 text-center text-xs font-semibold whitespace-nowrap text-foreground">
+                Potongan
+              </TableHead>
+              <TableHead className="min-w-24 py-3 text-center text-xs font-semibold whitespace-nowrap text-foreground">
+                Status
+              </TableHead>
+              <TableHead className="w-24 min-w-20 py-3 text-center text-xs font-semibold whitespace-nowrap text-foreground">
+                Aksi
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedRates.length === 0 ? (
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={12} className="p-0">
+                  <Empty className="w-full border-0 py-20 sm:py-24 md:py-28 lg:py-32">
+                    <EmptyMedia
+                      variant="icon"
+                      className="mb-3 size-12 rounded-2xl bg-primary/10 text-primary md:size-14"
                     >
-                      <TableCell className="text-center font-mono whitespace-nowrap text-muted-foreground">
-                        {rowNumber}
-                      </TableCell>
-                      <TableCell className="text-left whitespace-nowrap">
-                        <Badge
+                      {isFiltered ? (
+                        <RiSearchLine className="size-6 text-primary md:size-7" />
+                      ) : (
+                        <RiRouteLine className="size-6 text-primary md:size-7" />
+                      )}
+                    </EmptyMedia>
+                    <EmptyHeader className="max-w-md gap-2.5 sm:max-w-lg md:max-w-xl lg:max-w-2xl">
+                      <EmptyTitle className="text-base font-semibold sm:text-lg md:text-xl">
+                        {isFiltered
+                          ? "Tidak Ada Rute yang Cocok"
+                          : "Belum Ada Referensi Tarif"}
+                      </EmptyTitle>
+                      <EmptyDescription className="text-xs leading-relaxed text-muted-foreground sm:text-sm md:text-base">
+                        {isFiltered
+                          ? "Tidak ada referensi tarif yang sesuai dengan kata kunci pencarian atau kombinasi filter aktif Anda. Silakan ubah kata kunci atau klik tombol reset di bawah."
+                          : "Daftar referensi tarif pabrik saat ini masih kosong. Mulai daftarkan rute baru beserta acuan tarif ongkos angkut (OA) dan uang jalan supir."}
+                      </EmptyDescription>
+                    </EmptyHeader>
+                    <EmptyContent className="mt-3 w-full max-w-xs sm:max-w-sm md:max-w-md">
+                      {isFiltered ? (
+                        <Button
                           variant="outline"
-                          className="border-primary/20 bg-primary/5 text-[11px] font-semibold text-primary"
+                          size="default"
+                          onClick={handleResetFilters}
+                          className="h-10 gap-2 px-5 text-sm font-medium shadow-xs"
                         >
-                          {rate.originPlant || rate.clientName}
+                          <RiCloseLine className="size-4" />
+                          <span>Reset Filter</span>
+                        </Button>
+                      ) : (
+                        <Button
+                          size="default"
+                          onClick={() => setIsCreateOpen(true)}
+                          className="h-10 gap-2 px-6 text-sm font-medium shadow-xs transition-all hover:shadow-sm"
+                        >
+                          <RiAddLine className="size-4.5" />
+                          <span>Tambah Tarif</span>
+                        </Button>
+                      )}
+                    </EmptyContent>
+                  </Empty>
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedRates.map((rate, idx) => {
+                const numRate = parseFloat(rate.ratePerTon)
+                const numPct = parseFloat(rate.sanguPercentage)
+                const numTon = parseFloat(rate.standardTonnage || "31")
+                const rowJumlah = Math.round(numRate * numTon)
+                const formulaSangu = Math.round(rowJumlah * numPct)
+
+                const parsedDefaultSangu = rate.defaultSangu
+                  ? parseFloat(rate.defaultSangu)
+                  : 0
+                const isLegacyThousandRounding =
+                  parsedDefaultSangu > 0 &&
+                  formulaSangu > 0 &&
+                  Math.abs(
+                    parsedDefaultSangu - Math.round(formulaSangu / 1000) * 1000
+                  ) === 0 &&
+                  Math.abs(parsedDefaultSangu - formulaSangu) < 1000
+
+                const rowSangu =
+                  parsedDefaultSangu > 0 && !isLegacyThousandRounding
+                    ? parsedDefaultSangu
+                    : formulaSangu
+                const rowProfit = rowJumlah - rowSangu
+                const rowNumber = (currentPage - 1) * pageSize + idx + 1
+
+                return (
+                  <TableRow key={rate.id} className="text-xs hover:bg-muted/30">
+                    <TableCell className="text-center font-mono whitespace-nowrap text-muted-foreground">
+                      {rowNumber}
+                    </TableCell>
+                    <TableCell className="text-left whitespace-nowrap">
+                      <Badge
+                        variant="outline"
+                        className="border-primary/20 bg-primary/5 text-[11px] font-semibold text-primary"
+                      >
+                        {rate.originPlant || rate.clientName}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-left font-semibold whitespace-nowrap text-foreground">
+                      {rate.city}
+                    </TableCell>
+                    <TableCell className="text-left font-medium whitespace-nowrap text-foreground">
+                      {rate.destination}
+                    </TableCell>
+                    <TableCell className="text-right font-mono font-medium whitespace-nowrap text-foreground">
+                      {formatCurrency(numRate)}
+                    </TableCell>
+                    <TableCell className="text-right font-mono font-medium whitespace-nowrap text-foreground">
+                      {formatCurrency(rowJumlah)}
+                    </TableCell>
+                    <TableCell className="text-right font-mono whitespace-nowrap text-muted-foreground">
+                      {formatPercentage(rate.sanguPercentage)}
+                    </TableCell>
+                    <TableCell className="text-right font-mono font-semibold whitespace-nowrap text-primary">
+                      {formatCurrency(rowSangu)}
+                    </TableCell>
+                    <TableCell
+                      className={`text-right font-mono font-semibold whitespace-nowrap ${
+                        rowProfit > 0
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : rowProfit < 0
+                            ? "text-destructive"
+                            : "text-muted-foreground"
+                      }`}
+                    >
+                      {formatCurrency(rowProfit)}
+                    </TableCell>
+                    <TableCell className="text-center whitespace-nowrap">
+                      {rate.hasSpecialDeductions ? (
+                        <Badge
+                          variant="secondary"
+                          className="bg-purple-500/10 text-[10px] text-purple-700 dark:text-purple-300"
+                        >
+                          <RiPercentLine className="mr-0.5 size-3" />
+                          LJU
                         </Badge>
-                      </TableCell>
-                      <TableCell className="text-left font-semibold whitespace-nowrap text-foreground">
-                        {rate.city}
-                      </TableCell>
-                      <TableCell className="text-left font-medium whitespace-nowrap text-foreground">
-                        {rate.destination}
-                      </TableCell>
-                      <TableCell className="text-right font-mono font-medium whitespace-nowrap text-foreground">
-                        {formatCurrency(numRate)}
-                      </TableCell>
-                      <TableCell className="text-right font-mono font-medium whitespace-nowrap text-foreground">
-                        {formatCurrency(rowJumlah)}
-                      </TableCell>
-                      <TableCell className="text-right font-mono whitespace-nowrap text-muted-foreground">
-                        {formatPercentage(rate.sanguPercentage)}
-                      </TableCell>
-                      <TableCell className="text-right font-mono font-semibold whitespace-nowrap text-primary">
-                        {formatCurrency(rowSangu)}
-                      </TableCell>
-                      <TableCell
-                        className={`text-right font-mono font-semibold whitespace-nowrap ${
-                          rowProfit > 0
-                            ? "text-emerald-600 dark:text-emerald-400"
-                            : rowProfit < 0
-                              ? "text-destructive"
-                              : "text-muted-foreground"
+                      ) : (
+                        <span className="text-muted-foreground/50">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center whitespace-nowrap">
+                      <Badge
+                        variant={rate.isActive ? "default" : "outline"}
+                        className={`text-[10px] ${
+                          rate.isActive
+                            ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                            : "text-muted-foreground"
                         }`}
                       >
-                        {formatCurrency(rowProfit)}
-                      </TableCell>
-                      <TableCell className="text-center whitespace-nowrap">
-                        {rate.hasSpecialDeductions ? (
-                          <Badge
-                            variant="secondary"
-                            className="bg-purple-500/10 text-[10px] text-purple-700 dark:text-purple-300"
-                          >
-                            <RiPercentLine className="mr-0.5 size-3" />
-                            LJU
-                          </Badge>
-                        ) : (
-                          <span className="text-muted-foreground/50">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-center whitespace-nowrap">
-                        <Badge
-                          variant={rate.isActive ? "default" : "outline"}
-                          className={`text-[10px] ${
-                            rate.isActive
-                              ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                              : "text-muted-foreground"
-                          }`}
-                        >
-                          {rate.isActive ? "Aktif" : "Nonaktif"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-center whitespace-nowrap">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger
-                            render={
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="size-7"
-                              >
-                                <RiMoreLine className="size-4" />
-                              </Button>
-                            }
-                          />
-                          <DropdownMenuContent align="end" className="w-44">
-                            <DropdownMenuGroup>
-                              <DropdownMenuLabel className="text-xs">
-                                Aksi Rute
-                              </DropdownMenuLabel>
-                            </DropdownMenuGroup>
+                        {rate.isActive ? "Aktif" : "Nonaktif"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center whitespace-nowrap">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          render={
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7.5 gap-1.5 rounded-lg border-border/70 px-2.5 text-xs font-medium text-foreground shadow-2xs transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+                            >
+                              <span>Aksi</span>
+                              <RiArrowDownSLine className="size-3.5 text-muted-foreground" />
+                            </Button>
+                          }
+                        />
+                        <DropdownMenuContent align="end" className="w-44">
+                          <DropdownMenuGroup>
+                            <DropdownMenuLabel className="text-xs">
+                              Aksi Rute
+                            </DropdownMenuLabel>
+                          </DropdownMenuGroup>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuGroup>
+                            <DropdownMenuItem
+                              className="cursor-pointer gap-2 text-xs"
+                              onClick={() => setSelectedDetailRate(rate)}
+                            >
+                              <RiEyeLine className="size-3.5 text-muted-foreground" />
+                              <span>Lihat Detail</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="cursor-pointer gap-2 text-xs"
+                              onClick={() => setEditingRate(rate)}
+                            >
+                              <RiEditLine className="size-3.5 text-muted-foreground" />
+                              <span>Ubah Tarif</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="cursor-pointer gap-2 text-xs"
+                              onClick={() => handleToggleStatus(rate)}
+                            >
+                              {rate.isActive ? (
+                                <>
+                                  <RiCloseLine className="size-3.5 text-amber-600 dark:text-amber-400" />
+                                  <span>Nonaktifkan</span>
+                                </>
+                              ) : (
+                                <>
+                                  <RiCheckLine className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                                  <span>Aktifkan</span>
+                                </>
+                              )}
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuGroup>
-                              <DropdownMenuItem
-                                className="cursor-pointer gap-2 text-xs"
-                                onClick={() => setSelectedDetailRate(rate)}
-                              >
-                                <RiEyeLine className="size-3.5" />
-                                <span>Lihat Detail</span>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="cursor-pointer gap-2 text-xs"
-                                onClick={() => setEditingRate(rate)}
-                              >
-                                <RiEditLine className="size-3.5" />
-                                <span>Edit Tarif</span>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="cursor-pointer gap-2 text-xs"
-                                onClick={() => handleToggleStatus(rate)}
-                              >
-                                {rate.isActive ? (
-                                  <>
-                                    <RiCloseLine className="size-3.5 text-amber-600" />
-                                    <span>Nonaktifkan</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <RiCheckLine className="size-3.5 text-emerald-600" />
-                                    <span>Aktifkan</span>
-                                  </>
-                                )}
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                className="cursor-pointer gap-2 text-xs text-destructive focus:text-destructive"
-                                onClick={() => promptDeleteRate(rate)}
-                              >
-                                <RiDeleteBinLine className="size-3.5" />
-                                <span>Hapus Rute</span>
-                              </DropdownMenuItem>
-                            </DropdownMenuGroup>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  )
-                })
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                            <DropdownMenuItem
+                              className="cursor-pointer gap-2 text-xs text-destructive focus:bg-destructive/10 focus:text-destructive"
+                              onClick={() => promptDeleteRate(rate)}
+                            >
+                              <RiDeleteBinLine className="size-3.5" />
+                              <span>Hapus Rute</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuGroup>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                )
+              })
+            )}
+          </TableBody>
+        </Table>
       </div>
 
       {/* Pagination Footer (Mobile & Desktop) */}

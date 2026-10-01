@@ -5,12 +5,12 @@ import {
   RiCheckLine,
   RiCloseLine,
   RiEditLine,
-  RiFlightTakeoffLine,
   RiInformationLine,
   RiMapPinLine,
   RiPercentLine,
   RiRouteLine,
   RiScales3Line,
+  RiTable2,
   RiWallet3Line,
 } from "@remixicon/react"
 
@@ -20,11 +20,10 @@ import {
   Sheet,
   SheetContent,
   SheetDescription,
-  SheetFooter,
-  SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
-import { formatCurrency, formatPercentage } from "@/lib/utils"
+import { FactoryIcon } from "@/components/icons"
+import { cn, formatCurrency, formatPercentage } from "@/lib/utils"
 import type { RateReference } from "@/db/schema"
 
 interface RateDetailSheetProps {
@@ -67,74 +66,118 @@ export function RateDetailSheet({
     rowJumlah > 0 ? ((rowProfit / rowJumlah) * 100).toFixed(2) : "0"
 
   const additionalRate = parseFloat(rate.additionalTonnageRate || "0")
+  const sanguRatioDisplay = (numPct * 100).toFixed(1)
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-full max-w-full overflow-y-auto p-0 data-[side=right]:w-full sm:max-w-lg sm:data-[side=right]:max-w-lg md:max-w-xl md:data-[side=right]:max-w-xl"
+        showCloseButton={false}
+        className={cn(
+          // Pinned to right, 100% height, flex column
+          "flex flex-col gap-0 overflow-hidden bg-background p-0 shadow-2xl",
+          // Mobile & Tablet (< lg): 100% width (Full Screen)
+          "w-full max-w-full rounded-none border-0 data-[side=right]:w-full data-[side=right]:max-w-full sm:max-w-full sm:data-[side=right]:max-w-full md:max-w-full md:data-[side=right]:max-w-full",
+          // Desktop (lg: 1024px+): Standard Right Drawer (max-w-xl on right edge)
+          "lg:w-full lg:max-w-xl lg:border-l lg:border-border lg:data-[side=right]:max-w-xl"
+        )}
       >
-        {/* Header Drawer dengan padding kanan aman dari tombol close */}
-        <SheetHeader className="border-b bg-muted/40 p-4 pr-12 sm:p-6 sm:pr-14">
-          <div className="space-y-1.5">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <RiRouteLine className="size-4" />
-              </span>
-              <SheetTitle className="text-base font-bold tracking-tight text-foreground sm:text-lg">
-                {rate.city} — {rate.destination}
-              </SheetTitle>
-              <Badge
-                variant={rate.isActive ? "default" : "outline"}
-                className={`text-[10px] ${
-                  rate.isActive
-                    ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                    : "text-muted-foreground"
-                }`}
-              >
-                {rate.isActive ? "Aktif" : "Nonaktif"}
-              </Badge>
+        {/* Header Pinned */}
+        <div className="shrink-0 border-b border-border/80 bg-card/80 px-4 py-3.5 backdrop-blur-md sm:px-6 sm:py-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/25">
+                <RiTable2 className="size-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
+                    Detail Referensi Tarif
+                  </span>
+                  <Badge
+                    variant="outline"
+                    className={
+                      rate.isActive
+                        ? "py-0.2 border-emerald-500/30 bg-emerald-500/10 px-2 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400"
+                        : "py-0.2 border-border bg-muted/60 px-2 text-[10px] font-semibold text-muted-foreground"
+                    }
+                  >
+                    <span
+                      className={cn(
+                        "mr-1 inline-block size-1.5 rounded-full",
+                        rate.isActive ? "bg-emerald-500" : "bg-muted-foreground"
+                      )}
+                    />
+                    {rate.isActive ? "Aktif" : "Nonaktif"}
+                  </Badge>
+                </div>
+                <SheetTitle className="truncate text-base font-bold tracking-tight text-foreground sm:text-lg">
+                  {rate.city} — {rate.destination}
+                </SheetTitle>
+              </div>
             </div>
-            <SheetDescription className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Badge
-                variant="outline"
-                className="border-primary/20 bg-primary/5 text-[10px] font-semibold text-primary"
-              >
-                {rate.originPlant || rate.clientName}
-              </Badge>
-              <span>Referensi Tarif Operasional Armada</span>
-            </SheetDescription>
-          </div>
-        </SheetHeader>
 
-        {/* Content Body */}
-        <div className="space-y-5 p-4 sm:p-6">
-          {/* Section 1: Informasi Lokasi & Klien */}
-          <div className="space-y-2.5">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => onOpenChange(false)}
+              className="size-8.5 shrink-0 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+              aria-label="Tutup Detail Tarif"
+            >
+              <RiCloseLine className="size-5" />
+            </Button>
+          </div>
+          <SheetDescription className="sr-only">
+            Rincian referensi tarif operasional pabrik untuk rute {rate.city} ke{" "}
+            {rate.destination}
+          </SheetDescription>
+        </div>
+
+        {/* Scrollable Body */}
+        <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:space-y-5 sm:p-6">
+          {/* Section 1: Rute & Pabrik Pengiriman */}
+          <div className="space-y-2">
             <h4 className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-              <RiMapPinLine className="size-3.5 text-primary" />
+              <RiRouteLine className="size-3.5 text-primary" />
               <span>Rute & Tujuan Pengiriman</span>
             </h4>
-            <div className="space-y-3 rounded-xl border border-border/80 bg-card p-3.5 shadow-2xs">
-              <div className="flex items-start gap-2.5">
-                <RiFlightTakeoffLine className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+            <div className="space-y-3.5 rounded-2xl border border-border/80 bg-card p-4 shadow-xs">
+              {/* Pabrik Asal Muat with FactoryIcon */}
+              <div className="flex items-start gap-3">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 ring-1 ring-amber-500/20 dark:text-amber-400">
+                  <FactoryIcon className="size-4.5" />
+                </div>
                 <div className="min-w-0 flex-1">
-                  <span className="text-[11px] text-muted-foreground">
+                  <span className="text-[11px] font-medium text-muted-foreground">
                     Pabrik Asal Muat
                   </span>
-                  <p className="text-xs font-semibold text-foreground sm:text-sm">
-                    {rate.originPlant}
+                  <p className="text-sm font-bold text-foreground">
+                    {rate.originPlant || "-"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Klien / Rekanan:{" "}
+                    <span className="font-semibold text-foreground">
+                      {rate.clientName}
+                    </span>
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-2.5 border-t border-border/50 pt-2.5">
-                <RiMapPinLine className="mt-0.5 size-4 shrink-0 text-primary" />
+              {/* Visual Route Connector */}
+              <div className="ml-4 flex items-center gap-2 border-l-2 border-dashed border-border/80 py-0.5 pl-7 text-[11px] text-muted-foreground">
+                <span>Pengangkutan armada semen curah hi-blow</span>
+              </div>
+
+              {/* Lokasi Tujuan Bongkar with PinIcon */}
+              <div className="flex items-start gap-3">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20">
+                  <RiMapPinLine className="size-4.5" />
+                </div>
                 <div className="min-w-0 flex-1">
-                  <span className="text-[11px] text-muted-foreground">
+                  <span className="text-[11px] font-medium text-muted-foreground">
                     Kota & Lokasi Tujuan Bongkar
                   </span>
-                  <p className="text-xs font-semibold text-foreground sm:text-sm">
+                  <p className="text-sm font-bold text-foreground">
                     {rate.city}
                   </p>
                   <p className="text-xs text-muted-foreground">
@@ -142,159 +185,211 @@ export function RateDetailSheet({
                   </p>
                 </div>
               </div>
-
-              <div className="flex items-center justify-between border-t border-border/50 pt-2.5 text-xs">
-                <span className="text-muted-foreground">Klien / Rekanan:</span>
-                <span className="font-medium text-foreground">
-                  {rate.clientName}
-                </span>
-              </div>
             </div>
           </div>
 
-          {/* Section 2: Parameter Tarif & Standar Tonase */}
-          <div className="space-y-2.5">
+          {/* Section 2: Parameter Tarif & Estimasi Pendapatan */}
+          <div className="space-y-2">
             <h4 className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
               <RiScales3Line className="size-3.5 text-primary" />
               <span>Parameter Tarif & Estimasi Pendapatan</span>
             </h4>
             <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
-              <div className="rounded-lg border border-border/70 bg-card p-3 shadow-2xs">
-                <span className="block text-[11px] text-muted-foreground">
+              <div className="rounded-xl border border-border/80 bg-card p-3.5 shadow-2xs">
+                <span className="text-[11px] font-medium text-muted-foreground">
                   Tarif OA / Ton
                 </span>
-                <span className="font-mono text-sm font-bold text-foreground">
+                <p className="mt-1 text-base font-bold text-foreground tabular-nums sm:text-lg">
                   {formatCurrency(numRate)}
+                </p>
+                <span className="text-[10px] text-muted-foreground">
+                  Acuan per ton
                 </span>
               </div>
 
-              <div className="rounded-lg border border-border/70 bg-card p-3 shadow-2xs">
-                <span className="block text-[11px] text-muted-foreground">
+              <div className="rounded-xl border border-border/80 bg-card p-3.5 shadow-2xs">
+                <span className="text-[11px] font-medium text-muted-foreground">
                   Standar Tonase
                 </span>
-                <span className="font-mono text-sm font-semibold text-foreground">
-                  {numTon.toFixed(2)} Ton
-                </span>
-              </div>
-
-              <div className="col-span-2 rounded-lg border border-border/70 bg-card p-3 shadow-2xs sm:col-span-1">
-                <span className="block text-[11px] text-muted-foreground">
-                  Estimasi Jumlah
-                </span>
-                <span className="font-mono text-sm font-bold text-foreground">
-                  {formatCurrency(rowJumlah)}
-                </span>
-              </div>
-
-              <div className="col-span-2 rounded-lg border border-border/70 bg-card p-3 shadow-2xs sm:col-span-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="block text-[11px] text-muted-foreground">
-                      Tarif Lebih Tonase
-                    </span>
-                    <span className="text-[10px] text-muted-foreground">
-                      Tambahan per ton jika muatan melebihi standar
-                    </span>
-                  </div>
-                  <span className="font-mono text-sm font-semibold text-foreground">
-                    {formatCurrency(additionalRate)} / Ton
+                <p className="mt-1 text-base font-bold text-foreground tabular-nums sm:text-lg">
+                  {numTon.toFixed(2)}{" "}
+                  <span className="text-xs font-normal text-muted-foreground">
+                    Ton
                   </span>
+                </p>
+                <span className="text-[10px] text-muted-foreground">
+                  Kapasitas standar
+                </span>
+              </div>
+
+              <div className="col-span-2 rounded-xl border border-primary/30 bg-primary/5 p-3.5 shadow-2xs sm:col-span-1">
+                <div className="flex items-center justify-between sm:block">
+                  <span className="text-[11px] font-semibold text-primary">
+                    Estimasi Bruto
+                  </span>
+                  <Badge
+                    variant="outline"
+                    className="border-primary/30 bg-primary/10 text-[10px] text-primary sm:hidden"
+                  >
+                    Per Rit
+                  </Badge>
                 </div>
+                <p className="mt-1 text-base font-bold text-primary tabular-nums sm:text-lg">
+                  {formatCurrency(rowJumlah)}
+                </p>
+                <span className="text-[10px] text-muted-foreground">
+                  {numTon.toFixed(0)} Ton × {formatCurrency(numRate)}
+                </span>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-border/80 bg-card/60 p-3 shadow-2xs">
+              <div className="flex items-center justify-between text-xs">
+                <div>
+                  <span className="font-semibold text-foreground">
+                    Tarif Lebih Tonase:
+                  </span>
+                  <p className="text-[11px] text-muted-foreground">
+                    Kompensasi per ton jika muatan melebihi tonase standar
+                  </p>
+                </div>
+                <span className="font-mono text-xs font-bold text-foreground sm:text-sm">
+                  {formatCurrency(additionalRate)}{" "}
+                  <span className="text-xs font-normal text-muted-foreground">
+                    / Ton
+                  </span>
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Section 3: Rincian Sangu Supir & Profitabilitas */}
-          <div className="space-y-2.5">
+          {/* Section 3: Sangu Supir & Analisis Profitabilitas */}
+          <div className="space-y-2">
             <h4 className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
               <RiWallet3Line className="size-3.5 text-primary" />
               <span>Sangu Supir & Analisis Profitabilitas</span>
             </h4>
-            <div className="space-y-2.5 rounded-xl border border-border/80 bg-card p-3.5 shadow-2xs">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">Persentase Sangu:</span>
-                <Badge
-                  variant="outline"
-                  className="font-mono text-xs font-semibold text-primary"
-                >
-                  {formatPercentage(rate.sanguPercentage)}
-                </Badge>
-              </div>
-
-              <div className="flex items-center justify-between border-t border-border/50 pt-2 text-xs">
-                <div>
-                  <span className="block text-muted-foreground">
-                    Sangu Supir / Uang Jalan Acuan:
-                  </span>
-                  {isManualOverride && (
-                    <span className="text-[10px] text-amber-600 dark:text-amber-400">
-                      * Nominal ditetapkan manual khusus
+            <div className="space-y-4 rounded-2xl border border-border/80 bg-card p-4 shadow-xs">
+              <div className="grid grid-cols-2 gap-4">
+                {/* Sangu Supir */}
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <span>
+                      Sangu Supir ({formatPercentage(rate.sanguPercentage)})
+                    </span>
+                  </div>
+                  <p className="text-base font-bold text-amber-600 tabular-nums sm:text-lg dark:text-amber-400">
+                    {formatCurrency(rowSangu)}
+                  </p>
+                  {isManualOverride ? (
+                    <span className="text-[10px] font-medium text-amber-600 dark:text-amber-400">
+                      * Nominal acuan khusus
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-muted-foreground">
+                      Uang jalan & solar operasional
                     </span>
                   )}
                 </div>
-                <span className="font-mono text-sm font-bold text-primary">
-                  {formatCurrency(rowSangu)}
-                </span>
+
+                {/* Laba Bersih */}
+                <div className="space-y-1 border-l border-border/60 pl-4">
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <span>Laba Bersih ({profitMarginPct}%)</span>
+                  </div>
+                  <p className="text-base font-bold text-emerald-600 tabular-nums sm:text-lg dark:text-emerald-400">
+                    {formatCurrency(rowProfit)}
+                  </p>
+                  <span className="text-[10px] text-muted-foreground">
+                    Estimasi keuntungan armada
+                  </span>
+                </div>
               </div>
 
-              <div className="flex items-center justify-between border-t border-border/50 pt-2 text-xs">
-                <span className="text-muted-foreground">
-                  Estimasi Margin Laba:
-                </span>
-                <span className="font-mono font-semibold text-foreground">
-                  {profitMarginPct}%
-                </span>
+              {/* Rasio Bar */}
+              <div className="space-y-1.5 pt-1">
+                <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                  <span>Alokasi Pendapatan:</span>
+                  <span className="font-mono font-medium">
+                    {sanguRatioDisplay}% Sangu : {profitMarginPct}% Laba
+                  </span>
+                </div>
+                <div className="flex h-2 w-full overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="bg-amber-500/80 transition-all duration-300"
+                    style={{
+                      width: `${Math.min(100, Math.max(0, numPct * 100))}%`,
+                    }}
+                    title={`Sangu: ${formatPercentage(rate.sanguPercentage)}`}
+                  />
+                  <div
+                    className="bg-emerald-500 transition-all duration-300"
+                    style={{
+                      width: `${Math.min(100, Math.max(0, parseFloat(profitMarginPct)))}%`,
+                    }}
+                    title={`Laba: ${profitMarginPct}%`}
+                  />
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Section 4: Highlight Estimasi Laba Bersih */}
-          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4 shadow-2xs dark:bg-emerald-500/15">
+          {/* Section 4: Highlight Estimasi Laba Bersih Hero Card */}
+          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 shadow-xs dark:bg-emerald-500/15">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <span className="block text-xs font-semibold text-emerald-800 dark:text-emerald-300">
-                  Estimasi Laba Bersih per Ritase
-                </span>
-                <span className="text-[11px] text-muted-foreground">
-                  Perhitungan: Estimasi Jumlah ({formatCurrency(rowJumlah)}) −
-                  Sangu Supir ({formatCurrency(rowSangu)})
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300">
+                    Estimasi Laba Bersih per Ritase
+                  </span>
+                  <Badge
+                    variant="outline"
+                    className="py-0.2 border-emerald-500/40 bg-emerald-500/20 px-2 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300"
+                  >
+                    {profitMarginPct}% Margin
+                  </Badge>
+                </div>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">
+                  Kalkulasi: Bruto ({formatCurrency(rowJumlah)}) − Sangu (
+                  {formatCurrency(rowSangu)})
+                </p>
               </div>
-              <span className="shrink-0 font-mono text-lg font-bold text-emerald-700 sm:text-xl dark:text-emerald-400">
+              <span className="font-mono text-xl font-bold tracking-tight text-emerald-600 sm:text-2xl dark:text-emerald-400">
                 {formatCurrency(rowProfit)}
               </span>
             </div>
           </div>
 
-          {/* Section 5: Ketentuan Khusus / Pajak */}
-          <div className="space-y-2.5">
+          {/* Section 5: Ketentuan Khusus Pabrik */}
+          <div className="space-y-2">
             <h4 className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
               <RiInformationLine className="size-3.5 text-primary" />
               <span>Ketentuan Khusus Pabrik</span>
             </h4>
-            <div className="rounded-xl border border-border/80 bg-muted/20 p-3.5 text-xs shadow-2xs">
+            <div className="rounded-xl border border-border/80 bg-card p-3.5 shadow-2xs">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <span className="font-semibold text-foreground">
+                  <span className="text-xs font-semibold text-foreground">
                     Potongan Khusus Pabrik / LJU
                   </span>
                   <p className="text-[11px] text-muted-foreground">
-                    Perlakuan pajak 1%, potongan LJU 2%, atau potongan UJ
-                    Grobogan 5%
+                    {rate.hasSpecialDeductions
+                      ? "Rute ini menerapkan pajak 1%, potongan LJU 2%, atau potongan UJ Grobogan 5%."
+                      : "Rute ini menggunakan ketentuan tarif standar tanpa potongan khusus."}
                   </p>
                 </div>
                 {rate.hasSpecialDeductions ? (
                   <Badge
                     variant="secondary"
-                    className="w-fit bg-purple-500/10 text-[11px] font-semibold text-purple-700 dark:text-purple-300"
+                    className="w-fit gap-1 bg-purple-500/10 text-xs font-semibold text-purple-700 dark:text-purple-300"
                   >
-                    <RiPercentLine className="mr-0.5 size-3" />
-                    Berlaku (LJU)
+                    <RiPercentLine className="size-3" />
+                    <span>Berlaku (LJU)</span>
                   </Badge>
                 ) : (
                   <Badge
                     variant="outline"
-                    className="w-fit text-[11px] text-muted-foreground"
+                    className="w-fit text-xs text-muted-foreground"
                   >
                     Tidak Berlaku
                   </Badge>
@@ -304,27 +399,33 @@ export function RateDetailSheet({
           </div>
         </div>
 
-        {/* Footer Drawer Responsif */}
-        <SheetFooter className="border-t bg-muted/20 p-4">
-          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:justify-between sm:gap-2">
-            <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:items-center">
+        {/* Pinned Footer Actions */}
+        <div className="shrink-0 border-t border-border/80 bg-card/90 p-4 backdrop-blur-md sm:px-6 sm:py-4">
+          {/* Mobile Layout (< sm) */}
+          <div className="flex flex-col gap-2 sm:hidden">
+            <div className="grid grid-cols-2 gap-2">
               {onToggleStatus && (
                 <Button
                   type="button"
                   variant="outline"
-                  size="sm"
+                  size="default"
                   onClick={() => onToggleStatus(rate)}
-                  className="w-full justify-center gap-1 px-2 text-xs sm:w-auto sm:gap-1.5 sm:px-3"
+                  className={cn(
+                    "h-10 gap-1.5 text-xs font-semibold shadow-xs",
+                    rate.isActive
+                      ? "border-destructive/30 text-destructive hover:border-destructive/50 hover:bg-destructive/10 hover:text-destructive"
+                      : "border-emerald-500/30 text-emerald-600 hover:border-emerald-500/50 hover:bg-emerald-500/10 hover:text-emerald-600 dark:text-emerald-400"
+                  )}
                 >
                   {rate.isActive ? (
                     <>
-                      <RiCloseLine className="size-3.5 text-destructive" />
-                      <span className="truncate">Nonaktifkan</span>
+                      <RiCloseLine className="size-4" />
+                      <span>Nonaktifkan</span>
                     </>
                   ) : (
                     <>
-                      <RiCheckLine className="size-3.5 text-emerald-600 dark:text-emerald-400" />
-                      <span className="truncate">Aktifkan</span>
+                      <RiCheckLine className="size-4" />
+                      <span>Aktifkan</span>
                     </>
                   )}
                 </Button>
@@ -332,30 +433,91 @@ export function RateDetailSheet({
               {onEdit && (
                 <Button
                   type="button"
-                  variant="outline"
-                  size="sm"
+                  size="default"
                   onClick={() => {
                     onOpenChange(false)
                     onEdit(rate)
                   }}
-                  className="w-full justify-center gap-1.5 text-xs sm:w-auto"
+                  className={cn(
+                    "h-10 gap-1.5 text-xs font-semibold shadow-xs transition-all hover:shadow-sm",
+                    !onToggleStatus && "col-span-2"
+                  )}
                 >
-                  <RiEditLine className="size-3.5" />
-                  <span>Edit Tarif</span>
+                  <RiEditLine className="size-4" />
+                  <span>Ubah Tarif</span>
                 </Button>
               )}
             </div>
+            {/* Tombol Tutup di posisi paling bawah pada mobile */}
             <Button
               type="button"
-              variant="secondary"
-              size="sm"
+              variant="outline"
+              size="default"
               onClick={() => onOpenChange(false)}
-              className="w-full justify-center text-xs sm:w-auto"
+              className="h-10 w-full text-xs font-semibold shadow-xs"
             >
               Tutup
             </Button>
           </div>
-        </SheetFooter>
+
+          {/* Tablet & Desktop Layout (>= sm) */}
+          <div className="hidden sm:flex sm:items-center sm:justify-between sm:gap-3">
+            <div>
+              {onToggleStatus && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="default"
+                  onClick={() => onToggleStatus(rate)}
+                  className={cn(
+                    "h-10 gap-1.5 text-xs font-semibold shadow-xs",
+                    rate.isActive
+                      ? "border-destructive/30 text-destructive hover:border-destructive/50 hover:bg-destructive/10 hover:text-destructive"
+                      : "border-emerald-500/30 text-emerald-600 hover:border-emerald-500/50 hover:bg-emerald-500/10 hover:text-emerald-600 dark:text-emerald-400"
+                  )}
+                >
+                  {rate.isActive ? (
+                    <>
+                      <RiCloseLine className="size-4" />
+                      <span>Nonaktifkan Rute</span>
+                    </>
+                  ) : (
+                    <>
+                      <RiCheckLine className="size-4" />
+                      <span>Aktifkan Rute</span>
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="default"
+                onClick={() => onOpenChange(false)}
+                className="h-10 px-4 text-xs font-semibold shadow-xs"
+              >
+                Tutup
+              </Button>
+              {onEdit && (
+                <Button
+                  type="button"
+                  size="default"
+                  onClick={() => {
+                    onOpenChange(false)
+                    onEdit(rate)
+                  }}
+                  className="h-10 gap-2 px-5 text-xs font-semibold shadow-xs transition-all hover:shadow-sm"
+                >
+                  <RiEditLine className="size-4" />
+                  <span>Ubah Tarif</span>
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
       </SheetContent>
     </Sheet>
   )

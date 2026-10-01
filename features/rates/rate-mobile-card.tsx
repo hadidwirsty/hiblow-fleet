@@ -154,9 +154,9 @@ export function RateMobileCard({
               variant="outline"
               size="sm"
               onClick={() => onViewDetail(rate)}
-              className="h-7 gap-1 px-2.5 text-[11px] font-medium shadow-2xs hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+              className="h-7.5 gap-1.5 rounded-lg border-border/70 px-2.5 text-[11px] font-medium shadow-2xs transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
             >
-              <RiEyeLine className="size-3" />
+              <RiEyeLine className="size-3.5 text-muted-foreground" />
               <span>Detail</span>
             </Button>
           )}
@@ -167,20 +167,20 @@ export function RateMobileCard({
               size="sm"
               onClick={() => onToggleStatus(rate)}
               className={cn(
-                "h-7 gap-1 px-2.5 text-[11px] font-medium shadow-2xs transition-colors",
+                "h-7.5 gap-1.5 rounded-lg px-2.5 text-[11px] font-medium shadow-2xs transition-colors",
                 rate.isActive
-                  ? "hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive"
+                  ? "border-amber-500/30 text-amber-600 hover:border-amber-500/60 hover:bg-amber-500/10 hover:text-amber-700 dark:text-amber-400"
                   : "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 hover:text-emerald-700 dark:text-emerald-400"
               )}
             >
               {rate.isActive ? (
                 <>
-                  <RiCloseLine className="size-3 text-destructive" />
+                  <RiCloseLine className="size-3.5 text-amber-600 dark:text-amber-400" />
                   <span>Nonaktifkan</span>
                 </>
               ) : (
                 <>
-                  <RiCheckLine className="size-3 text-emerald-600 dark:text-emerald-400" />
+                  <RiCheckLine className="size-3.5 text-emerald-600 dark:text-emerald-400" />
                   <span>Aktifkan</span>
                 </>
               )}
@@ -192,23 +192,22 @@ export function RateMobileCard({
               variant="outline"
               size="sm"
               onClick={() => onEdit(rate)}
-              className="h-7 gap-1 px-2.5 text-[11px] font-medium shadow-2xs hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+              className="h-7.5 gap-1.5 rounded-lg border-border/70 px-2.5 text-[11px] font-medium shadow-2xs transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
             >
-              <RiEditLine className="size-3" />
-              <span>Edit</span>
+              <RiEditLine className="size-3.5 text-muted-foreground" />
+              <span>Ubah</span>
             </Button>
           )}
           {onDelete && (
             <Button
               type="button"
-              variant="ghost"
-              size="icon-xs"
+              variant="outline"
+              size="sm"
               onClick={() => onDelete(rate)}
-              className="h-7 w-7 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-              title="Hapus Rute"
+              className="h-7.5 gap-1.5 rounded-lg border-destructive/30 px-2.5 text-[11px] font-medium text-destructive shadow-2xs transition-colors hover:border-destructive/60 hover:bg-destructive/10 hover:text-destructive"
             >
               <RiDeleteBinLine className="size-3.5" />
-              <span className="sr-only">Hapus</span>
+              <span>Hapus</span>
             </Button>
           )}
         </div>
