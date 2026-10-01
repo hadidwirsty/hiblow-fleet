@@ -49,21 +49,16 @@ export function DashboardKpiCards({
   return (
     <div className="grid grid-cols-1 gap-3 px-4 sm:grid-cols-2 xl:grid-cols-4 xl:gap-4 xl:px-6">
       {/* Card 1: Omset Ritase Berjalan */}
-      <div className="group flex h-full flex-col justify-between rounded-2xl border border-border/80 bg-card/75 p-4.5 shadow-xs backdrop-blur-xs transition-all duration-200 hover:border-emerald-500/30 hover:shadow-md sm:p-5">
+      <div className="group flex h-full flex-col justify-between rounded-2xl border border-border/80 bg-card/75 p-4 shadow-xs backdrop-blur-xs transition-all duration-200 hover:border-emerald-500/30 hover:shadow-md sm:p-5">
         <div>
           <div className="flex items-center justify-between gap-2">
-            <div className="flex min-w-0 items-center gap-2">
-              <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-500/25 dark:text-emerald-400">
-                <RiMoneyDollarCircleLine className="size-4" />
-              </div>
-              <span className="truncate text-xs font-semibold text-muted-foreground">
-                Omset Ritase Berjalan
-              </span>
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-500/25 dark:text-emerald-400">
+              <RiMoneyDollarCircleLine className="size-4.5" />
             </div>
             {kpis.previousOmset > 0 ? (
               <Badge
                 variant="outline"
-                className={`shrink-0 gap-0.5 rounded-full px-2 py-0.5 text-[10px] font-semibold sm:text-xs ${
+                className={`shrink-0 gap-0.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
                   isOmsetUp
                     ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                     : "border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400"
@@ -81,21 +76,25 @@ export function DashboardKpiCards({
             ) : (
               <Badge
                 variant="outline"
-                className="shrink-0 rounded-full border-muted bg-muted/50 text-[10px] font-medium text-muted-foreground"
+                className="shrink-0 rounded-full border-muted bg-muted/50 px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground"
               >
                 Bulan baru
               </Badge>
             )}
           </div>
 
-          <div className="mt-3">
-            <span className="text-2xl font-bold tracking-tight text-foreground tabular-nums sm:text-3xl">
+          <p className="mt-3 text-xs font-semibold text-muted-foreground">
+            Omset Ritase Berjalan
+          </p>
+
+          <div className="mt-1">
+            <span className="text-xl font-bold tracking-tight text-foreground tabular-nums sm:text-2xl xl:text-xl 2xl:text-2xl">
               {formatCurrency(kpis.totalOmset)}
             </span>
           </div>
         </div>
 
-        <div className="mt-4 flex flex-col gap-0.5 border-t border-border/50 pt-3">
+        <div className="mt-3.5 flex flex-col gap-0.5 border-t border-border/50 pt-2.5">
           <div
             className={`flex items-center gap-1.5 text-xs font-medium ${
               kpis.previousOmset === 0
@@ -124,21 +123,16 @@ export function DashboardKpiCards({
       </div>
 
       {/* Card 2: Ritase Selesai */}
-      <div className="group flex h-full flex-col justify-between rounded-2xl border border-border/80 bg-card/75 p-4.5 shadow-xs backdrop-blur-xs transition-all duration-200 hover:border-blue-500/30 hover:shadow-md sm:p-5">
+      <div className="group flex h-full flex-col justify-between rounded-2xl border border-border/80 bg-card/75 p-4 shadow-xs backdrop-blur-xs transition-all duration-200 hover:border-blue-500/30 hover:shadow-md sm:p-5">
         <div>
           <div className="flex items-center justify-between gap-2">
-            <div className="flex min-w-0 items-center gap-2">
-              <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600 ring-1 ring-blue-500/25 dark:text-blue-400">
-                <RiTruckLine className="size-4" />
-              </div>
-              <span className="truncate text-xs font-semibold text-muted-foreground">
-                Ritase Selesai
-              </span>
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600 ring-1 ring-blue-500/25 dark:text-blue-400">
+              <RiTruckLine className="size-4.5" />
             </div>
             {kpis.previousTrips > 0 ? (
               <Badge
                 variant="outline"
-                className="shrink-0 gap-0.5 rounded-full border-blue-500/30 bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-600 sm:text-xs dark:text-blue-400"
+                className="shrink-0 gap-0.5 rounded-full border-blue-500/30 bg-blue-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-blue-600 dark:text-blue-400"
               >
                 <RiCheckLine className="size-3" />
                 {tripDiff >= 0 ? `+${tripDiff} rit` : `${tripDiff} rit`}
@@ -146,21 +140,28 @@ export function DashboardKpiCards({
             ) : (
               <Badge
                 variant="outline"
-                className="shrink-0 rounded-full border-muted bg-muted/50 text-[10px] font-medium text-muted-foreground"
+                className="shrink-0 rounded-full border-muted bg-muted/50 px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground"
               >
                 Bulan baru
               </Badge>
             )}
           </div>
 
-          <div className="mt-3">
-            <span className="text-2xl font-bold tracking-tight text-foreground tabular-nums sm:text-3xl">
-              {kpis.totalTrips} Rit
+          <p className="mt-3 text-xs font-semibold text-muted-foreground">
+            Ritase Selesai
+          </p>
+
+          <div className="mt-1">
+            <span className="text-xl font-bold tracking-tight text-foreground tabular-nums sm:text-2xl xl:text-xl 2xl:text-2xl">
+              {kpis.totalTrips}{" "}
+              <span className="text-sm font-semibold text-muted-foreground">
+                Rit
+              </span>
             </span>
           </div>
         </div>
 
-        <div className="mt-4 flex flex-col gap-0.5 border-t border-border/50 pt-3">
+        <div className="mt-3.5 flex flex-col gap-0.5 border-t border-border/50 pt-2.5">
           <div className="flex items-center gap-1.5 text-xs font-medium text-blue-600 dark:text-blue-400">
             <span className="truncate">Target 50 rit/bln ({targetPct}%)</span>
           </div>
@@ -171,33 +172,32 @@ export function DashboardKpiCards({
       </div>
 
       {/* Card 3: Sangu Supir & Solar */}
-      <div className="group flex h-full flex-col justify-between rounded-2xl border border-border/80 bg-card/75 p-4.5 shadow-xs backdrop-blur-xs transition-all duration-200 hover:border-amber-500/30 hover:shadow-md sm:p-5">
+      <div className="group flex h-full flex-col justify-between rounded-2xl border border-border/80 bg-card/75 p-4 shadow-xs backdrop-blur-xs transition-all duration-200 hover:border-amber-500/30 hover:shadow-md sm:p-5">
         <div>
           <div className="flex items-center justify-between gap-2">
-            <div className="flex min-w-0 items-center gap-2">
-              <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 ring-1 ring-amber-500/25 dark:text-amber-400">
-                <RiGasStationLine className="size-4" />
-              </div>
-              <span className="truncate text-xs font-semibold text-muted-foreground">
-                Sangu Supir & Solar
-              </span>
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 ring-1 ring-amber-500/25 dark:text-amber-400">
+              <RiGasStationLine className="size-4.5" />
             </div>
             <Badge
               variant="outline"
-              className="shrink-0 gap-0.5 rounded-full border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-600 sm:text-xs dark:text-amber-400"
+              className="shrink-0 gap-0.5 rounded-full border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-amber-600 dark:text-amber-400"
             >
-              {sanguRatio.toFixed(1)}%
+              {sanguRatio.toFixed(1)}% Rasio
             </Badge>
           </div>
 
-          <div className="mt-3">
-            <span className="text-2xl font-bold tracking-tight text-foreground tabular-nums sm:text-3xl">
+          <p className="mt-3 text-xs font-semibold text-muted-foreground">
+            Sangu Supir & Solar
+          </p>
+
+          <div className="mt-1">
+            <span className="text-xl font-bold tracking-tight text-foreground tabular-nums sm:text-2xl xl:text-xl 2xl:text-2xl">
               {formatCurrency(kpis.totalSangu)}
             </span>
           </div>
         </div>
 
-        <div className="mt-4 flex flex-col gap-0.5 border-t border-border/50 pt-3">
+        <div className="mt-3.5 flex flex-col gap-0.5 border-t border-border/50 pt-2.5">
           <div className="flex items-center gap-1.5 text-xs font-medium text-amber-600 dark:text-amber-400">
             <span className="truncate">Rasio operasional aman</span>
           </div>
@@ -208,33 +208,32 @@ export function DashboardKpiCards({
       </div>
 
       {/* Card 4: Estimasi Laba Berjalan */}
-      <div className="group flex h-full flex-col justify-between rounded-2xl border border-border/80 bg-card/75 p-4.5 shadow-xs backdrop-blur-xs transition-all duration-200 hover:border-emerald-500/30 hover:shadow-md sm:p-5">
+      <div className="group flex h-full flex-col justify-between rounded-2xl border border-border/80 bg-card/75 p-4 shadow-xs backdrop-blur-xs transition-all duration-200 hover:border-emerald-500/30 hover:shadow-md sm:p-5">
         <div>
           <div className="flex items-center justify-between gap-2">
-            <div className="flex min-w-0 items-center gap-2">
-              <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-500/25 dark:text-emerald-400">
-                <RiLineChartLine className="size-4" />
-              </div>
-              <span className="truncate text-xs font-semibold text-muted-foreground">
-                Estimasi Laba Berjalan
-              </span>
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-500/25 dark:text-emerald-400">
+              <RiLineChartLine className="size-4.5" />
             </div>
             <Badge
               variant="outline"
-              className="shrink-0 gap-0.5 rounded-full border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 sm:text-xs dark:text-emerald-400"
+              className="shrink-0 gap-0.5 rounded-full border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400"
             >
-              {marginRatio.toFixed(1)}%
+              {marginRatio.toFixed(1)}% Margin
             </Badge>
           </div>
 
-          <div className="mt-3">
-            <span className="text-2xl font-bold tracking-tight text-foreground tabular-nums sm:text-3xl">
+          <p className="mt-3 text-xs font-semibold text-muted-foreground">
+            Estimasi Laba Berjalan
+          </p>
+
+          <div className="mt-1">
+            <span className="text-xl font-bold tracking-tight text-emerald-600 tabular-nums sm:text-2xl xl:text-xl 2xl:text-2xl dark:text-emerald-400">
               {formatCurrency(kpis.estimasiLaba)}
             </span>
           </div>
         </div>
 
-        <div className="mt-4 flex flex-col gap-0.5 border-t border-border/50 pt-3">
+        <div className="mt-3.5 flex flex-col gap-0.5 border-t border-border/50 pt-2.5">
           <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
             <span className="truncate">Margin operasional ritase</span>
           </div>
