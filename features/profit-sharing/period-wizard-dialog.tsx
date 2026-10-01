@@ -535,23 +535,25 @@ export function PeriodWizardDialog({
                     </Button>
                   </div>
 
-                  <div className="overflow-hidden rounded-lg border">
+                  <div className="max-h-64 overflow-auto rounded-lg border">
                     <table className="w-full text-xs">
-                      <thead className="border-b bg-muted/60">
+                      <thead className="sticky top-0 z-10 border-b bg-muted/95 text-foreground backdrop-blur-xs">
                         <tr>
-                          <th className="px-3 py-2.5 text-left font-medium">
+                          <th className="sticky top-0 z-10 bg-muted/95 px-3 py-2.5 text-left font-medium backdrop-blur-xs">
                             Nama Investor
                           </th>
-                          <th className="px-3 py-2.5 text-right font-medium">
+                          <th className="sticky top-0 z-10 bg-muted/95 px-3 py-2.5 text-right font-medium backdrop-blur-xs">
                             Modal Disetor (Rp)
                           </th>
-                          <th className="px-3 py-2.5 text-right font-medium">
+                          <th className="sticky top-0 z-10 bg-muted/95 px-3 py-2.5 text-right font-medium backdrop-blur-xs">
                             % Saham
                           </th>
-                          <th className="px-3 py-2.5 text-right font-medium">
+                          <th className="sticky top-0 z-10 bg-muted/95 px-3 py-2.5 text-right font-medium backdrop-blur-xs">
                             Hak Dividen (Rp)
                           </th>
-                          <th className="w-10 px-2 py-2.5 text-center">Aksi</th>
+                          <th className="sticky top-0 z-10 w-10 bg-muted/95 px-2 py-2.5 text-center font-medium backdrop-blur-xs">
+                            Aksi
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border">

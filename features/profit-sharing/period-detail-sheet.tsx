@@ -291,21 +291,23 @@ export function PeriodDetailSheet({
               </span>
             </div>
 
-            <div className="overflow-hidden rounded-lg border">
+            <div className="max-h-72 overflow-auto rounded-lg border">
               <table className="w-full text-xs">
-                <thead className="border-b bg-muted/60">
+                <thead className="sticky top-0 z-10 border-b bg-muted/95 text-foreground backdrop-blur-xs">
                   <tr>
-                    <th className="px-3 py-2.5 text-left font-medium">No</th>
-                    <th className="px-3 py-2.5 text-left font-medium">
+                    <th className="sticky top-0 z-10 bg-muted/95 px-3 py-2.5 text-left font-medium backdrop-blur-xs">
+                      No
+                    </th>
+                    <th className="sticky top-0 z-10 bg-muted/95 px-3 py-2.5 text-left font-medium backdrop-blur-xs">
                       Nama Pemodal
                     </th>
-                    <th className="px-3 py-2.5 text-right font-medium">
+                    <th className="sticky top-0 z-10 bg-muted/95 px-3 py-2.5 text-right font-medium backdrop-blur-xs">
                       Modal Disetor
                     </th>
-                    <th className="px-3 py-2.5 text-right font-medium">
+                    <th className="sticky top-0 z-10 bg-muted/95 px-3 py-2.5 text-right font-medium backdrop-blur-xs">
                       Porsi Saham
                     </th>
-                    <th className="px-3 py-2.5 text-right font-medium">
+                    <th className="sticky top-0 z-10 bg-muted/95 px-3 py-2.5 text-right font-medium backdrop-blur-xs">
                       Hak Bagi Hasil (Rp)
                     </th>
                   </tr>
