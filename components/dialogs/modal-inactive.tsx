@@ -63,7 +63,7 @@ export default function ModalInactive() {
       <DialogContent className="flex flex-col items-center justify-between sm:max-w-md lg:max-w-md">
         <LottiePlayer
           autoplay
-          loop={false}
+          loop
           animationData={inactiveAnimation}
           style={{ height: "120px", width: "200px" }}
         />

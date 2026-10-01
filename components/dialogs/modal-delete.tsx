@@ -61,7 +61,7 @@ export default function ModalDelete() {
       <DialogContent className="flex flex-col items-center justify-between sm:max-w-md lg:max-w-md">
         <LottiePlayer
           autoplay
-          loop={false}
+          loop
           animationData={warningAnimation}
           style={{ height: "180px", width: "180px" }}
         />

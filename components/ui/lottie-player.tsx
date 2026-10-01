@@ -3,6 +3,8 @@
 import * as React from "react"
 import dynamic from "next/dynamic"
 
+import type { LottieHandle } from "lottie-react"
+
 export interface LottiePlayerProps {
   animationData?: unknown
   src?: string | object
@@ -19,18 +21,28 @@ export const LottiePlayer = dynamic(
       return function LottieComponent({
         animationData,
         src,
-        loop = false,
+        loop = true,
         autoplay = true,
         style,
         className,
       }: LottiePlayerProps) {
+        const lottieRef = React.useRef<LottieHandle>(null)
         const animSrc = src ?? (animationData as object)
         if (!animSrc) return null
+
         return (
           <Component
+            lottieRef={lottieRef}
             src={animSrc}
             loop={loop}
-            autoplay={autoplay}
+            autoplay={false}
+            subscriptions={{
+              ready: () => {
+                if (autoplay) {
+                  lottieRef.current?.play()
+                }
+              },
+            }}
             style={style}
             className={className}
           />
