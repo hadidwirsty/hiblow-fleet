@@ -12,7 +12,6 @@ import {
   RiEditLine,
   RiEyeLine,
   RiFilterLine,
-  RiMoreLine,
   RiSearchLine,
   RiTruckLine,
 } from "@remixicon/react"
@@ -426,298 +425,294 @@ export function TripsTable({
 
       {/* Desktop Table Container (>= md) */}
       <div className="hidden overflow-hidden rounded-xl border bg-card shadow-xs md:block">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader className="bg-muted/40">
-              <TableRow>
-                <TableHead className="min-w-36 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
-                  No. Surat Jalan
-                </TableHead>
-                <TableHead className="min-w-32 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
-                  Supir - Armada
-                </TableHead>
-                <TableHead className="min-w-44 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
-                  Pabrik Asal
-                </TableHead>
-                <TableHead className="min-w-48 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
-                  Kota & Pabrik Tujuan
-                </TableHead>
-                <TableHead className="min-w-32 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
-                  Tonase Muatan (Ton)
-                </TableHead>
-                <TableHead className="min-w-28 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
-                  Tarif / Ton
-                </TableHead>
-                <TableHead className="min-w-36 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
-                  Sangu Supir / Uang Jalan
-                </TableHead>
-                <TableHead className="min-w-28 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
-                  Tgl Order
-                </TableHead>
-                <TableHead className="min-w-32 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
-                  Tonase Bongkar (Ton)
-                </TableHead>
-                <TableHead className="min-w-28 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
-                  Tgl Bongkar
-                </TableHead>
-                <TableHead className="min-w-32 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
-                  Omset Bruto
-                </TableHead>
-                <TableHead className="min-w-32 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
-                  Laba Bersih
-                </TableHead>
-                <TableHead className="min-w-56 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
-                  Biaya DO Pihak Ke-3
-                </TableHead>
-                <TableHead className="w-16 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
-                  Aksi
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedTrips.length === 0 ? (
-                <TableRow className="hover:bg-transparent">
-                  <TableCell colSpan={14} className="p-0">
-                    <Empty className="w-full border-0 py-20 sm:py-24 md:py-28 lg:py-32">
-                      <EmptyMedia
-                        variant="icon"
-                        className="mb-3 size-12 rounded-2xl bg-primary/10 text-primary md:size-14"
-                      >
-                        {isFiltered ? (
-                          <RiSearchLine className="size-6 text-primary md:size-7" />
-                        ) : (
-                          <RiTruckLine className="size-6 text-primary md:size-7" />
-                        )}
-                      </EmptyMedia>
-                      <EmptyHeader className="max-w-md gap-2.5 sm:max-w-lg md:max-w-xl lg:max-w-2xl">
-                        <EmptyTitle className="text-base font-semibold sm:text-lg md:text-xl">
-                          {isFiltered
-                            ? "Tidak Ada Ritase yang Cocok"
-                            : "Belum Ada Surat Jalan"}
-                        </EmptyTitle>
-                        <EmptyDescription className="text-xs leading-relaxed text-muted-foreground sm:text-sm md:text-base">
-                          {isFiltered
-                            ? "Tidak ada data ritase surat jalan yang sesuai dengan kata kunci pencarian atau kombinasi filter aktif Anda. Silakan ubah kata kunci atau klik tombol reset filter di bawah."
-                            : "Daftar pencatatan ritase operasional saat ini masih kosong. Mulai tambahkan surat jalan pengiriman pertama Anda."}
-                        </EmptyDescription>
-                      </EmptyHeader>
-                      <EmptyContent className="mt-3 w-full max-w-xs sm:max-w-sm md:max-w-md">
-                        {isFiltered ? (
-                          <Button
-                            variant="outline"
-                            size="default"
-                            onClick={handleResetFilters}
-                            className="h-10 gap-2 px-5 text-sm font-medium shadow-xs"
-                          >
-                            <RiCloseLine className="size-4" />
-                            <span>Reset Filter</span>
-                          </Button>
-                        ) : (
-                          <Button
-                            size="default"
-                            onClick={() => setIsCreateOpen(true)}
-                            className="h-10 gap-2 px-6 text-sm font-medium shadow-xs transition-all hover:shadow-sm"
-                          >
-                            <RiAddLine className="size-4.5" />
-                            <span>Tambah Pencatatan Ritase</span>
-                          </Button>
-                        )}
-                      </EmptyContent>
-                    </Empty>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                paginatedTrips.map((trip) => {
-                  const isPaid = isDoFeePaid(trip.thirdPartyStatus)
-                  const hasFee =
-                    parseFloat(trip.thirdPartyFee || "0") > 0 ||
-                    Boolean(trip.thirdPartyName)
-                  const driverInfo = getDriverAndTruck(trip.truckId)
-                  const rateRef = rateMap.get(trip.rateReferenceId ?? "")
-                  const originPlant = rateRef?.originPlant || "-"
-
-                  return (
-                    <TableRow
-                      key={trip.id}
-                      className="text-xs hover:bg-muted/30"
+        <Table containerClassName="max-h-[calc(100vh-14rem)]">
+          <TableHeader>
+            <TableRow className="border-border hover:bg-muted/95">
+              <TableHead className="min-w-36 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
+                No. Surat Jalan
+              </TableHead>
+              <TableHead className="min-w-32 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
+                Supir - Armada
+              </TableHead>
+              <TableHead className="min-w-44 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
+                Pabrik Asal
+              </TableHead>
+              <TableHead className="min-w-48 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
+                Kota & Pabrik Tujuan
+              </TableHead>
+              <TableHead className="min-w-32 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
+                Tonase Muatan (Ton)
+              </TableHead>
+              <TableHead className="min-w-28 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
+                Tarif / Ton
+              </TableHead>
+              <TableHead className="min-w-36 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
+                Sangu Supir / Uang Jalan
+              </TableHead>
+              <TableHead className="min-w-28 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
+                Tgl Order
+              </TableHead>
+              <TableHead className="min-w-32 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
+                Tonase Bongkar (Ton)
+              </TableHead>
+              <TableHead className="min-w-28 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
+                Tgl Bongkar
+              </TableHead>
+              <TableHead className="min-w-32 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
+                Omset Bruto
+              </TableHead>
+              <TableHead className="min-w-32 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
+                Laba Bersih
+              </TableHead>
+              <TableHead className="min-w-56 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
+                Biaya DO Pihak Ke-3
+              </TableHead>
+              <TableHead className="w-24 min-w-20 py-3 text-center text-xs font-semibold whitespace-nowrap text-foreground">
+                Aksi
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedTrips.length === 0 ? (
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={14} className="p-0">
+                  <Empty className="w-full border-0 py-20 sm:py-24 md:py-28 lg:py-32">
+                    <EmptyMedia
+                      variant="icon"
+                      className="mb-3 size-12 rounded-2xl bg-primary/10 text-primary md:size-14"
                     >
-                      {/* 1. No. Surat Jalan */}
-                      <TableCell className="text-left font-mono font-bold whitespace-nowrap text-foreground">
-                        {trip.orderNumber.startsWith("#")
-                          ? trip.orderNumber
-                          : `#${trip.orderNumber}`}
-                      </TableCell>
+                      {isFiltered ? (
+                        <RiSearchLine className="size-6 text-primary md:size-7" />
+                      ) : (
+                        <RiTruckLine className="size-6 text-primary md:size-7" />
+                      )}
+                    </EmptyMedia>
+                    <EmptyHeader className="max-w-md gap-2.5 sm:max-w-lg md:max-w-xl lg:max-w-2xl">
+                      <EmptyTitle className="text-base font-semibold sm:text-lg md:text-xl">
+                        {isFiltered
+                          ? "Tidak Ada Ritase yang Cocok"
+                          : "Belum Ada Surat Jalan"}
+                      </EmptyTitle>
+                      <EmptyDescription className="text-xs leading-relaxed text-muted-foreground sm:text-sm md:text-base">
+                        {isFiltered
+                          ? "Tidak ada data ritase surat jalan yang sesuai dengan kata kunci pencarian atau kombinasi filter aktif Anda. Silakan ubah kata kunci atau klik tombol reset filter di bawah."
+                          : "Daftar pencatatan ritase operasional saat ini masih kosong. Mulai tambahkan surat jalan pengiriman pertama Anda."}
+                      </EmptyDescription>
+                    </EmptyHeader>
+                    <EmptyContent className="mt-3 w-full max-w-xs sm:max-w-sm md:max-w-md">
+                      {isFiltered ? (
+                        <Button
+                          variant="outline"
+                          size="default"
+                          onClick={handleResetFilters}
+                          className="h-10 gap-2 px-5 text-sm font-medium shadow-xs"
+                        >
+                          <RiCloseLine className="size-4" />
+                          <span>Reset Filter</span>
+                        </Button>
+                      ) : (
+                        <Button
+                          size="default"
+                          onClick={() => setIsCreateOpen(true)}
+                          className="h-10 gap-2 px-6 text-sm font-medium shadow-xs transition-all hover:shadow-sm"
+                        >
+                          <RiAddLine className="size-4.5" />
+                          <span>Tambah Pencatatan Ritase</span>
+                        </Button>
+                      )}
+                    </EmptyContent>
+                  </Empty>
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedTrips.map((trip) => {
+                const isPaid = isDoFeePaid(trip.thirdPartyStatus)
+                const hasFee =
+                  parseFloat(trip.thirdPartyFee || "0") > 0 ||
+                  Boolean(trip.thirdPartyName)
+                const driverInfo = getDriverAndTruck(trip.truckId)
+                const rateRef = rateMap.get(trip.rateReferenceId ?? "")
+                const originPlant = rateRef?.originPlant || "-"
 
-                      {/* 2. Supir - Armada */}
-                      <TableCell className="text-left whitespace-nowrap">
-                        <div className="flex flex-col items-start gap-0.5">
-                          <span className="font-semibold text-foreground">
-                            {driverInfo.driver}
-                          </span>
+                return (
+                  <TableRow key={trip.id} className="text-xs hover:bg-muted/30">
+                    {/* 1. No. Surat Jalan */}
+                    <TableCell className="text-left font-mono font-bold whitespace-nowrap text-foreground">
+                      {trip.orderNumber.startsWith("#")
+                        ? trip.orderNumber
+                        : `#${trip.orderNumber}`}
+                    </TableCell>
+
+                    {/* 2. Supir - Armada */}
+                    <TableCell className="text-left whitespace-nowrap">
+                      <div className="flex flex-col items-start gap-0.5">
+                        <span className="font-semibold text-foreground">
+                          {driverInfo.driver}
+                        </span>
+                        <Badge
+                          variant="outline"
+                          className={
+                            trip.truckId === "W8187UA"
+                              ? "border-primary/40 bg-primary/10 font-mono text-[11px] font-semibold text-primary"
+                              : "border-amber-500/40 bg-amber-500/10 font-mono text-[11px] font-semibold text-amber-600 dark:text-amber-400"
+                          }
+                        >
+                          {driverInfo.plate}
+                        </Badge>
+                      </div>
+                    </TableCell>
+
+                    {/* 3. Pabrik Asal */}
+                    <TableCell className="text-left whitespace-nowrap text-muted-foreground">
+                      {originPlant}
+                    </TableCell>
+
+                    {/* 4. Kota & Pabrik Tujuan */}
+                    <TableCell className="text-left whitespace-nowrap">
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-foreground">
+                          {trip.destinationCity}
+                        </span>
+                        <span className="text-[11px] text-muted-foreground">
+                          {trip.destinationName}
+                        </span>
+                      </div>
+                    </TableCell>
+
+                    {/* 5. Tonase Muatan (Ton) */}
+                    <TableCell className="text-left font-mono font-medium whitespace-nowrap text-foreground">
+                      {trip.loadedTonnage
+                        ? parseFloat(trip.loadedTonnage).toFixed(2)
+                        : "31.00"}
+                    </TableCell>
+
+                    {/* 6. Tarif / Ton */}
+                    <TableCell className="text-left font-mono whitespace-nowrap text-muted-foreground">
+                      {formatCurrency(parseFloat(trip.ratePerTon))}
+                    </TableCell>
+
+                    {/* 7. Sangu Supir / Uang Jalan */}
+                    <TableCell className="text-left font-mono whitespace-nowrap text-muted-foreground">
+                      {formatCurrency(parseFloat(trip.sangu))}
+                    </TableCell>
+
+                    {/* 8. Tgl Order */}
+                    <TableCell className="text-left whitespace-nowrap text-muted-foreground">
+                      {formatDateIndonesian(trip.orderDate, true)}
+                    </TableCell>
+
+                    {/* 9. Tonase Bongkar (Ton) */}
+                    <TableCell className="text-left font-mono font-medium whitespace-nowrap text-foreground">
+                      {trip.unloadingDate &&
+                      parseFloat(trip.unloadedTonnage) > 0
+                        ? parseFloat(trip.unloadedTonnage).toFixed(2)
+                        : "-"}
+                    </TableCell>
+
+                    {/* 10. Tgl Bongkar */}
+                    <TableCell className="text-left whitespace-nowrap text-muted-foreground">
+                      {trip.unloadingDate
+                        ? formatDateIndonesian(trip.unloadingDate, true)
+                        : "-"}
+                    </TableCell>
+
+                    {/* 11. Omset Bruto */}
+                    <TableCell className="text-left font-mono font-semibold whitespace-nowrap text-foreground">
+                      {formatCurrency(parseFloat(trip.omset))}
+                    </TableCell>
+
+                    {/* 12. Laba Bersih */}
+                    <TableCell className="text-left font-mono font-bold whitespace-nowrap text-emerald-600 dark:text-emerald-400">
+                      {formatCurrency(parseFloat(trip.profit))}
+                    </TableCell>
+
+                    {/* 13. Biaya DO Pihak Ke-3 */}
+                    <TableCell className="text-left whitespace-nowrap">
+                      {hasFee ? (
+                        <div className="flex flex-col items-start gap-1">
+                          <div className="flex items-center gap-1.5 font-mono text-[11px] font-semibold text-foreground">
+                            <span>
+                              {formatCurrency(
+                                parseFloat(trip.thirdPartyFee || "0")
+                              )}
+                            </span>
+                            {trip.thirdPartyName && (
+                              <span className="font-sans text-[11px] font-normal text-muted-foreground">
+                                ({trip.thirdPartyName})
+                              </span>
+                            )}
+                          </div>
                           <Badge
                             variant="outline"
-                            className={
-                              trip.truckId === "W8187UA"
-                                ? "border-primary/40 bg-primary/10 font-mono text-[11px] font-semibold text-primary"
-                                : "border-amber-500/40 bg-amber-500/10 font-mono text-[11px] font-semibold text-amber-600 dark:text-amber-400"
-                            }
+                            className={`px-1.5 py-0 text-[10px] font-normal ${
+                              isPaid
+                                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                                : "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                            }`}
                           >
-                            {driverInfo.plate}
+                            {trip.thirdPartyStatus || "Belum Bayar"}
                           </Badge>
                         </div>
-                      </TableCell>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
 
-                      {/* 3. Pabrik Asal */}
-                      <TableCell className="text-left whitespace-nowrap text-muted-foreground">
-                        {originPlant}
-                      </TableCell>
-
-                      {/* 4. Kota & Pabrik Tujuan */}
-                      <TableCell className="text-left whitespace-nowrap">
-                        <div className="flex flex-col">
-                          <span className="font-semibold text-foreground">
-                            {trip.destinationCity}
-                          </span>
-                          <span className="text-[11px] text-muted-foreground">
-                            {trip.destinationName}
-                          </span>
-                        </div>
-                      </TableCell>
-
-                      {/* 5. Tonase Muatan (Ton) */}
-                      <TableCell className="text-left font-mono font-medium whitespace-nowrap text-foreground">
-                        {trip.loadedTonnage
-                          ? parseFloat(trip.loadedTonnage).toFixed(2)
-                          : "31.00"}
-                      </TableCell>
-
-                      {/* 6. Tarif / Ton */}
-                      <TableCell className="text-left font-mono whitespace-nowrap text-muted-foreground">
-                        {formatCurrency(parseFloat(trip.ratePerTon))}
-                      </TableCell>
-
-                      {/* 7. Sangu Supir / Uang Jalan */}
-                      <TableCell className="text-left font-mono whitespace-nowrap text-muted-foreground">
-                        {formatCurrency(parseFloat(trip.sangu))}
-                      </TableCell>
-
-                      {/* 8. Tgl Order */}
-                      <TableCell className="text-left whitespace-nowrap text-muted-foreground">
-                        {formatDateIndonesian(trip.orderDate, true)}
-                      </TableCell>
-
-                      {/* 9. Tonase Bongkar (Ton) */}
-                      <TableCell className="text-left font-mono font-medium whitespace-nowrap text-foreground">
-                        {trip.unloadingDate &&
-                        parseFloat(trip.unloadedTonnage) > 0
-                          ? parseFloat(trip.unloadedTonnage).toFixed(2)
-                          : "-"}
-                      </TableCell>
-
-                      {/* 10. Tgl Bongkar */}
-                      <TableCell className="text-left whitespace-nowrap text-muted-foreground">
-                        {trip.unloadingDate
-                          ? formatDateIndonesian(trip.unloadingDate, true)
-                          : "-"}
-                      </TableCell>
-
-                      {/* 11. Omset Bruto */}
-                      <TableCell className="text-left font-mono font-semibold whitespace-nowrap text-foreground">
-                        {formatCurrency(parseFloat(trip.omset))}
-                      </TableCell>
-
-                      {/* 12. Laba Bersih */}
-                      <TableCell className="text-left font-mono font-bold whitespace-nowrap text-emerald-600 dark:text-emerald-400">
-                        {formatCurrency(parseFloat(trip.profit))}
-                      </TableCell>
-
-                      {/* 13. Biaya DO Pihak Ke-3 */}
-                      <TableCell className="text-left whitespace-nowrap">
-                        {hasFee ? (
-                          <div className="flex flex-col items-start gap-1">
-                            <div className="flex items-center gap-1.5 font-mono text-[11px] font-semibold text-foreground">
-                              <span>
-                                {formatCurrency(
-                                  parseFloat(trip.thirdPartyFee || "0")
-                                )}
-                              </span>
-                              {trip.thirdPartyName && (
-                                <span className="font-sans text-[11px] font-normal text-muted-foreground">
-                                  ({trip.thirdPartyName})
-                                </span>
-                              )}
-                            </div>
-                            <Badge
+                    {/* 14. Aksi */}
+                    <TableCell className="text-center whitespace-nowrap">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          render={
+                            <Button
                               variant="outline"
-                              className={`px-1.5 py-0 text-[10px] font-normal ${
-                                isPaid
-                                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                                  : "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                              }`}
+                              size="sm"
+                              className="h-7.5 gap-1.5 rounded-lg border-border/70 px-2.5 text-xs font-medium text-foreground shadow-2xs transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
                             >
-                              {trip.thirdPartyStatus || "Belum Bayar"}
-                            </Badge>
-                          </div>
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-
-                      {/* 14. Aksi */}
-                      <TableCell className="text-left whitespace-nowrap">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger
-                            render={
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="size-7"
-                              >
-                                <RiMoreLine className="size-4" />
-                              </Button>
-                            }
-                          />
-                          <DropdownMenuContent align="end" className="w-44">
-                            <DropdownMenuGroup>
-                              <DropdownMenuLabel className="text-xs">
-                                Aksi Ritase
-                              </DropdownMenuLabel>
-                            </DropdownMenuGroup>
+                              <span>Aksi</span>
+                              <RiArrowDownSLine className="size-3.5 text-muted-foreground" />
+                            </Button>
+                          }
+                        />
+                        <DropdownMenuContent align="end" className="w-44">
+                          <DropdownMenuGroup>
+                            <DropdownMenuLabel className="text-xs">
+                              Aksi Ritase
+                            </DropdownMenuLabel>
+                          </DropdownMenuGroup>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuGroup>
+                            <DropdownMenuItem
+                              className="cursor-pointer gap-2 text-xs"
+                              onClick={() => setSelectedDetailTrip(trip)}
+                            >
+                              <RiEyeLine className="size-3.5 text-muted-foreground" />
+                              <span>Lihat Detail</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="cursor-pointer gap-2 text-xs"
+                              onClick={() => setEditingTrip(trip)}
+                            >
+                              <RiEditLine className="size-3.5 text-muted-foreground" />
+                              <span>Ubah Ritase</span>
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuGroup>
-                              <DropdownMenuItem
-                                className="cursor-pointer gap-2 text-xs"
-                                onClick={() => setSelectedDetailTrip(trip)}
-                              >
-                                <RiEyeLine className="size-3.5" />
-                                <span>Lihat Detail</span>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="cursor-pointer gap-2 text-xs"
-                                onClick={() => setEditingTrip(trip)}
-                              >
-                                <RiEditLine className="size-3.5" />
-                                <span>Edit Ritase</span>
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                className="cursor-pointer gap-2 text-xs text-destructive focus:text-destructive"
-                                onClick={() => handlePromptDelete(trip)}
-                              >
-                                <RiDeleteBinLine className="size-3.5" />
-                                <span>Hapus Ritase</span>
-                              </DropdownMenuItem>
-                            </DropdownMenuGroup>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  )
-                })
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                            <DropdownMenuItem
+                              className="cursor-pointer gap-2 text-xs text-destructive focus:bg-destructive/10 focus:text-destructive"
+                              onClick={() => handlePromptDelete(trip)}
+                            >
+                              <RiDeleteBinLine className="size-3.5" />
+                              <span>Hapus Ritase</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuGroup>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                )
+              })
+            )}
+          </TableBody>
+        </Table>
       </div>
 
       {/* Pagination Footer (Mobile & Desktop) */}

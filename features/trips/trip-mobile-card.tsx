@@ -1,12 +1,11 @@
 "use client"
 
+import * as React from "react"
 import {
   RiCalendarLine,
   RiDeleteBinLine,
   RiEditLine,
   RiEyeLine,
-  RiFlightLandLine,
-  RiFlightTakeoffLine,
   RiMapPinLine,
 } from "@remixicon/react"
 
@@ -14,9 +13,10 @@ import { Badge } from "@/components/ui/badge"
 import { formatPlateNumber, getDriverName } from "@/domain/trucks"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import type { TripRecord } from "@/features/trips/trips-table"
+import { FactoryIcon } from "@/components/icons"
 import { isDoFeePaid } from "@/features/trips/trips.filter"
 import { formatCurrency, formatDateIndonesian } from "@/lib/utils"
+import type { TripRecord } from "@/features/trips/trips-table"
 
 interface TripMobileCardProps {
   trip: TripRecord
@@ -88,7 +88,7 @@ export function TripMobileCard({
         <div className="space-y-2 rounded-lg border border-border/60 bg-muted/30 p-2.5">
           {/* Pabrik Asal */}
           <div className="flex items-start gap-1.5 text-xs">
-            <RiFlightTakeoffLine className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+            <FactoryIcon className="mt-0.5 size-3.5 shrink-0 text-amber-600 dark:text-amber-400" />
             <div className="min-w-0 flex-1">
               <span className="text-[10px] text-muted-foreground">
                 Pabrik Asal:
@@ -115,7 +115,7 @@ export function TripMobileCard({
           {/* Tgl Bongkar (Jika Ada) */}
           <div className="flex items-center justify-between border-t border-border/40 pt-1.5 text-[11px]">
             <span className="flex items-center gap-1 text-muted-foreground">
-              <RiFlightLandLine className="size-3" />
+              <RiCalendarLine className="size-3 text-muted-foreground" />
               <span>Tgl Bongkar:</span>
             </span>
             <span className="font-medium text-foreground">
@@ -235,9 +235,9 @@ export function TripMobileCard({
                 variant="outline"
                 size="sm"
                 onClick={() => onViewDetail(trip)}
-                className="h-7 gap-1 px-2.5 text-[11px]"
+                className="h-7.5 gap-1.5 rounded-lg border-border/70 px-2.5 text-[11px] font-medium shadow-2xs transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
               >
-                <RiEyeLine className="size-3" />
+                <RiEyeLine className="size-3.5 text-muted-foreground" />
                 <span>Detail</span>
               </Button>
             )}
@@ -247,23 +247,22 @@ export function TripMobileCard({
                 variant="outline"
                 size="sm"
                 onClick={() => onEdit(trip)}
-                className="h-7 gap-1 px-2.5 text-[11px]"
+                className="h-7.5 gap-1.5 rounded-lg border-border/70 px-2.5 text-[11px] font-medium shadow-2xs transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
               >
-                <RiEditLine className="size-3" />
+                <RiEditLine className="size-3.5 text-muted-foreground" />
                 <span>Ubah</span>
               </Button>
             )}
             {onDelete && (
               <Button
                 type="button"
-                variant="ghost"
-                size="icon"
+                variant="outline"
+                size="sm"
                 onClick={() => onDelete(trip)}
-                className="size-7 text-muted-foreground hover:text-destructive"
-                title="Hapus Ritase"
+                className="h-7.5 gap-1.5 rounded-lg border-destructive/30 px-2.5 text-[11px] font-medium text-destructive shadow-2xs transition-colors hover:border-destructive/60 hover:bg-destructive/10 hover:text-destructive"
               >
                 <RiDeleteBinLine className="size-3.5" />
-                <span className="sr-only">Hapus</span>
+                <span>Hapus</span>
               </Button>
             )}
           </div>
