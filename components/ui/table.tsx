@@ -4,11 +4,15 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-function Table({ className, ...props }: React.ComponentProps<"table">) {
+interface TableProps extends React.ComponentProps<"table"> {
+  containerClassName?: string
+}
+
+function Table({ className, containerClassName, ...props }: TableProps) {
   return (
     <div
       data-slot="table-container"
-      className="relative w-full overflow-x-auto"
+      className={cn("relative w-full overflow-auto", containerClassName)}
     >
       <table
         data-slot="table"
@@ -23,7 +27,10 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   return (
     <thead
       data-slot="table-header"
-      className={cn("[&_tr]:border-b", className)}
+      className={cn(
+        "sticky top-0 z-20 bg-muted/95 backdrop-blur-xs [&_tr]:border-b",
+        className
+      )}
       {...props}
     />
   )
@@ -44,7 +51,7 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
     <tfoot
       data-slot="table-footer"
       className={cn(
-        "border-t bg-muted/50 font-medium [&>tr]:last:border-b-0",
+        "sticky bottom-0 z-20 border-t bg-muted/95 font-medium backdrop-blur-xs [&>tr]:last:border-b-0",
         className
       )}
       {...props}
@@ -70,7 +77,7 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
     <th
       data-slot="table-head"
       className={cn(
-        "h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground has-[[role=checkbox]]:pr-0",
+        "sticky top-0 z-20 h-10 border-b border-border bg-muted/95 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground shadow-xs backdrop-blur-xs has-[[role=checkbox]]:pr-0",
         className
       )}
       {...props}
@@ -114,3 +121,4 @@ export {
   TableCell,
   TableCaption,
 }
+export type { TableProps }

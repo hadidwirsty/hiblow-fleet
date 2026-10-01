@@ -401,9 +401,9 @@ export function ExpensesTable({ expenses, initialFilter }: ExpensesTableProps) {
 
           {/* Desktop View: Table */}
           <div className="hidden overflow-hidden rounded-lg border border-border md:block">
-            <Table>
+            <Table containerClassName="max-h-[calc(100vh-14rem)]">
               <TableHeader>
-                <TableRow className="border-border bg-muted/30 hover:bg-muted/30">
+                <TableRow className="border-border hover:bg-muted/95">
                   <TableHead className="w-28 pl-6 text-xs font-semibold">
                     Tanggal
                   </TableHead>
