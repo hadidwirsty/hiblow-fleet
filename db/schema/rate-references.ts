@@ -14,7 +14,9 @@ export const rateReferences = pgTable("rate_references", {
     .notNull(),
   clientName: varchar("client_name", { length: 50 }).notNull(),
   city: varchar("city", { length: 100 }).notNull(),
+  cityCode: varchar("city_code", { length: 50 }),
   destination: varchar("destination", { length: 255 }).notNull(),
+  distanceKm: numeric("distance_km", { precision: 8, scale: 2 }),
   ratePerTon: numeric("rate_per_ton", { precision: 12, scale: 2 }).notNull(),
   standardTonnage: numeric("standard_tonnage", { precision: 6, scale: 2 })
     .default("31.00")

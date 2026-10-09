@@ -17,11 +17,27 @@ export const createRateReferenceSchema = z.object({
     .trim()
     .min(1, "Nama kota tidak boleh kosong")
     .max(100, "Nama kota maksimal 100 karakter"),
+  cityCode: z
+    .string()
+    .trim()
+    .max(50, "Kode tujuan maksimal 50 karakter")
+    .optional()
+    .nullable(),
   destination: z
     .string()
     .trim()
     .min(1, "Nama tujuan pabrik tidak boleh kosong")
     .max(255, "Nama tujuan pabrik maksimal 255 karakter"),
+  distanceKm: z
+    .string()
+    .optional()
+    .nullable()
+    .refine(
+      (val) => !val || (!isNaN(parseFloat(val)) && parseFloat(val) >= 0),
+      {
+        message: "Jarak tempuh harus berupa angka non-negatif",
+      }
+    ),
   ratePerTon: z
     .string()
     .refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
@@ -81,12 +97,28 @@ export const updateRateReferenceSchema = z.object({
     .min(1, "Nama kota tidak boleh kosong")
     .max(100, "Nama kota maksimal 100 karakter")
     .optional(),
+  cityCode: z
+    .string()
+    .trim()
+    .max(50, "Kode tujuan maksimal 50 karakter")
+    .optional()
+    .nullable(),
   destination: z
     .string()
     .trim()
     .min(1, "Nama tujuan pabrik tidak boleh kosong")
     .max(255, "Nama tujuan pabrik maksimal 255 karakter")
     .optional(),
+  distanceKm: z
+    .string()
+    .optional()
+    .nullable()
+    .refine(
+      (val) => !val || (!isNaN(parseFloat(val)) && parseFloat(val) >= 0),
+      {
+        message: "Jarak tempuh harus berupa angka non-negatif",
+      }
+    ),
   ratePerTon: z
     .string()
     .refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
@@ -144,7 +176,20 @@ export const rateFormSchema = z.object({
   originPlant: z.string().trim().min(1, "Pabrik asal wajib dipilih"),
   clientName: z.string().trim().min(1, "Nama pabrik/klien tidak boleh kosong"),
   city: z.string().trim().min(1, "Nama kota tujuan wajib diisi"),
+  cityCode: z
+    .string()
+    .trim()
+    .max(50, "Kode tujuan maksimal 50 karakter")
+    .optional(),
   destination: z.string().trim().min(1, "Tujuan bongkar wajib diisi"),
+  distanceKm: z
+    .string()
+    .optional()
+    .refine((val) => {
+      if (!val || val.trim() === "") return true
+      const num = parseFloat(val.replace(",", "."))
+      return !isNaN(num) && num >= 0
+    }, "Jarak tempuh harus berupa angka non-negatif"),
   ratePerTon: z
     .string()
     .min(1, "Tarif per ton wajib diisi")

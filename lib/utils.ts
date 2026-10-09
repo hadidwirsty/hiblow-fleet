@@ -121,3 +121,24 @@ export function formatCurrencyInput(value: string): string {
   if (isNaN(num)) return str
   return new Intl.NumberFormat("id-ID").format(num)
 }
+
+/**
+ * Menggabungkan nama kota dan kode tujuan (city code).
+ * Contoh: "BANJARNEGARA", "BC35" -> "BANJARNEGARA (BC35)"
+ * Jika kota sudah memuat kode tujuan di dalamnya, hindari duplikasi tanda kurung.
+ */
+export function formatCityWithCode(
+  city: string,
+  cityCode?: string | null
+): string {
+  if (!cityCode || !cityCode.trim()) return city
+  const trimmedCode = cityCode.trim().toUpperCase()
+  const trimmedCity = city.trim()
+  if (
+    trimmedCity.toUpperCase().includes(`(${trimmedCode})`) ||
+    trimmedCity.toUpperCase().endsWith(` ${trimmedCode}`)
+  ) {
+    return trimmedCity
+  }
+  return `${trimmedCity} (${trimmedCode})`
+}

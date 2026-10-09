@@ -32,6 +32,7 @@ export async function listRateReferences(
       or(
         ilike(rateReferences.originPlant, term),
         ilike(rateReferences.city, term),
+        ilike(rateReferences.cityCode, term),
         ilike(rateReferences.destination, term),
         ilike(rateReferences.clientName, term)
       )

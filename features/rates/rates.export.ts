@@ -1,4 +1,4 @@
-import { formatPercentage } from "@/lib/utils"
+import { formatCityWithCode, formatPercentage } from "@/lib/utils"
 
 import type { RateReference } from "@/db/schema"
 import type { ExcelSheetData } from "@/lib/export/excel-builder"
@@ -48,7 +48,7 @@ export function formatRatesForExport(rates: RateReference[]): ExcelSheetData {
     return [
       index + 1,
       rate.originPlant || rate.clientName,
-      rate.city,
+      formatCityWithCode(rate.city, rate.cityCode),
       rate.destination,
       numRate,
       numTon,

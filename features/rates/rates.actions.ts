@@ -51,7 +51,11 @@ export async function createRateReference(input: CreateRateReferenceInput) {
 
     const [rate] = await db
       .insert(rateReferences)
-      .values(parsed.data)
+      .values({
+        ...parsed.data,
+        cityCode: parsed.data.cityCode?.trim() || null,
+        distanceKm: parsed.data.distanceKm?.trim() || null,
+      })
       .returning()
 
     revalidatePath("/rates")
@@ -79,9 +83,19 @@ export async function updateRateReference(input: UpdateRateReferenceInput) {
 
     const { id, ...dataToUpdate } = parsed.data
 
+    const payload = {
+      ...dataToUpdate,
+      ...(dataToUpdate.cityCode !== undefined
+        ? { cityCode: dataToUpdate.cityCode?.trim() || null }
+        : {}),
+      ...(dataToUpdate.distanceKm !== undefined
+        ? { distanceKm: dataToUpdate.distanceKm?.trim() || null }
+        : {}),
+    }
+
     const [rate] = await db
       .update(rateReferences)
-      .set(dataToUpdate)
+      .set(payload)
       .where(eq(rateReferences.id, id))
       .returning()
 

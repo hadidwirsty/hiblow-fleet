@@ -17,7 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { cn, formatCurrency } from "@/lib/utils"
+import { cn, formatCityWithCode, formatCurrency } from "@/lib/utils"
 import type { rateReferences } from "@/db/schema"
 
 export type RateReferenceRecord = typeof rateReferences.$inferSelect
@@ -101,7 +101,7 @@ export function TripDestinationCombobox({
               </span>
               <span className="text-muted-foreground">→</span>
               <span className="font-semibold text-foreground">
-                {selectedRef.city}
+                {formatCityWithCode(selectedRef.city, selectedRef.cityCode)}
               </span>
               <span className="text-muted-foreground">-</span>
               <span className="truncate text-foreground">
@@ -166,7 +166,7 @@ export function TripDestinationCombobox({
                             →
                           </span>
                           <span className="shrink-0 font-semibold text-foreground">
-                            {rate.city}
+                            {formatCityWithCode(rate.city, rate.cityCode)}
                           </span>
                           <span className="shrink-0 text-muted-foreground">
                             -
@@ -219,7 +219,9 @@ export function TripDestinationCombobox({
                           </span>
                         </div>
                         <div className="text-xs font-semibold text-foreground">
-                          <span>{rate.city}</span>
+                          <span>
+                            {formatCityWithCode(rate.city, rate.cityCode)}
+                          </span>
                           <span className="mx-1 text-muted-foreground">→</span>
                           <span className="font-normal text-muted-foreground">
                             {rate.destination}
