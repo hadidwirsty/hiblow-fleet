@@ -17,6 +17,24 @@ export const rateReferences = pgTable("rate_references", {
   cityCode: varchar("city_code", { length: 50 }),
   destination: varchar("destination", { length: 255 }).notNull(),
   distanceKm: numeric("distance_km", { precision: 8, scale: 2 }),
+  zoneCode: varchar("zone_code", { length: 50 }),
+  saving5Percent: numeric("saving_5_percent", { precision: 12, scale: 2 }),
+  deduction2Percent: numeric("deduction_2_percent", {
+    precision: 12,
+    scale: 2,
+  }),
+  ljuDeduction: numeric("lju_deduction", { precision: 12, scale: 2 }),
+  oaDriver: numeric("oa_driver", { precision: 12, scale: 2 }),
+  estimatedRevenue: numeric("estimated_revenue", { precision: 14, scale: 2 }),
+  estimatedProfitBase: numeric("estimated_profit_base", {
+    precision: 14,
+    scale: 2,
+  }),
+  totalSaving: numeric("total_saving", { precision: 14, scale: 2 }),
+  estimatedProfitTotal: numeric("estimated_profit_total", {
+    precision: 14,
+    scale: 2,
+  }),
   ratePerTon: numeric("rate_per_ton", { precision: 12, scale: 2 }).notNull(),
   standardTonnage: numeric("standard_tonnage", { precision: 6, scale: 2 })
     .default("31.00")
