@@ -34,13 +34,36 @@ interface RateDetailSheetProps {
   onToggleStatus?: (rate: RateReference) => void
 }
 
+export function getRateDetailSheetAnimationClasses(): string {
+  return "transition-all duration-300 ease-out data-starting-style:translate-x-full data-ending-style:translate-x-full data-starting-style:opacity-0 data-ending-style:opacity-0"
+}
+
+export function resolveActiveRateDetail(
+  rate: RateReference | null,
+  cachedRate: RateReference | null
+): RateReference | null {
+  return rate ?? cachedRate
+}
+
 export function RateDetailSheet({
-  rate,
+  rate: propRate,
   open,
   onOpenChange,
   onEdit,
   onToggleStatus,
 }: RateDetailSheetProps) {
+  const [cachedRate, setCachedRate] = React.useState<RateReference | null>(
+    propRate
+  )
+
+  React.useEffect(() => {
+    if (propRate) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setCachedRate(propRate)
+    }
+  }, [propRate])
+
+  const rate = resolveActiveRateDetail(propRate, cachedRate)
   if (!rate) return null
 
   const numRate = parseFloat(rate.ratePerTon || "0")
@@ -76,6 +99,8 @@ export function RateDetailSheet({
         className={cn(
           // Pinned to right, 100% height, flex column
           "flex flex-col gap-0 overflow-hidden bg-background p-0 shadow-2xl",
+          // Animasi slide-in dan slide-out penuh dari luar layar
+          getRateDetailSheetAnimationClasses(),
           // Mobile & Tablet (< lg): 100% width (Full Screen)
           "w-full max-w-full rounded-none border-0 data-[side=right]:w-full data-[side=right]:max-w-full sm:max-w-full sm:data-[side=right]:max-w-full md:max-w-full md:data-[side=right]:max-w-full",
           // Desktop (lg: 1024px+): Standard Right Drawer (max-w-xl on right edge)

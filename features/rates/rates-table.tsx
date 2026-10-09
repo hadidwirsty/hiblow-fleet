@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import {
   RiAddLine,
   RiArrowDownSLine,
@@ -59,7 +59,11 @@ import {
 import { RateDetailSheet } from "@/features/rates/rate-detail-sheet"
 import { RateFormDialog } from "@/features/rates/rate-form-dialog"
 import { RateMobileCard } from "@/features/rates/rate-mobile-card"
-import { formatCurrency, formatPercentage } from "@/lib/utils"
+import {
+  formatCityWithCode,
+  formatCurrency,
+  formatPercentage,
+} from "@/lib/utils"
 import { useUIStore } from "@/stores/theme"
 import type { RateReference } from "@/db/schema"
 
@@ -89,9 +93,66 @@ export function RatesTable({
 
   // Dialog action state
   const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [isEditOpen, setIsEditOpen] = useState(false)
   const [editingRate, setEditingRate] = useState<RateReference | null>(null)
+  const [isDetailOpen, setIsDetailOpen] = useState(false)
   const [selectedDetailRate, setSelectedDetailRate] =
     useState<RateReference | null>(null)
+
+  // Timeout refs untuk pembatalan dan pembersihan timer transisi keluar modal
+  const detailTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const editTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (detailTimeoutRef.current) clearTimeout(detailTimeoutRef.current)
+      if (editTimeoutRef.current) clearTimeout(editTimeoutRef.current)
+    }
+  }, [])
+
+  const handleOpenDetail = (rate: RateReference) => {
+    if (detailTimeoutRef.current) {
+      clearTimeout(detailTimeoutRef.current)
+      detailTimeoutRef.current = null
+    }
+    setSelectedDetailRate(rate)
+    setIsDetailOpen(true)
+  }
+
+  const handleCloseDetail = (isOpen: boolean) => {
+    setIsDetailOpen(isOpen)
+    if (!isOpen) {
+      if (detailTimeoutRef.current) {
+        clearTimeout(detailTimeoutRef.current)
+      }
+      detailTimeoutRef.current = setTimeout(() => {
+        setSelectedDetailRate(null)
+        detailTimeoutRef.current = null
+      }, 350)
+    }
+  }
+
+  const handleOpenEdit = (rate: RateReference) => {
+    if (editTimeoutRef.current) {
+      clearTimeout(editTimeoutRef.current)
+      editTimeoutRef.current = null
+    }
+    setEditingRate(rate)
+    setIsEditOpen(true)
+  }
+
+  const handleCloseEdit = (isOpen: boolean) => {
+    setIsEditOpen(isOpen)
+    if (!isOpen) {
+      if (editTimeoutRef.current) {
+        clearTimeout(editTimeoutRef.current)
+      }
+      editTimeoutRef.current = setTimeout(() => {
+        setEditingRate(null)
+        editTimeoutRef.current = null
+      }, 350)
+    }
+  }
 
   const isFiltered =
     Boolean(search.trim()) ||
@@ -108,10 +169,14 @@ export function RatesTable({
   // Filtered dataset
   const filteredRates = useMemo(() => {
     return rates.filter((rate) => {
-      // 1. Search filter: Hanya kota tujuan dan tujuan bongkar (pabrik telah tercakup pada filter dropdown)
+      // 1. Search filter: Hanya kota tujuan (termasuk kode) dan tujuan bongkar (pabrik telah tercakup pada filter dropdown)
       if (search.trim()) {
         const query = search.toLowerCase()
-        const matchCity = rate.city.toLowerCase().includes(query)
+        const fullCity = formatCityWithCode(
+          rate.city,
+          rate.cityCode
+        ).toLowerCase()
+        const matchCity = fullCity.includes(query)
         const matchDest = rate.destination.toLowerCase().includes(query)
         if (!matchCity && !matchDest) return false
       }
@@ -147,7 +212,7 @@ export function RatesTable({
       setModalInactive({
         open: true,
         title: "Nonaktifkan Referensi Rute?",
-        message: `Apakah Anda yakin ingin menonaktifkan rute tujuan "${rate.destination}" di kota ${rate.city}? Rute ini tidak akan muncul pada pilihan pencatatan ritase baru.`,
+        message: `Apakah Anda yakin ingin menonaktifkan rute tujuan "${rate.destination}" di kota ${formatCityWithCode(rate.city, rate.cityCode)}? Rute ini tidak akan muncul pada pilihan pencatatan ritase baru.`,
         actionMessage: "Nonaktifkan",
         action: async () => {
           try {
@@ -194,7 +259,7 @@ export function RatesTable({
     setModalDelete({
       open: true,
       title: "Hapus Referensi Rute",
-      message: `Apakah Anda yakin ingin menghapus rute tujuan "${rate.destination}" di kota ${rate.city}? Tindakan ini tidak dapat dibatalkan.`,
+      message: `Apakah Anda yakin ingin menghapus rute tujuan "${rate.destination}" (${formatCityWithCode(rate.city, rate.cityCode)})? Tindakan ini tidak dapat dibatalkan.`,
       action: async () => {
         const res = await deleteRateReference(rate.id)
         if (res.success) {
@@ -387,8 +452,8 @@ export function RatesTable({
             <RateMobileCard
               key={rate.id}
               rate={rate}
-              onViewDetail={setSelectedDetailRate}
-              onEdit={setEditingRate}
+              onViewDetail={handleOpenDetail}
+              onEdit={handleOpenEdit}
               onToggleStatus={handleToggleStatus}
               onDelete={promptDeleteRate}
             />
@@ -531,7 +596,7 @@ export function RatesTable({
                       </Badge>
                     </TableCell>
                     <TableCell className="text-left font-semibold whitespace-nowrap text-foreground">
-                      {rate.city}
+                      {formatCityWithCode(rate.city, rate.cityCode)}
                     </TableCell>
                     <TableCell className="text-left font-medium whitespace-nowrap text-foreground">
                       {rate.destination}
@@ -608,14 +673,14 @@ export function RatesTable({
                           <DropdownMenuGroup>
                             <DropdownMenuItem
                               className="cursor-pointer gap-2 text-xs"
-                              onClick={() => setSelectedDetailRate(rate)}
+                              onClick={() => handleOpenDetail(rate)}
                             >
                               <RiEyeLine className="size-3.5 text-muted-foreground" />
                               <span>Lihat Detail</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               className="cursor-pointer gap-2 text-xs"
-                              onClick={() => setEditingRate(rate)}
+                              onClick={() => handleOpenEdit(rate)}
                             >
                               <RiEditLine className="size-3.5 text-muted-foreground" />
                               <span>Ubah Tarif</span>
@@ -726,25 +791,23 @@ export function RatesTable({
         distinctOriginPlants={distinctOriginPlants}
       />
 
-      {/* Edit Dialog Modal */}
-      {editingRate && (
-        <RateFormDialog
-          mode="edit"
-          rate={editingRate}
-          open={!!editingRate}
-          onOpenChange={(isOpen) => !isOpen && setEditingRate(null)}
-          distinctOriginPlants={distinctOriginPlants}
-        />
-      )}
+      {/* Edit Dialog Modal: Selalu terpasang di DOM agar transisi buka (slide-up di mobile / zoom-fade di desktop) terpicu mulus sama persis dengan modal create */}
+      <RateFormDialog
+        mode="edit"
+        rate={editingRate}
+        open={isEditOpen}
+        onOpenChange={handleCloseEdit}
+        distinctOriginPlants={distinctOriginPlants}
+      />
 
-      {/* Drawer Rincian Detail Referensi Tarif Pabrik */}
+      {/* Sheet Rincian Detail Referensi Tarif Pabrik: animasi slide-in/slide-out penuh 300ms */}
       <RateDetailSheet
         rate={selectedDetailRate}
-        open={!!selectedDetailRate}
-        onOpenChange={(isOpen) => !isOpen && setSelectedDetailRate(null)}
+        open={isDetailOpen}
+        onOpenChange={handleCloseDetail}
         onEdit={(r) => {
-          setSelectedDetailRate(null)
-          setEditingRate(r)
+          setIsDetailOpen(false)
+          handleOpenEdit(r)
         }}
         onToggleStatus={handleToggleStatus}
       />
