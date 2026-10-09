@@ -14,39 +14,55 @@ describe("Rates Queries Integration", () => {
   const testIds: string[] = []
 
   beforeAll(async () => {
-    // Pastikan ada data uji mandiri
-    const existing = await db.select().from(rateReferences).limit(1)
-    if (existing.length === 0) {
+    // Pastikan ada data uji mandiri untuk Tuban dan Indocement
+    const hasIndocement = await db
+      .select({ id: rateReferences.id })
+      .from(rateReferences)
+      .where(eq(rateReferences.originPlant, "Indocement - Grobogan"))
+      .limit(1)
+
+    if (hasIndocement.length === 0) {
       const inserted = await db
         .insert(rateReferences)
-        .values([
-          {
-            originPlant: "Semen Indonesia (SI) - Tuban",
-            clientName: "SI",
-            city: "REMBANG",
-            destination: "BATCHING PLANT REMBANG",
-            ratePerTon: "95000.00",
-            standardTonnage: "31.00",
-            sanguPercentage: "0.5200",
-            defaultSangu: "1531000.00",
-            additionalTonnageRate: "25000.00",
-            hasSpecialDeductions: false,
-            isActive: true,
-          },
-          {
-            originPlant: "Indocement - Grobogan",
-            clientName: "Indocement Grobogan",
-            city: "SEMARANG",
-            destination: "PROYEK TOL SEMARANG",
-            ratePerTon: "110000.00",
-            standardTonnage: "31.00",
-            sanguPercentage: "0.5000",
-            defaultSangu: "1705000.00",
-            additionalTonnageRate: "25000.00",
-            hasSpecialDeductions: true,
-            isActive: true,
-          },
-        ])
+        .values({
+          originPlant: "Indocement - Grobogan",
+          clientName: "Indocement Grobogan",
+          city: "SEMARANG",
+          destination: "PROYEK TOL SEMARANG",
+          ratePerTon: "110000.00",
+          standardTonnage: "31.00",
+          sanguPercentage: "0.5000",
+          defaultSangu: "1705000.00",
+          additionalTonnageRate: "25000.00",
+          hasSpecialDeductions: true,
+          isActive: true,
+        })
+        .returning({ id: rateReferences.id })
+      testIds.push(...inserted.map((i) => i.id))
+    }
+
+    const hasTuban = await db
+      .select({ id: rateReferences.id })
+      .from(rateReferences)
+      .where(eq(rateReferences.originPlant, "Semen Indonesia (SI) - Tuban"))
+      .limit(1)
+
+    if (hasTuban.length === 0) {
+      const inserted = await db
+        .insert(rateReferences)
+        .values({
+          originPlant: "Semen Indonesia (SI) - Tuban",
+          clientName: "SI",
+          city: "REMBANG",
+          destination: "BATCHING PLANT REMBANG",
+          ratePerTon: "95000.00",
+          standardTonnage: "31.00",
+          sanguPercentage: "0.5200",
+          defaultSangu: "1531000.00",
+          additionalTonnageRate: "25000.00",
+          hasSpecialDeductions: false,
+          isActive: true,
+        })
         .returning({ id: rateReferences.id })
       testIds.push(...inserted.map((i) => i.id))
     }
@@ -130,6 +146,17 @@ describe("Rates Queries Integration", () => {
     expect(results.length).toBeGreaterThan(0)
     results.forEach((r) => {
       expect(r.originPlant).toBe("Semen Indonesia (SI) - Tuban")
+    })
+  })
+
+  it("harus dapat memfilter berdasarkan pabrik asal Indocement - Grobogan", async () => {
+    const results = await listRateReferences({
+      originPlant: "Indocement - Grobogan",
+    })
+    expect(Array.isArray(results)).toBe(true)
+    expect(results.length).toBeGreaterThan(0)
+    results.forEach((r) => {
+      expect(r.originPlant).toBe("Indocement - Grobogan")
     })
   })
 })

@@ -38,6 +38,86 @@ export const createRateReferenceSchema = z.object({
         message: "Jarak tempuh harus berupa angka non-negatif",
       }
     ),
+  zoneCode: z
+    .string()
+    .trim()
+    .max(50, "Kode zona maksimal 50 karakter")
+    .optional()
+    .nullable(),
+  saving5Percent: z
+    .string()
+    .optional()
+    .nullable()
+    .refine(
+      (val) => !val || (!isNaN(parseFloat(val)) && parseFloat(val) >= 0),
+      {
+        message: "Saving 5% harus berupa angka non-negatif",
+      }
+    ),
+  deduction2Percent: z
+    .string()
+    .optional()
+    .nullable()
+    .refine(
+      (val) => !val || (!isNaN(parseFloat(val)) && parseFloat(val) >= 0),
+      {
+        message: "Potongan 2% harus berupa angka non-negatif",
+      }
+    ),
+  ljuDeduction: z
+    .string()
+    .optional()
+    .nullable()
+    .refine(
+      (val) => !val || (!isNaN(parseFloat(val)) && parseFloat(val) >= 0),
+      {
+        message: "Potongan LJU harus berupa angka non-negatif",
+      }
+    ),
+  oaDriver: z
+    .string()
+    .optional()
+    .nullable()
+    .refine(
+      (val) => !val || (!isNaN(parseFloat(val)) && parseFloat(val) >= 0),
+      {
+        message: "OA Driver harus berupa angka non-negatif",
+      }
+    ),
+  estimatedRevenue: z
+    .string()
+    .optional()
+    .nullable()
+    .refine(
+      (val) => !val || (!isNaN(parseFloat(val)) && parseFloat(val) >= 0),
+      {
+        message: "Estimasi pendapatan harus berupa angka non-negatif",
+      }
+    ),
+  estimatedProfitBase: z
+    .string()
+    .optional()
+    .nullable()
+    .refine((val) => !val || !isNaN(parseFloat(val)), {
+      message: "Estimasi keuntungan harus berupa angka valid",
+    }),
+  totalSaving: z
+    .string()
+    .optional()
+    .nullable()
+    .refine(
+      (val) => !val || (!isNaN(parseFloat(val)) && parseFloat(val) >= 0),
+      {
+        message: "Total saving harus berupa angka non-negatif",
+      }
+    ),
+  estimatedProfitTotal: z
+    .string()
+    .optional()
+    .nullable()
+    .refine((val) => !val || !isNaN(parseFloat(val)), {
+      message: "Estimasi profit total harus berupa angka valid",
+    }),
   ratePerTon: z
     .string()
     .refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
@@ -119,6 +199,86 @@ export const updateRateReferenceSchema = z.object({
         message: "Jarak tempuh harus berupa angka non-negatif",
       }
     ),
+  zoneCode: z
+    .string()
+    .trim()
+    .max(50, "Kode zona maksimal 50 karakter")
+    .optional()
+    .nullable(),
+  saving5Percent: z
+    .string()
+    .optional()
+    .nullable()
+    .refine(
+      (val) => !val || (!isNaN(parseFloat(val)) && parseFloat(val) >= 0),
+      {
+        message: "Saving 5% harus berupa angka non-negatif",
+      }
+    ),
+  deduction2Percent: z
+    .string()
+    .optional()
+    .nullable()
+    .refine(
+      (val) => !val || (!isNaN(parseFloat(val)) && parseFloat(val) >= 0),
+      {
+        message: "Potongan 2% harus berupa angka non-negatif",
+      }
+    ),
+  ljuDeduction: z
+    .string()
+    .optional()
+    .nullable()
+    .refine(
+      (val) => !val || (!isNaN(parseFloat(val)) && parseFloat(val) >= 0),
+      {
+        message: "Potongan LJU harus berupa angka non-negatif",
+      }
+    ),
+  oaDriver: z
+    .string()
+    .optional()
+    .nullable()
+    .refine(
+      (val) => !val || (!isNaN(parseFloat(val)) && parseFloat(val) >= 0),
+      {
+        message: "OA Driver harus berupa angka non-negatif",
+      }
+    ),
+  estimatedRevenue: z
+    .string()
+    .optional()
+    .nullable()
+    .refine(
+      (val) => !val || (!isNaN(parseFloat(val)) && parseFloat(val) >= 0),
+      {
+        message: "Estimasi pendapatan harus berupa angka non-negatif",
+      }
+    ),
+  estimatedProfitBase: z
+    .string()
+    .optional()
+    .nullable()
+    .refine((val) => !val || !isNaN(parseFloat(val)), {
+      message: "Estimasi keuntungan harus berupa angka valid",
+    }),
+  totalSaving: z
+    .string()
+    .optional()
+    .nullable()
+    .refine(
+      (val) => !val || (!isNaN(parseFloat(val)) && parseFloat(val) >= 0),
+      {
+        message: "Total saving harus berupa angka non-negatif",
+      }
+    ),
+  estimatedProfitTotal: z
+    .string()
+    .optional()
+    .nullable()
+    .refine((val) => !val || !isNaN(parseFloat(val)), {
+      message: "Estimasi profit total harus berupa angka valid",
+    }),
   ratePerTon: z
     .string()
     .refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
@@ -181,6 +341,11 @@ export const rateFormSchema = z.object({
     .trim()
     .max(50, "Kode tujuan maksimal 50 karakter")
     .optional(),
+  zoneCode: z
+    .string()
+    .trim()
+    .max(50, "Kode zona maksimal 50 karakter")
+    .optional(),
   destination: z.string().trim().min(1, "Tujuan bongkar wajib diisi"),
   distanceKm: z
     .string()
@@ -190,6 +355,14 @@ export const rateFormSchema = z.object({
       const num = parseFloat(val.replace(",", "."))
       return !isNaN(num) && num >= 0
     }, "Jarak tempuh harus berupa angka non-negatif"),
+  saving5Percent: z.string().optional(),
+  deduction2Percent: z.string().optional(),
+  ljuDeduction: z.string().optional(),
+  oaDriver: z.string().optional(),
+  estimatedRevenue: z.string().optional(),
+  estimatedProfitBase: z.string().optional(),
+  totalSaving: z.string().optional(),
+  estimatedProfitTotal: z.string().optional(),
   ratePerTon: z
     .string()
     .min(1, "Tarif per ton wajib diisi")

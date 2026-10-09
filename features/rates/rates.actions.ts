@@ -49,12 +49,31 @@ export async function createRateReference(input: CreateRateReferenceInput) {
       }
     }
 
+    const isIndocement = Boolean(
+      parsed.data.originPlant &&
+      (parsed.data.originPlant.toLowerCase().includes("indocement") ||
+        parsed.data.originPlant.toLowerCase().includes("grobogan"))
+    )
+    const effectiveHasSpecialDeductions = isIndocement
+      ? true
+      : (parsed.data.hasSpecialDeductions ?? false)
+
     const [rate] = await db
       .insert(rateReferences)
       .values({
         ...parsed.data,
+        hasSpecialDeductions: effectiveHasSpecialDeductions,
         cityCode: parsed.data.cityCode?.trim() || null,
         distanceKm: parsed.data.distanceKm?.trim() || null,
+        zoneCode: parsed.data.zoneCode?.trim() || null,
+        saving5Percent: parsed.data.saving5Percent?.trim() || null,
+        deduction2Percent: parsed.data.deduction2Percent?.trim() || null,
+        ljuDeduction: parsed.data.ljuDeduction?.trim() || null,
+        oaDriver: parsed.data.oaDriver?.trim() || null,
+        estimatedRevenue: parsed.data.estimatedRevenue?.trim() || null,
+        estimatedProfitBase: parsed.data.estimatedProfitBase?.trim() || null,
+        totalSaving: parsed.data.totalSaving?.trim() || null,
+        estimatedProfitTotal: parsed.data.estimatedProfitTotal?.trim() || null,
       })
       .returning()
 
@@ -83,13 +102,58 @@ export async function updateRateReference(input: UpdateRateReferenceInput) {
 
     const { id, ...dataToUpdate } = parsed.data
 
+    let effectiveHasSpecialDeductions = dataToUpdate.hasSpecialDeductions
+    if (dataToUpdate.originPlant !== undefined) {
+      const isIndocement = Boolean(
+        dataToUpdate.originPlant.toLowerCase().includes("indocement") ||
+        dataToUpdate.originPlant.toLowerCase().includes("grobogan")
+      )
+      effectiveHasSpecialDeductions = isIndocement
+    }
+
     const payload = {
       ...dataToUpdate,
+      ...(effectiveHasSpecialDeductions !== undefined
+        ? { hasSpecialDeductions: effectiveHasSpecialDeductions }
+        : {}),
       ...(dataToUpdate.cityCode !== undefined
         ? { cityCode: dataToUpdate.cityCode?.trim() || null }
         : {}),
       ...(dataToUpdate.distanceKm !== undefined
         ? { distanceKm: dataToUpdate.distanceKm?.trim() || null }
+        : {}),
+      ...(dataToUpdate.zoneCode !== undefined
+        ? { zoneCode: dataToUpdate.zoneCode?.trim() || null }
+        : {}),
+      ...(dataToUpdate.saving5Percent !== undefined
+        ? { saving5Percent: dataToUpdate.saving5Percent?.trim() || null }
+        : {}),
+      ...(dataToUpdate.deduction2Percent !== undefined
+        ? { deduction2Percent: dataToUpdate.deduction2Percent?.trim() || null }
+        : {}),
+      ...(dataToUpdate.ljuDeduction !== undefined
+        ? { ljuDeduction: dataToUpdate.ljuDeduction?.trim() || null }
+        : {}),
+      ...(dataToUpdate.oaDriver !== undefined
+        ? { oaDriver: dataToUpdate.oaDriver?.trim() || null }
+        : {}),
+      ...(dataToUpdate.estimatedRevenue !== undefined
+        ? { estimatedRevenue: dataToUpdate.estimatedRevenue?.trim() || null }
+        : {}),
+      ...(dataToUpdate.estimatedProfitBase !== undefined
+        ? {
+            estimatedProfitBase:
+              dataToUpdate.estimatedProfitBase?.trim() || null,
+          }
+        : {}),
+      ...(dataToUpdate.totalSaving !== undefined
+        ? { totalSaving: dataToUpdate.totalSaving?.trim() || null }
+        : {}),
+      ...(dataToUpdate.estimatedProfitTotal !== undefined
+        ? {
+            estimatedProfitTotal:
+              dataToUpdate.estimatedProfitTotal?.trim() || null,
+          }
         : {}),
     }
 

@@ -24,7 +24,9 @@ export function formatRatesForExport(rates: RateReference[]): ExcelSheetData {
     const numRate = parseFloat(rate.ratePerTon || "0")
     const numTon = parseFloat(rate.standardTonnage || "31")
     const numPct = parseFloat(rate.sanguPercentage || "0")
-    const rowJumlah = Math.round(numRate * numTon)
+    const rowJumlah = rate.estimatedRevenue
+      ? parseFloat(rate.estimatedRevenue)
+      : Math.round(numRate * numTon)
     const formulaSangu = Math.round(rowJumlah * numPct)
 
     const parsedDefaultSangu = rate.defaultSangu
@@ -42,7 +44,9 @@ export function formatRatesForExport(rates: RateReference[]): ExcelSheetData {
         ? parsedDefaultSangu
         : formulaSangu
 
-    const rowProfit = rowJumlah - rowSangu
+    const rowProfit = rate.estimatedProfitTotal
+      ? parseFloat(rate.estimatedProfitTotal)
+      : rowJumlah - rowSangu
     const addRate = parseFloat(rate.additionalTonnageRate || "0")
 
     return [

@@ -100,6 +100,43 @@ describe("Rates Schema Validation", () => {
         false
       )
     })
+
+    it("harus memvalidasi field parameter khusus Indocement Grobogan", () => {
+      const indocementData = {
+        originPlant: "Indocement - Grobogan",
+        clientName: "Indocement",
+        city: "MALANG",
+        cityCode: "040304",
+        zoneCode: "0403",
+        destination: "Wagir",
+        ratePerTon: "214500.00",
+        standardTonnage: "31.00",
+        sanguPercentage: "0.57405",
+        defaultSangu: "3550000.00",
+        saving5Percent: "10725.00",
+        deduction2Percent: "4290.00",
+        ljuDeduction: "132990.00",
+        oaDriver: "199485.00",
+        estimatedRevenue: "6184035.00",
+        estimatedProfitBase: "2634035.00",
+        totalSaving: "332475.00",
+        estimatedProfitTotal: "2966510.00",
+        hasSpecialDeductions: true,
+      }
+      const result = createRateReferenceSchema.safeParse(indocementData)
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.data.zoneCode).toBe("0403")
+        expect(result.data.saving5Percent).toBe("10725.00")
+        expect(result.data.deduction2Percent).toBe("4290.00")
+        expect(result.data.ljuDeduction).toBe("132990.00")
+        expect(result.data.oaDriver).toBe("199485.00")
+        expect(result.data.estimatedRevenue).toBe("6184035.00")
+        expect(result.data.estimatedProfitBase).toBe("2634035.00")
+        expect(result.data.totalSaving).toBe("332475.00")
+        expect(result.data.estimatedProfitTotal).toBe("2966510.00")
+      }
+    })
   })
 
   describe("updateRateReferenceSchema", () => {
