@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/sheet"
 import { FactoryIcon } from "@/components/icons"
 import { resolveAdditionalTonnageCalculation } from "@/features/rates/rates.calculations"
+import { isIndocementRoute } from "@/features/rates/rates.indocement"
 import { cn, formatCurrency, formatPercentage } from "@/lib/utils"
 import type { RateReference } from "@/db/schema"
 
@@ -90,10 +91,7 @@ export function RateDetailSheet({
   const rowSangu = isManualOverride ? parsedDefaultSangu : formulaSangu
   const rowProfit = rowJumlah - rowSangu
 
-  const isIndocement =
-    Boolean(rate.originPlant?.toLowerCase().includes("indocement")) ||
-    Boolean(rate.originPlant?.toLowerCase().includes("grobogan")) ||
-    Boolean(rate.estimatedProfitTotal)
+  const isIndocement = isIndocementRoute(rate)
 
   const effectiveRevenue =
     isIndocement && rate.estimatedRevenue
@@ -275,8 +273,7 @@ export function RateDetailSheet({
           </div>
 
           {/* Section Tambahan Khusus Indocement Grobogan */}
-          {(rate.originPlant?.toLowerCase().includes("indocement") ||
-            rate.originPlant?.toLowerCase().includes("grobogan") ||
+          {(isIndocementRoute(rate) ||
             rate.saving5Percent ||
             rate.zoneCode) && (
             <div className="space-y-2">

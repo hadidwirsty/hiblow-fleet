@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { FactoryIcon } from "@/components/icons"
+import { isIndocementRoute } from "@/features/rates/rates.indocement"
 import {
   cn,
   formatCityWithCode,
@@ -41,7 +42,14 @@ export function RateMobileCard({
   const numRate = parseFloat(rate.ratePerTon)
   const numPct = parseFloat(rate.sanguPercentage)
   const numTon = parseFloat(rate.standardTonnage || "31")
-  const rowJumlah = Math.round(numRate * numTon)
+
+  const isIndocement = isIndocementRoute(rate)
+
+  const rowJumlah =
+    isIndocement && rate.estimatedRevenue
+      ? parseFloat(rate.estimatedRevenue)
+      : Math.round(numRate * numTon)
+
   const formulaSangu = Math.round(rowJumlah * numPct)
 
   const parsedDefaultSangu = rate.defaultSangu
@@ -58,7 +66,13 @@ export function RateMobileCard({
     parsedDefaultSangu > 0 && !isLegacyThousandRounding
       ? parsedDefaultSangu
       : formulaSangu
-  const rowProfit = rowJumlah - rowSangu
+
+  const rowProfit =
+    isIndocement && rate.estimatedProfitTotal
+      ? parseFloat(rate.estimatedProfitTotal)
+      : rowJumlah - rowSangu
+
+  const additionalRate = parseFloat(rate.additionalTonnageRate || "0")
 
   const distanceNum = rate.distanceKm ? parseFloat(rate.distanceKm) : 0
   const cleanCity = rate.city.trim().toLowerCase()
@@ -115,11 +129,16 @@ export function RateMobileCard({
 
           {/* Destination Block: Kota Tujuan & Detail Lokasi Bongkar */}
           <div className="space-y-0.5">
-            <div className="flex items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-1.5">
               <RiMapPinLine className="size-3.5 shrink-0 text-primary" />
               <span className="text-sm font-bold text-foreground">
                 {formatCityWithCode(rate.city, rate.cityCode)}
               </span>
+              {rate.zoneCode && (
+                <span className="font-mono text-[11px] text-muted-foreground">
+                  (Zone: {rate.zoneCode})
+                </span>
+              )}
               {distanceNum > 0 && (
                 <span className="font-mono text-[11px] text-muted-foreground">
                   • {distanceNum} km
@@ -177,6 +196,18 @@ export function RateMobileCard({
             </div>
           </div>
         </div>
+
+        {/* Informasi Tarif Lebih Tonase jika ada */}
+        {additionalRate > 0 && (
+          <div className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/20 px-2.5 py-1.5 text-xs">
+            <span className="text-[11px] text-muted-foreground">
+              Tarif Lebih Tonase
+            </span>
+            <span className="font-mono font-medium text-foreground">
+              +{formatCurrency(additionalRate)} / Ton
+            </span>
+          </div>
+        )}
 
         {/* Action Buttons */}
         <div className="flex items-center justify-between gap-2 border-t border-border/60 pt-2.5">

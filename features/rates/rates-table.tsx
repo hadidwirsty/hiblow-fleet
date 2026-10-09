@@ -166,6 +166,14 @@ export function RatesTable({
     setCurrentPage(1)
   }
 
+  const filterPlantOptions = useMemo(() => {
+    const list =
+      distinctOriginPlants && distinctOriginPlants.length > 0
+        ? distinctOriginPlants
+        : distinctClients
+    return Array.from(new Set(list))
+  }, [distinctOriginPlants, distinctClients])
+
   // Filtered dataset
   const filteredRates = useMemo(() => {
     return rates.filter((rate) => {
@@ -181,8 +189,12 @@ export function RatesTable({
         if (!matchCity && !matchDest) return false
       }
 
-      // 2. Client filter
-      if (selectedClient !== "ALL" && rate.clientName !== selectedClient) {
+      // 2. Client / Origin Plant filter
+      if (
+        selectedClient !== "ALL" &&
+        rate.clientName !== selectedClient &&
+        rate.originPlant !== selectedClient
+      ) {
         return false
       }
 
@@ -343,9 +355,9 @@ export function RatesTable({
               <SelectItem value="ALL" className="text-xs font-medium">
                 Semua Pabrik
               </SelectItem>
-              {distinctClients.map((client) => (
-                <SelectItem key={client} value={client} className="text-xs">
-                  {client}
+              {filterPlantOptions.map((plant) => (
+                <SelectItem key={plant} value={plant} className="text-xs">
+                  {plant}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -561,7 +573,9 @@ export function RatesTable({
                 const numRate = parseFloat(rate.ratePerTon)
                 const numPct = parseFloat(rate.sanguPercentage)
                 const numTon = parseFloat(rate.standardTonnage || "31")
-                const rowJumlah = Math.round(numRate * numTon)
+                const rowJumlah = rate.estimatedRevenue
+                  ? parseFloat(rate.estimatedRevenue)
+                  : Math.round(numRate * numTon)
                 const formulaSangu = Math.round(rowJumlah * numPct)
 
                 const parsedDefaultSangu = rate.defaultSangu
@@ -579,7 +593,9 @@ export function RatesTable({
                   parsedDefaultSangu > 0 && !isLegacyThousandRounding
                     ? parsedDefaultSangu
                     : formulaSangu
-                const rowProfit = rowJumlah - rowSangu
+                const rowProfit = rate.estimatedProfitTotal
+                  ? parseFloat(rate.estimatedProfitTotal)
+                  : rowJumlah - rowSangu
                 const rowNumber = (currentPage - 1) * pageSize + idx + 1
 
                 return (
@@ -595,8 +611,15 @@ export function RatesTable({
                         {rate.originPlant || rate.clientName}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-left font-semibold whitespace-nowrap text-foreground">
-                      {formatCityWithCode(rate.city, rate.cityCode)}
+                    <TableCell className="text-left whitespace-nowrap">
+                      <div className="font-semibold text-foreground">
+                        {formatCityWithCode(rate.city, rate.cityCode)}
+                      </div>
+                      {rate.zoneCode && (
+                        <div className="font-mono text-[10px] text-muted-foreground">
+                          Zone: {rate.zoneCode}
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell className="text-left font-medium whitespace-nowrap text-foreground">
                       {rate.destination}

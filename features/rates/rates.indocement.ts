@@ -103,3 +103,25 @@ export function calculateIndocementParameters(
     estimatedProfitTotal,
   }
 }
+
+/**
+ * Mengecek apakah suatu string nama pabrik atau objek rute merupakan rute Indocement - Grobogan.
+ */
+export function isIndocementRoute(
+  input?:
+    | { originPlant?: string | null; estimatedProfitTotal?: string | null }
+    | string
+    | null
+): boolean {
+  if (!input) return false
+  if (typeof input === "string") {
+    const lower = input.toLowerCase()
+    return lower.includes("indocement") || lower.includes("grobogan")
+  }
+  const plantLower = input.originPlant?.toLowerCase() || ""
+  return (
+    plantLower.includes("indocement") ||
+    plantLower.includes("grobogan") ||
+    Boolean(input.estimatedProfitTotal)
+  )
+}
