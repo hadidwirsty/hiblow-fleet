@@ -8,6 +8,7 @@ import {
   RiInformationLine,
   RiMapPinLine,
   RiPercentLine,
+  RiPinDistanceLine,
   RiRouteLine,
   RiScales3Line,
   RiTable2,
@@ -23,6 +24,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { FactoryIcon } from "@/components/icons"
+import { resolveAdditionalTonnageCalculation } from "@/features/rates/rates.calculations"
 import { cn, formatCurrency, formatPercentage } from "@/lib/utils"
 import type { RateReference } from "@/db/schema"
 
@@ -44,6 +46,8 @@ export function resolveActiveRateDetail(
 ): RateReference | null {
   return rate ?? cachedRate
 }
+
+export { resolveAdditionalTonnageCalculation }
 
 export function RateDetailSheet({
   rate: propRate,
@@ -85,10 +89,32 @@ export function RateDetailSheet({
   const isManualOverride = parsedDefaultSangu > 0 && !isLegacyThousandRounding
   const rowSangu = isManualOverride ? parsedDefaultSangu : formulaSangu
   const rowProfit = rowJumlah - rowSangu
+
+  const isIndocement =
+    Boolean(rate.originPlant?.toLowerCase().includes("indocement")) ||
+    Boolean(rate.originPlant?.toLowerCase().includes("grobogan")) ||
+    Boolean(rate.estimatedProfitTotal)
+
+  const effectiveRevenue =
+    isIndocement && rate.estimatedRevenue
+      ? parseFloat(rate.estimatedRevenue)
+      : rowJumlah
+
+  const effectiveProfit =
+    isIndocement && rate.estimatedProfitTotal
+      ? parseFloat(rate.estimatedProfitTotal)
+      : rowProfit
+
   const profitMarginPct =
-    rowJumlah > 0 ? ((rowProfit / rowJumlah) * 100).toFixed(2) : "0"
+    effectiveRevenue > 0
+      ? ((effectiveProfit / effectiveRevenue) * 100).toFixed(2)
+      : "0"
 
   const additionalRate = parseFloat(rate.additionalTonnageRate || "0")
+  const additionalCalc = resolveAdditionalTonnageCalculation(
+    numRate,
+    additionalRate
+  )
   const sanguRatioDisplay = (numPct * 100).toFixed(1)
 
   return (
@@ -189,8 +215,13 @@ export function RateDetailSheet({
               </div>
 
               {/* Visual Route Connector */}
-              <div className="ml-4 flex items-center gap-2 border-l-2 border-dashed border-border/80 py-0.5 pl-7 text-[11px] text-muted-foreground">
+              <div className="ml-4 flex items-center justify-between border-l-2 border-dashed border-border/80 py-0.5 pr-2 pl-7 text-[11px] text-muted-foreground">
                 <span>Pengangkutan armada semen curah hi-blow</span>
+                {rate.distanceKm && parseFloat(rate.distanceKm) > 0 && (
+                  <span className="font-mono text-[11px] font-medium text-foreground">
+                    ± {parseFloat(rate.distanceKm)} Km
+                  </span>
+                )}
               </div>
 
               {/* Lokasi Tujuan Bongkar with PinIcon */}
@@ -208,10 +239,156 @@ export function RateDetailSheet({
                   <p className="text-xs text-muted-foreground">
                     {rate.destination}
                   </p>
+                  {(rate.cityCode ||
+                    rate.zoneCode ||
+                    (rate.distanceKm && parseFloat(rate.distanceKm) > 0)) && (
+                    <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                      {rate.cityCode && (
+                        <Badge
+                          variant="outline"
+                          className="border-primary/20 bg-primary/5 text-[10px] font-medium text-primary"
+                        >
+                          Destinasi Kode: {rate.cityCode}
+                        </Badge>
+                      )}
+                      {rate.zoneCode && (
+                        <Badge
+                          variant="outline"
+                          className="border-border bg-muted/60 text-[10px] font-medium text-muted-foreground"
+                        >
+                          Zone Kode: {rate.zoneCode}
+                        </Badge>
+                      )}
+                      {rate.distanceKm && parseFloat(rate.distanceKm) > 0 && (
+                        <Badge
+                          variant="outline"
+                          className="border-border bg-muted/60 text-[10px] font-medium text-muted-foreground"
+                        >
+                          Jarak: {parseFloat(rate.distanceKm)} Km
+                        </Badge>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Section Tambahan Khusus Indocement Grobogan */}
+          {(rate.originPlant?.toLowerCase().includes("indocement") ||
+            rate.originPlant?.toLowerCase().includes("grobogan") ||
+            rate.saving5Percent ||
+            rate.zoneCode) && (
+            <div className="space-y-2">
+              <h4 className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-primary uppercase">
+                <RiPinDistanceLine className="size-3.5" />
+                <span>Parameter Khusus Indocement Grobogan</span>
+              </h4>
+              <div className="space-y-3 rounded-2xl border border-primary/20 bg-primary/5 p-4 shadow-xs">
+                <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+                  <div className="rounded-xl border border-border/80 bg-background/80 p-2.5">
+                    <span className="text-[10px] font-medium text-muted-foreground">
+                      Saving 5%
+                    </span>
+                    <p className="font-mono text-xs font-bold text-foreground">
+                      {rate.saving5Percent
+                        ? formatCurrency(parseFloat(rate.saving5Percent))
+                        : "-"}
+                    </p>
+                    <span className="text-[9px] text-muted-foreground">
+                      5% × OA/Ton
+                    </span>
+                  </div>
+
+                  <div className="rounded-xl border border-border/80 bg-background/80 p-2.5">
+                    <span className="text-[10px] font-medium text-muted-foreground">
+                      Potongan 2%
+                    </span>
+                    <p className="font-mono text-xs font-bold text-foreground">
+                      {rate.deduction2Percent
+                        ? formatCurrency(parseFloat(rate.deduction2Percent))
+                        : "-"}
+                    </p>
+                    <span className="text-[9px] text-muted-foreground">
+                      2% × OA/Ton
+                    </span>
+                  </div>
+
+                  <div className="rounded-xl border border-border/80 bg-background/80 p-2.5">
+                    <span className="text-[10px] font-medium text-muted-foreground">
+                      Potongan LJU
+                    </span>
+                    <p className="font-mono text-xs font-bold text-foreground">
+                      {rate.ljuDeduction
+                        ? formatCurrency(parseFloat(rate.ljuDeduction))
+                        : "-"}
+                    </p>
+                    <span className="text-[9px] text-muted-foreground">
+                      Tonase × Pot 2%
+                    </span>
+                  </div>
+
+                  <div className="rounded-xl border border-border/80 bg-background/80 p-2.5">
+                    <span className="text-[10px] font-medium text-muted-foreground">
+                      OA Driver / Ton
+                    </span>
+                    <p className="font-mono text-xs font-bold text-primary">
+                      {rate.oaDriver
+                        ? formatCurrency(parseFloat(rate.oaDriver))
+                        : "-"}
+                    </p>
+                    <span className="text-[9px] text-muted-foreground">
+                      OA − Saving − Pot
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2.5 border-t border-primary/10 pt-2 sm:grid-cols-3">
+                  <div className="rounded-xl border border-border/80 bg-background/80 p-2.5">
+                    <span className="text-[10px] font-medium text-muted-foreground">
+                      Estimasi Pendapatan
+                    </span>
+                    <p className="font-mono text-xs font-bold text-primary">
+                      {rate.estimatedRevenue
+                        ? formatCurrency(parseFloat(rate.estimatedRevenue))
+                        : "-"}
+                    </p>
+                    <span className="text-[9px] text-muted-foreground">
+                      OA Driver × Tonase
+                    </span>
+                  </div>
+
+                  <div className="rounded-xl border border-border/80 bg-background/80 p-2.5">
+                    <span className="text-[10px] font-medium text-muted-foreground">
+                      Keuntungan
+                    </span>
+                    <p className="font-mono text-xs font-bold text-foreground">
+                      {rate.estimatedProfitBase
+                        ? formatCurrency(parseFloat(rate.estimatedProfitBase))
+                        : "-"}
+                    </p>
+                    <span className="text-[9px] text-muted-foreground">
+                      Pendapatan − UJ 31 Ton
+                    </span>
+                  </div>
+
+                  <div className="col-span-2 rounded-xl border border-emerald-500/20 bg-background/80 p-2.5 sm:col-span-1">
+                    <span className="text-[10px] font-medium text-muted-foreground">
+                      Total Saving
+                    </span>
+                    <p className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                      {rate.totalSaving
+                        ? formatCurrency(parseFloat(rate.totalSaving))
+                        : "-"}
+                    </p>
+                    <span className="text-[9px] text-muted-foreground">
+                      Saving 5% × Tonase
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Section 2: Parameter Tarif & Estimasi Pendapatan */}
           <div className="space-y-2">
@@ -269,21 +446,42 @@ export function RateDetailSheet({
             </div>
 
             <div className="rounded-xl border border-border/80 bg-card/60 p-3 shadow-2xs">
-              <div className="flex items-center justify-between text-xs">
+              <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <span className="font-semibold text-foreground">
-                    Tarif Lebih Tonase:
-                  </span>
-                  <p className="text-[11px] text-muted-foreground">
-                    Kompensasi per ton jika muatan melebihi tonase standar
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-foreground">
+                      Tarif Lebih Tonase:
+                    </span>
+                    {additionalCalc.isPercentage ? (
+                      <Badge
+                        variant="outline"
+                        className="border-primary/25 bg-primary/5 text-[10px] font-semibold text-primary"
+                      >
+                        {additionalCalc.percentage}% dari Tarif OA
+                      </Badge>
+                    ) : (
+                      <Badge
+                        variant="outline"
+                        className="border-border bg-muted/60 text-[10px] font-medium text-muted-foreground"
+                      >
+                        Nominal Acuan Tetap
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="mt-0.5 text-[11px] text-muted-foreground">
+                    {additionalCalc.isPercentage
+                      ? `Rumus: ${additionalCalc.percentage}% × Tarif Dibulatkan (${formatCurrency(Math.round(numRate))})`
+                      : "Kompensasi per ton jika muatan melebihi tonase standar"}
                   </p>
                 </div>
-                <span className="font-mono text-xs font-bold text-foreground sm:text-sm">
-                  {formatCurrency(additionalRate)}{" "}
+                <div className="flex items-baseline gap-1 self-start sm:self-center">
+                  <span className="font-mono text-xs font-bold text-foreground sm:text-sm">
+                    {formatCurrency(additionalRate)}
+                  </span>
                   <span className="text-xs font-normal text-muted-foreground">
                     / Ton
                   </span>
-                </span>
+                </div>
               </div>
             </div>
           </div>
@@ -375,12 +573,13 @@ export function RateDetailSheet({
                   </Badge>
                 </div>
                 <p className="mt-0.5 text-[11px] text-muted-foreground">
-                  Kalkulasi: Bruto ({formatCurrency(rowJumlah)}) − Sangu (
-                  {formatCurrency(rowSangu)})
+                  {isIndocement && rate.estimatedProfitTotal
+                    ? `Kalkulasi Indocement: Keuntungan (${formatCurrency(parseFloat(rate.estimatedProfitBase || "0"))}) + Total Saving (${formatCurrency(parseFloat(rate.totalSaving || "0"))})`
+                    : `Kalkulasi: Bruto (${formatCurrency(rowJumlah)}) − Sangu (${formatCurrency(rowSangu)})`}
                 </p>
               </div>
               <span className="font-mono text-xl font-bold tracking-tight text-emerald-600 sm:text-2xl dark:text-emerald-400">
-                {formatCurrency(rowProfit)}
+                {formatCurrency(effectiveProfit)}
               </span>
             </div>
           </div>
