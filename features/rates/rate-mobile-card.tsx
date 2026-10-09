@@ -14,7 +14,13 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { cn, formatCurrency, formatPercentage } from "@/lib/utils"
+import { FactoryIcon } from "@/components/icons"
+import {
+  cn,
+  formatCityWithCode,
+  formatCurrency,
+  formatPercentage,
+} from "@/lib/utils"
 import type { RateReference } from "@/db/schema"
 
 interface RateMobileCardProps {
@@ -54,51 +60,77 @@ export function RateMobileCard({
       : formulaSangu
   const rowProfit = rowJumlah - rowSangu
 
+  const distanceNum = rate.distanceKm ? parseFloat(rate.distanceKm) : 0
+  const cleanCity = rate.city.trim().toLowerCase()
+  const cleanDest = rate.destination.trim().toLowerCase()
+  const cleanCityWithCode = formatCityWithCode(rate.city, rate.cityCode)
+    .trim()
+    .toLowerCase()
+  const isDifferentDestination =
+    Boolean(cleanDest) &&
+    cleanDest !== cleanCity &&
+    cleanDest !== cleanCityWithCode
+
   return (
     <Card className="overflow-hidden rounded-xl border border-border/80 bg-card shadow-xs transition-all hover:border-primary/30">
       <CardContent className="space-y-3 p-4">
-        {/* Top: City, Client & Status */}
-        <div className="flex items-start justify-between gap-2">
-          <div className="space-y-1">
-            <div className="flex flex-wrap items-center gap-1.5">
+        {/* Header Section: Pabrik Asal, Status, & Tujuan Pengiriman */}
+        <div className="space-y-2">
+          {/* Top Bar: Pabrik Asal & Status */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0 flex-1">
               <Badge
                 variant="outline"
-                className="border-primary/20 bg-primary/5 text-[10px] font-semibold text-primary"
+                className="max-w-full gap-1.5 border-primary/25 bg-primary/5 px-2 py-0.5 text-[10px] font-semibold text-primary"
               >
-                {rate.originPlant || rate.clientName}
+                <FactoryIcon className="size-3 shrink-0 text-amber-500 dark:text-amber-400" />
+                <span className="truncate">
+                  {rate.originPlant || rate.clientName}
+                </span>
               </Badge>
-              <span className="text-sm font-bold text-foreground">
-                {rate.city}
-              </span>
             </div>
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <RiMapPinLine className="size-3 shrink-0 text-primary" />
-              <span className="font-medium text-foreground">
-                {rate.destination}
-              </span>
+
+            <div className="flex shrink-0 items-center gap-1">
+              {rate.hasSpecialDeductions && (
+                <Badge
+                  variant="secondary"
+                  className="bg-purple-500/10 text-[10px] font-medium text-purple-700 dark:text-purple-300"
+                >
+                  <RiPercentLine className="mr-0.5 size-3" />
+                  LJU
+                </Badge>
+              )}
+              <Badge
+                variant={rate.isActive ? "default" : "outline"}
+                className={`text-[10px] font-medium ${
+                  rate.isActive
+                    ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                    : "text-muted-foreground"
+                }`}
+              >
+                {rate.isActive ? "Aktif" : "Nonaktif"}
+              </Badge>
             </div>
           </div>
 
-          <div className="flex items-center gap-1">
-            {rate.hasSpecialDeductions && (
-              <Badge
-                variant="secondary"
-                className="bg-purple-500/10 text-[10px] text-purple-700 dark:text-purple-300"
-              >
-                <RiPercentLine className="mr-0.5 size-3" />
-                LJU
-              </Badge>
+          {/* Destination Block: Kota Tujuan & Detail Lokasi Bongkar */}
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-1.5">
+              <RiMapPinLine className="size-3.5 shrink-0 text-primary" />
+              <span className="text-sm font-bold text-foreground">
+                {formatCityWithCode(rate.city, rate.cityCode)}
+              </span>
+              {distanceNum > 0 && (
+                <span className="font-mono text-[11px] text-muted-foreground">
+                  • {distanceNum} km
+                </span>
+              )}
+            </div>
+            {isDifferentDestination && (
+              <p className="truncate pl-5 text-xs font-medium text-muted-foreground">
+                {rate.destination}
+              </p>
             )}
-            <Badge
-              variant={rate.isActive ? "default" : "outline"}
-              className={`text-[10px] ${
-                rate.isActive
-                  ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                  : "text-muted-foreground"
-              }`}
-            >
-              {rate.isActive ? "Aktif" : "Nonaktif"}
-            </Badge>
           </div>
         </div>
 
@@ -147,69 +179,76 @@ export function RateMobileCard({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap items-center justify-end gap-1.5 border-t border-border/60 pt-2.5">
-          {onViewDetail && (
+        <div className="flex items-center justify-between gap-2 border-t border-border/60 pt-2.5">
+          {onViewDetail ? (
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={() => onViewDetail(rate)}
-              className="h-7.5 gap-1.5 rounded-lg border-border/70 px-2.5 text-[11px] font-medium shadow-2xs transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+              className="h-8 gap-1.5 rounded-lg border-border/70 px-2.5 text-xs font-medium text-foreground shadow-2xs transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
             >
               <RiEyeLine className="size-3.5 text-muted-foreground" />
               <span>Detail</span>
             </Button>
+          ) : (
+            <div />
           )}
-          {onToggleStatus && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => onToggleStatus(rate)}
-              className={cn(
-                "h-7.5 gap-1.5 rounded-lg px-2.5 text-[11px] font-medium shadow-2xs transition-colors",
-                rate.isActive
-                  ? "border-amber-500/30 text-amber-600 hover:border-amber-500/60 hover:bg-amber-500/10 hover:text-amber-700 dark:text-amber-400"
-                  : "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 hover:text-emerald-700 dark:text-emerald-400"
-              )}
-            >
-              {rate.isActive ? (
-                <>
-                  <RiCloseLine className="size-3.5 text-amber-600 dark:text-amber-400" />
-                  <span>Nonaktifkan</span>
-                </>
-              ) : (
-                <>
-                  <RiCheckLine className="size-3.5 text-emerald-600 dark:text-emerald-400" />
-                  <span>Aktifkan</span>
-                </>
-              )}
-            </Button>
-          )}
-          {onEdit && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => onEdit(rate)}
-              className="h-7.5 gap-1.5 rounded-lg border-border/70 px-2.5 text-[11px] font-medium shadow-2xs transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
-            >
-              <RiEditLine className="size-3.5 text-muted-foreground" />
-              <span>Ubah</span>
-            </Button>
-          )}
-          {onDelete && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => onDelete(rate)}
-              className="h-7.5 gap-1.5 rounded-lg border-destructive/30 px-2.5 text-[11px] font-medium text-destructive shadow-2xs transition-colors hover:border-destructive/60 hover:bg-destructive/10 hover:text-destructive"
-            >
-              <RiDeleteBinLine className="size-3.5" />
-              <span>Hapus</span>
-            </Button>
-          )}
+
+          <div className="flex items-center gap-1.5">
+            {onToggleStatus && (
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => onToggleStatus(rate)}
+                title={rate.isActive ? "Nonaktifkan rute" : "Aktifkan rute"}
+                aria-label={
+                  rate.isActive ? "Nonaktifkan rute" : "Aktifkan rute"
+                }
+                className={cn(
+                  "size-8 rounded-lg shadow-2xs transition-colors",
+                  rate.isActive
+                    ? "border-amber-500/30 text-amber-600 hover:border-amber-500/60 hover:bg-amber-500/10 hover:text-amber-700 dark:text-amber-400"
+                    : "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 hover:text-emerald-700 dark:text-emerald-400"
+                )}
+              >
+                {rate.isActive ? (
+                  <RiCloseLine className="size-4 text-amber-600 dark:text-amber-400" />
+                ) : (
+                  <RiCheckLine className="size-4 text-emerald-600 dark:text-emerald-400" />
+                )}
+              </Button>
+            )}
+
+            {onEdit && (
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => onEdit(rate)}
+                title="Ubah referensi rute"
+                aria-label="Ubah referensi rute"
+                className="size-8 rounded-lg border-border/70 text-muted-foreground shadow-2xs transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+              >
+                <RiEditLine className="size-3.5" />
+              </Button>
+            )}
+
+            {onDelete && (
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => onDelete(rate)}
+                title="Hapus referensi rute"
+                aria-label="Hapus referensi rute"
+                className="size-8 rounded-lg border-destructive/30 text-destructive shadow-2xs transition-colors hover:border-destructive/60 hover:bg-destructive/10 hover:text-destructive"
+              >
+                <RiDeleteBinLine className="size-3.5" />
+              </Button>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>

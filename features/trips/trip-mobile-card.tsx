@@ -228,43 +228,51 @@ export function TripMobileCard({
 
         {/* Action Buttons */}
         {(onViewDetail || onEdit || onDelete) && (
-          <div className="flex flex-wrap items-center justify-end gap-1.5 border-t border-border/60 pt-2.5">
-            {onViewDetail && (
+          <div className="flex items-center justify-between gap-2 border-t border-border/60 pt-2.5">
+            {onViewDetail ? (
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={() => onViewDetail(trip)}
-                className="h-7.5 gap-1.5 rounded-lg border-border/70 px-2.5 text-[11px] font-medium shadow-2xs transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+                className="h-8 gap-1.5 rounded-lg border-border/70 px-2.5 text-xs font-medium text-foreground shadow-2xs transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
               >
                 <RiEyeLine className="size-3.5 text-muted-foreground" />
                 <span>Detail</span>
               </Button>
+            ) : (
+              <div />
             )}
-            {onEdit && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => onEdit(trip)}
-                className="h-7.5 gap-1.5 rounded-lg border-border/70 px-2.5 text-[11px] font-medium shadow-2xs transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
-              >
-                <RiEditLine className="size-3.5 text-muted-foreground" />
-                <span>Ubah</span>
-              </Button>
-            )}
-            {onDelete && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => onDelete(trip)}
-                className="h-7.5 gap-1.5 rounded-lg border-destructive/30 px-2.5 text-[11px] font-medium text-destructive shadow-2xs transition-colors hover:border-destructive/60 hover:bg-destructive/10 hover:text-destructive"
-              >
-                <RiDeleteBinLine className="size-3.5" />
-                <span>Hapus</span>
-              </Button>
-            )}
+
+            <div className="flex items-center gap-1.5">
+              {onEdit && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => onEdit(trip)}
+                  title="Ubah data ritase"
+                  aria-label="Ubah data ritase"
+                  className="size-8 rounded-lg border-border/70 text-muted-foreground shadow-2xs transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+                >
+                  <RiEditLine className="size-3.5" />
+                </Button>
+              )}
+
+              {onDelete && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => onDelete(trip)}
+                  title="Hapus data ritase"
+                  aria-label="Hapus data ritase"
+                  className="size-8 rounded-lg border-destructive/30 text-destructive shadow-2xs transition-colors hover:border-destructive/60 hover:bg-destructive/10 hover:text-destructive"
+                >
+                  <RiDeleteBinLine className="size-3.5" />
+                </Button>
+              )}
+            </div>
           </div>
         )}
       </CardContent>
