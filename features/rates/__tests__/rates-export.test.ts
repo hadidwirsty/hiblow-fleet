@@ -43,10 +43,13 @@ describe("rates.export", () => {
     expect(data.headers).toContain("Pabrik Asal")
     expect(data.headers).toContain("Kota Tujuan")
     expect(data.headers).toContain("Tujuan Bongkar (Proyek / BP)")
+    expect(data.headers).toContain("Jarak (Km)")
     expect(data.headers).toContain("Tarif OA / Ton (Rp)")
     expect(data.headers).toContain("Persentase Sangu (%)")
     expect(data.headers).toContain("Sangu Supir (Rp)")
     expect(data.headers).toContain("Estimasi Profit (Rp)")
+    expect(data.headers).toContain("Pendapatan / Km (Rp)")
+    expect(data.headers).toContain("Estimasi Profit / Km (Rp)")
 
     expect(data.rows).toHaveLength(1)
     const row = data.rows[0]
@@ -54,14 +57,32 @@ describe("rates.export", () => {
     expect(row[1]).toBe("Semen Indonesia (SI) - Tuban")
     expect(row[2]).toBe("SEMARANG")
     expect(row[3]).toBe("PROYEK TOL SEMARANG")
-    expect(row[4]).toBe(110000)
-    expect(row[5]).toBe(31)
-    expect(row[6]).toBe(3410000) // 110.000 * 31
-    expect(row[7]).toBe("50%")
-    expect(row[8]).toBe(1705000) // 3.410.000 * 50%
-    expect(row[10]).toBe(1705000) // Profit
-    expect(row[11]).toBe("LJU (1%, 2%, 5%)")
-    expect(row[12]).toBe("Aktif")
+    expect(row[4]).toBe("-") // Jarak (null)
+    expect(row[5]).toBe(110000) // Tarif OA
+    expect(row[6]).toBe(31) // Tonase
+    expect(row[7]).toBe(3410000) // 110.000 * 31
+    expect(row[8]).toBe("50%") // % Sangu
+    expect(row[9]).toBe(1705000) // Sangu Supir
+    expect(row[10]).toBe(33000) // Tarif Lebih Tonase
+    expect(row[11]).toBe(1705000) // Estimasi Profit
+    expect(row[12]).toBe("-") // Pendapatan / Km (null jika jarak null)
+    expect(row[13]).toBe("-") // Profit / Km (null jika jarak null)
+    expect(row[14]).toBe("LJU (1%, 2%, 5%)")
+    expect(row[15]).toBe("Aktif")
+  })
+
+  it("should format distance and unit metrics when distanceKm is present", () => {
+    const rateWithDistance: RateReference = {
+      ...mockRates[0],
+      id: "rate-2",
+      distanceKm: "200.00",
+    }
+    const data = formatRatesForExport([rateWithDistance])
+    const row = data.rows[0]
+
+    expect(row[4]).toBe(200) // Jarak (Km)
+    expect(row[12]).toBe(17050) // Pendapatan / Km: 3.410.000 / 200
+    expect(row[13]).toBe(8525) // Profit / Km: 1.705.000 / 200
   })
 
   it("should generate proper export filename with current date", () => {

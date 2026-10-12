@@ -165,6 +165,7 @@ export function RateFormDialog({
   const watchedEstimatedProfitBase = watch("estimatedProfitBase")
   const watchedTotalSaving = watch("totalSaving")
   const watchedEstimatedProfitTotal = watch("estimatedProfitTotal")
+  const watchedDistanceKm = watch("distanceKm")
   /* eslint-enable react-hooks/incompatible-library */
 
   const availableOriginPlants = [
@@ -204,13 +205,11 @@ export function RateFormDialog({
       setValue("clientName", "Semen Indonesia - Rembang")
       setValue("cityCode", "")
       setValue("zoneCode", "")
-      setValue("distanceKm", "")
       setValue("hasSpecialDeductions", false)
     } else if (lower.includes("tuban") && !upper.includes("SBI")) {
       setValue("clientName", "Semen Indonesia - Tuban")
       setValue("cityCode", "")
       setValue("zoneCode", "")
-      setValue("distanceKm", "")
       setValue("hasSpecialDeductions", false)
     }
   }
@@ -485,10 +484,9 @@ export function RateFormDialog({
       isIndocement && values.zoneCode
         ? values.zoneCode.toUpperCase().trim()
         : null
-    const cleanDistanceKm =
-      isSBI && values.distanceKm
-        ? values.distanceKm.replace(",", ".").trim()
-        : null
+    const cleanDistanceKm = values.distanceKm
+      ? values.distanceKm.replace(",", ".").trim()
+      : null
 
     const cleanSaving5Percent =
       isIndocement && values.saving5Percent
@@ -756,6 +754,69 @@ export function RateFormDialog({
             </div>
           </div>
 
+          {/* Jarak Tempuh Rute (Universal untuk seluruh pabrik) */}
+          <div className="space-y-1.5">
+            <div className="flex h-5 items-center justify-between">
+              <Label
+                htmlFor="distanceKm"
+                className="text-xs font-semibold text-foreground"
+              >
+                Jarak Tempuh Rute
+              </Label>
+              <span className="text-[10px] text-muted-foreground">
+                Opsional • Untuk analisis efisiensi biaya/laba per km
+              </span>
+            </div>
+            <div className="relative">
+              <Input
+                id="distanceKm"
+                type="text"
+                inputMode="decimal"
+                {...register("distanceKm")}
+                placeholder="mis. 250"
+                className="h-9! bg-background pr-9 font-mono text-xs font-medium"
+              />
+              <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs font-semibold text-muted-foreground">
+                Km
+              </span>
+            </div>
+            {errors.distanceKm && (
+              <p className="text-[11px] text-destructive">
+                {errors.distanceKm.message}
+              </p>
+            )}
+            {/* Live Efficiency Helper Preview jika distanceKm diisi */}
+            {(() => {
+              const dNum = parseFloat(watchedDistanceKm || "0")
+              const revEst = isIndocement
+                ? parseFloat(watchedEstimatedRevenue || "0") || 0
+                : Math.round(numRate * (numTon > 0 ? numTon : 31))
+              const profEst = isIndocement
+                ? parseFloat(watchedEstimatedProfitTotal || "0") || 0
+                : revEst -
+                  (parseFloat(watchedDefaultSangu || "0") ||
+                    Math.round(revEst * numPct))
+
+              if (dNum > 0 && revEst > 0) {
+                const revPerKm = Math.round(revEst / dNum)
+                const profPerKm = Math.round(profEst / dNum)
+                return (
+                  <div className="flex flex-wrap items-center gap-2 pt-0.5 font-mono text-[11px] text-muted-foreground">
+                    <span>Estimasi Unit:</span>
+                    <span className="text-foreground">
+                      Rp{revPerKm.toLocaleString("id-ID")}/Km (Pendapatan)
+                    </span>
+                    <span>•</span>
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                      Rp{profPerKm.toLocaleString("id-ID")}/Km (Laba)
+                    </span>
+                  </div>
+                )
+              }
+              return null
+            })()}
+          </div>
+
           {/* Parameter Khusus Solusi Bangun Indonesia (SBI) */}
           {isSBI && (
             <div className="animate-in space-y-3 rounded-xl border border-primary/20 bg-primary/5 p-3.5 duration-200 fade-in slide-in-from-top-1">
@@ -775,59 +836,30 @@ export function RateFormDialog({
                 </Badge>
               </div>
 
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div className="space-y-1.5">
-                  <Label
-                    htmlFor="cityCode"
-                    className="text-xs font-semibold text-foreground"
-                  >
-                    Kode Tujuan (City Code)
-                  </Label>
-                  <Input
-                    id="cityCode"
-                    {...register("cityCode", {
-                      onChange: (e) => {
-                        const upper = e.target.value.toUpperCase()
-                        e.target.value = upper
-                        setValue("cityCode", upper, { shouldValidate: true })
-                      },
-                    })}
-                    placeholder="mis. BC35"
-                    className="h-9! bg-background font-mono text-xs font-medium uppercase placeholder:normal-case"
-                  />
-                  {errors.cityCode && (
-                    <p className="text-[11px] text-destructive">
-                      {errors.cityCode.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label
-                    htmlFor="distanceKm"
-                    className="text-xs font-semibold text-foreground"
-                  >
-                    Jarak Tempuh
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      id="distanceKm"
-                      type="text"
-                      inputMode="decimal"
-                      {...register("distanceKm")}
-                      placeholder="mis. 470"
-                      className="h-9! bg-background pr-9 font-mono text-xs font-medium"
-                    />
-                    <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs font-semibold text-muted-foreground">
-                      Km
-                    </span>
-                  </div>
-                  {errors.distanceKm && (
-                    <p className="text-[11px] text-destructive">
-                      {errors.distanceKm.message}
-                    </p>
-                  )}
-                </div>
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="cityCode"
+                  className="text-xs font-semibold text-foreground"
+                >
+                  Kode Tujuan (City Code)
+                </Label>
+                <Input
+                  id="cityCode"
+                  {...register("cityCode", {
+                    onChange: (e) => {
+                      const upper = e.target.value.toUpperCase()
+                      e.target.value = upper
+                      setValue("cityCode", upper, { shouldValidate: true })
+                    },
+                  })}
+                  placeholder="mis. BC35"
+                  className="h-9! bg-background font-mono text-xs font-medium uppercase placeholder:normal-case"
+                />
+                {errors.cityCode && (
+                  <p className="text-[11px] text-destructive">
+                    {errors.cityCode.message}
+                  </p>
+                )}
               </div>
             </div>
           )}

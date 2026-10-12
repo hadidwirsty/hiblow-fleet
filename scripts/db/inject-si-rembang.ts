@@ -6,7 +6,7 @@ dotenv.config({ path: ".env.local" })
 
 import { db, pool } from "@/db"
 import { rateReferences } from "@/db/schema"
-import { and, eq } from "drizzle-orm"
+import { eq } from "drizzle-orm"
 
 const CSV_PATH = path.resolve(
   "./docs/csv/PERHITUNGAN HIBLOW HW Trans.xlsx - Semen Indonesia (SI) - Rembang.csv"

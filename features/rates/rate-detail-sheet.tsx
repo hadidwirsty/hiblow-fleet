@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/sheet"
 import { FactoryIcon } from "@/components/icons"
 import {
+  calculateDistanceCostMetrics,
   resolveAdditionalTonnageCalculation,
   resolveRowFinancialMetrics,
 } from "@/features/rates/rates.calculations"
@@ -99,6 +100,12 @@ export function RateDetailSheet({
     additionalRate
   )
   const sanguRatioDisplay = (numPct * 100).toFixed(1)
+  const distanceMetrics = calculateDistanceCostMetrics({
+    distanceKm: rate.distanceKm,
+    rowJumlah,
+    rowSangu,
+    rowProfit,
+  })
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -566,7 +573,103 @@ export function RateDetailSheet({
             </div>
           </div>
 
-          {/* Section 5: Ketentuan Khusus Pabrik */}
+          {/* Section 5: Analisis Efisiensi Jarak & Biaya (Unit Economics) */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h4 className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+                <RiPinDistanceLine className="size-3.5 text-primary" />
+                <span>Analisis Efisiensi Jarak & Biaya</span>
+              </h4>
+              {distanceMetrics.distanceKm ? (
+                <Badge
+                  variant="outline"
+                  className="border-primary/25 bg-primary/5 text-[10px] font-semibold text-primary"
+                >
+                  {distanceMetrics.distanceKm} Km Rute
+                </Badge>
+              ) : (
+                <Badge
+                  variant="outline"
+                  className="border-border bg-muted/60 text-[10px] font-medium text-muted-foreground"
+                >
+                  Jarak Belum Diisi
+                </Badge>
+              )}
+            </div>
+
+            {distanceMetrics.distanceKm ? (
+              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+                {/* Jarak Rute */}
+                <div className="rounded-xl border border-border/80 bg-card p-3 shadow-2xs">
+                  <span className="text-[10px] font-medium text-muted-foreground">
+                    Jarak Rute
+                  </span>
+                  <p className="mt-0.5 font-mono text-sm font-bold text-foreground">
+                    {distanceMetrics.distanceKm}{" "}
+                    <span className="text-[10px] font-normal text-muted-foreground">
+                      Km
+                    </span>
+                  </p>
+                  <span className="text-[9px] text-muted-foreground">
+                    Titik muat ke bongkar
+                  </span>
+                </div>
+
+                {/* Pendapatan / Km */}
+                <div className="rounded-xl border border-border/80 bg-card p-3 shadow-2xs">
+                  <span className="text-[10px] font-medium text-muted-foreground">
+                    Pendapatan / Km
+                  </span>
+                  <p className="mt-0.5 font-mono text-sm font-bold text-foreground">
+                    {formatCurrency(distanceMetrics.revenuePerKm || 0)}
+                  </p>
+                  <span className="text-[9px] text-muted-foreground">
+                    Omset dibagi jarak
+                  </span>
+                </div>
+
+                {/* Sangu Supir / Km */}
+                <div className="rounded-xl border border-border/80 bg-card p-3 shadow-2xs">
+                  <span className="text-[10px] font-medium text-muted-foreground">
+                    Sangu / Km
+                  </span>
+                  <p className="mt-0.5 font-mono text-sm font-bold text-amber-600 dark:text-amber-400">
+                    {formatCurrency(distanceMetrics.sanguPerKm || 0)}
+                  </p>
+                  <span className="text-[9px] text-muted-foreground">
+                    Uang jalan per jarak
+                  </span>
+                </div>
+
+                {/* Laba Bersih / Km */}
+                <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3 shadow-2xs">
+                  <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
+                    Laba Bersih / Km
+                  </span>
+                  <p className="mt-0.5 font-mono text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                    {formatCurrency(distanceMetrics.profitPerKm || 0)}
+                  </p>
+                  <span className="text-[9px] text-emerald-700/70 dark:text-emerald-400/70">
+                    Margin laba per jarak
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-dashed border-border/80 bg-muted/20 p-3.5 text-center">
+                <p className="text-xs text-muted-foreground">
+                  Informasi jarak tempuh kilometer belum terdaftar untuk rute
+                  ini.
+                </p>
+                <p className="mt-0.5 text-[11px] text-muted-foreground/80">
+                  Klik tombol <strong>Edit</strong> untuk melengkapi jarak (Km)
+                  agar metrik pendapatan dan laba per kilometer dapat
+                  dianalisis.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Section 6: Ketentuan Khusus Pabrik */}
           <div className="space-y-2">
             <h4 className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
               <RiInformationLine className="size-3.5 text-primary" />

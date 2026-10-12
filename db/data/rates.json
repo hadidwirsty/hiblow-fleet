@@ -10,7 +10,8 @@
     "defaultSangu": "3325000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "350.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -23,7 +24,8 @@
     "defaultSangu": "3045000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "340.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -36,7 +38,8 @@
     "defaultSangu": "3143000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "330.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -49,7 +52,8 @@
     "defaultSangu": "3095000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "345.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -62,7 +66,8 @@
     "defaultSangu": "2342000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "270.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -75,7 +80,8 @@
     "defaultSangu": "2563000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "275.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -88,7 +94,8 @@
     "defaultSangu": "2354000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "260.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -101,7 +108,8 @@
     "defaultSangu": "2338000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "255.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -114,7 +122,8 @@
     "defaultSangu": "2660000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "265.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -127,7 +136,8 @@
     "defaultSangu": "3241000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "380.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -140,7 +150,8 @@
     "defaultSangu": "3389000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "425.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -153,7 +164,8 @@
     "defaultSangu": "4051000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "490.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -166,7 +178,8 @@
     "defaultSangu": "2477000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "285.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -179,7 +192,8 @@
     "defaultSangu": "2410000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "275.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -192,7 +206,8 @@
     "defaultSangu": "2477000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "280.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -205,7 +220,8 @@
     "defaultSangu": "2342000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "270.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -218,7 +234,8 @@
     "defaultSangu": "2342000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "270.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -231,7 +248,8 @@
     "defaultSangu": "2630000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "170.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -244,7 +262,8 @@
     "defaultSangu": "2533000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "295.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -257,7 +276,8 @@
     "defaultSangu": "2781000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "255.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -270,7 +290,8 @@
     "defaultSangu": "2065000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "220.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -283,7 +304,8 @@
     "defaultSangu": "2692000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "225.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -296,7 +318,8 @@
     "defaultSangu": "2756000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "245.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -309,7 +332,8 @@
     "defaultSangu": "2905000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "310.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -322,7 +346,8 @@
     "defaultSangu": "2297000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "220.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -335,7 +360,8 @@
     "defaultSangu": "3092000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "350.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -348,7 +374,8 @@
     "defaultSangu": "2832000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "340.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -361,7 +388,8 @@
     "defaultSangu": "2923000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "330.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -374,7 +402,8 @@
     "defaultSangu": "2878000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "345.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -387,7 +416,8 @@
     "defaultSangu": "2178000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "270.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -400,7 +430,8 @@
     "defaultSangu": "2384000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "275.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -413,7 +444,8 @@
     "defaultSangu": "2189000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "260.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -426,7 +458,8 @@
     "defaultSangu": "2175000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "255.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -439,7 +472,8 @@
     "defaultSangu": "2474000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "265.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -452,7 +486,8 @@
     "defaultSangu": "3014000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "380.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -465,7 +500,8 @@
     "defaultSangu": "3152000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "425.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -478,7 +514,8 @@
     "defaultSangu": "3768000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "490.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -491,7 +528,8 @@
     "defaultSangu": "2304000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "285.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -504,7 +542,8 @@
     "defaultSangu": "2241000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "275.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -517,7 +556,8 @@
     "defaultSangu": "2304000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "280.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -530,7 +570,8 @@
     "defaultSangu": "2178000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "270.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -543,7 +584,8 @@
     "defaultSangu": "2178000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "270.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -556,7 +598,8 @@
     "defaultSangu": "2446000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "170.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -569,7 +612,8 @@
     "defaultSangu": "2356000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "295.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -582,7 +626,8 @@
     "defaultSangu": "2586000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "255.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -595,7 +640,8 @@
     "defaultSangu": "1920000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "220.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -608,7 +654,8 @@
     "defaultSangu": "2503000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "225.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -621,7 +668,8 @@
     "defaultSangu": "2563000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "245.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -634,7 +682,8 @@
     "defaultSangu": "2701000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "310.00"
   },
   {
     "originPlant": "Indocement - Grobogan",
@@ -647,7 +696,8 @@
     "defaultSangu": "2136000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": true,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "220.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -660,7 +710,8 @@
     "defaultSangu": "675397.00",
     "additionalTonnageRate": "13072.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "25.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -673,7 +724,8 @@
     "defaultSangu": "741970.00",
     "additionalTonnageRate": "14361.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "35.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -686,7 +738,8 @@
     "defaultSangu": "793027.00",
     "additionalTonnageRate": "15349.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "70.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -699,7 +752,8 @@
     "defaultSangu": "761996.00",
     "additionalTonnageRate": "14748.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "50.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -712,7 +766,8 @@
     "defaultSangu": "909664.00",
     "additionalTonnageRate": "17606.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "75.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -725,7 +780,8 @@
     "defaultSangu": "945903.00",
     "additionalTonnageRate": "18308.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "85.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -738,7 +794,8 @@
     "defaultSangu": "1079932.00",
     "additionalTonnageRate": "20902.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "105.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -751,7 +808,8 @@
     "defaultSangu": "1323497.00",
     "additionalTonnageRate": "21613.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "135.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -764,7 +822,8 @@
     "defaultSangu": "1251610.00",
     "additionalTonnageRate": "24225.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "145.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -777,7 +836,8 @@
     "defaultSangu": "2600000.00",
     "additionalTonnageRate": "39030.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "130.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -790,7 +850,8 @@
     "defaultSangu": "1357676.00",
     "additionalTonnageRate": "26278.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "170.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -803,7 +864,8 @@
     "defaultSangu": "1633312.00",
     "additionalTonnageRate": "30625.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "220.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -816,7 +878,8 @@
     "defaultSangu": "1684633.00",
     "additionalTonnageRate": "32606.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "245.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -829,7 +892,8 @@
     "defaultSangu": "1864836.00",
     "additionalTonnageRate": "36094.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "275.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -842,7 +906,8 @@
     "defaultSangu": "2154516.00",
     "additionalTonnageRate": "41700.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "305.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -855,7 +920,8 @@
     "defaultSangu": "2299549.00",
     "additionalTonnageRate": "44507.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "320.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -868,7 +934,8 @@
     "defaultSangu": "1593741.00",
     "additionalTonnageRate": "30847.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "145.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -881,7 +948,8 @@
     "defaultSangu": "1750121.00",
     "additionalTonnageRate": "33873.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "140.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -894,7 +962,8 @@
     "defaultSangu": "1562354.00",
     "additionalTonnageRate": "30239.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "145.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -907,7 +976,8 @@
     "defaultSangu": "2002988.00",
     "additionalTonnageRate": "38768.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "175.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -920,7 +990,8 @@
     "defaultSangu": "2142581.00",
     "additionalTonnageRate": "41469.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "180.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -933,7 +1004,8 @@
     "defaultSangu": "2484387.00",
     "additionalTonnageRate": "48085.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "270.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -946,7 +1018,8 @@
     "defaultSangu": "2928787.00",
     "additionalTonnageRate": "56686.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "210.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -959,7 +1032,8 @@
     "defaultSangu": "3101364.00",
     "additionalTonnageRate": "60026.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "245.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -972,7 +1046,8 @@
     "defaultSangu": "2749979.00",
     "additionalTonnageRate": "53225.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "320.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -985,7 +1060,8 @@
     "defaultSangu": "2806880.00",
     "additionalTonnageRate": "54327.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "310.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -998,7 +1074,8 @@
     "defaultSangu": "2009746.00",
     "additionalTonnageRate": "38898.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "185.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -1011,7 +1088,8 @@
     "defaultSangu": "2329743.00",
     "additionalTonnageRate": "45092.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "195.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -1024,7 +1102,8 @@
     "defaultSangu": "2011931.00",
     "additionalTonnageRate": "38941.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "190.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -1037,7 +1116,8 @@
     "defaultSangu": "2178804.00",
     "additionalTonnageRate": "42170.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "210.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Rembang",
@@ -1050,7 +1130,8 @@
     "defaultSangu": "1906578.00",
     "additionalTonnageRate": "36902.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "235.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1063,7 +1144,8 @@
     "defaultSangu": "1879000.00",
     "additionalTonnageRate": "35000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "240.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1076,7 +1158,8 @@
     "defaultSangu": "1531000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "100.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1089,7 +1172,8 @@
     "defaultSangu": "1313380.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "140.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1102,7 +1186,8 @@
     "defaultSangu": "1665751.00",
     "additionalTonnageRate": "31000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "130.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1115,7 +1200,8 @@
     "defaultSangu": "1450000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "130.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1128,7 +1214,8 @@
     "defaultSangu": "1313380.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "140.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1141,7 +1228,8 @@
     "defaultSangu": "1652937.00",
     "additionalTonnageRate": "30762.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "190.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1154,7 +1242,8 @@
     "defaultSangu": "1900000.00",
     "additionalTonnageRate": "35000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "240.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1167,7 +1256,8 @@
     "defaultSangu": "1012263.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "100.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1180,7 +1270,8 @@
     "defaultSangu": "1306974.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "80.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1193,7 +1284,8 @@
     "defaultSangu": "1545141.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "180.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1206,7 +1298,8 @@
     "defaultSangu": "1878844.00",
     "additionalTonnageRate": "35000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "240.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1219,7 +1312,8 @@
     "defaultSangu": "1878844.00",
     "additionalTonnageRate": "35000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "240.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1232,7 +1326,8 @@
     "defaultSangu": "1878844.00",
     "additionalTonnageRate": "35000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "240.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1245,7 +1340,8 @@
     "defaultSangu": "2000000.00",
     "additionalTonnageRate": "35000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "240.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1258,7 +1354,8 @@
     "defaultSangu": "2710541.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "230.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1271,7 +1368,8 @@
     "defaultSangu": "2800000.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "230.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1284,7 +1382,8 @@
     "defaultSangu": "3000000.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "270.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1297,7 +1396,8 @@
     "defaultSangu": "2407240.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "310.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1310,7 +1410,8 @@
     "defaultSangu": "2188400.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "310.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1323,7 +1424,8 @@
     "defaultSangu": "2188400.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "310.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1336,7 +1438,8 @@
     "defaultSangu": "2318493.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "250.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1349,7 +1452,8 @@
     "defaultSangu": "2650000.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "280.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1362,7 +1466,8 @@
     "defaultSangu": "2462526.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "280.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1375,7 +1480,8 @@
     "defaultSangu": "2800000.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "280.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1388,7 +1494,8 @@
     "defaultSangu": "2265352.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "300.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1401,7 +1508,8 @@
     "defaultSangu": "2265352.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "300.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1414,7 +1522,8 @@
     "defaultSangu": "2265352.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "300.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1427,7 +1536,8 @@
     "defaultSangu": "2265352.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "300.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1440,7 +1550,8 @@
     "defaultSangu": "2703863.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "290.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1453,7 +1564,8 @@
     "defaultSangu": "2977160.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "290.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1466,7 +1578,8 @@
     "defaultSangu": "2211604.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "290.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1479,7 +1592,8 @@
     "defaultSangu": "2211604.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "290.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1492,7 +1606,8 @@
     "defaultSangu": "2211604.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "290.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1505,7 +1620,8 @@
     "defaultSangu": "2885372.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "330.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1518,7 +1634,8 @@
     "defaultSangu": "2900278.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "320.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1531,7 +1648,8 @@
     "defaultSangu": "2742081.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "320.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1544,7 +1662,8 @@
     "defaultSangu": "3085092.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "320.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1557,7 +1676,8 @@
     "defaultSangu": "2546425.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "320.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1570,7 +1690,8 @@
     "defaultSangu": "2546425.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "320.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1583,7 +1704,8 @@
     "defaultSangu": "2546425.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "320.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1596,7 +1718,8 @@
     "defaultSangu": "2828127.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "330.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1609,7 +1732,8 @@
     "defaultSangu": "2794814.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "350.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1622,7 +1746,8 @@
     "defaultSangu": "1450000.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "130.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1635,7 +1760,8 @@
     "defaultSangu": "1572114.00",
     "additionalTonnageRate": "30000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "170.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1648,7 +1774,8 @@
     "defaultSangu": "1572114.00",
     "additionalTonnageRate": "30000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "170.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1661,7 +1788,8 @@
     "defaultSangu": "1572114.00",
     "additionalTonnageRate": "30000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "170.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1674,7 +1802,8 @@
     "defaultSangu": "1743124.00",
     "additionalTonnageRate": "30000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "190.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1687,7 +1816,8 @@
     "defaultSangu": "1849875.00",
     "additionalTonnageRate": "35000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "180.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1700,7 +1830,8 @@
     "defaultSangu": "1849875.00",
     "additionalTonnageRate": "35000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "180.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1713,7 +1844,8 @@
     "defaultSangu": "1849875.00",
     "additionalTonnageRate": "35000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "180.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1726,7 +1858,8 @@
     "defaultSangu": "2281595.00",
     "additionalTonnageRate": "40000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "250.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1739,7 +1872,8 @@
     "defaultSangu": "2281595.00",
     "additionalTonnageRate": "40000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "250.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1752,7 +1886,8 @@
     "defaultSangu": "1151738.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "65.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1765,7 +1900,8 @@
     "defaultSangu": "1151738.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "65.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1778,7 +1914,8 @@
     "defaultSangu": "569952.00",
     "additionalTonnageRate": "20000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "25.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1791,7 +1928,8 @@
     "defaultSangu": "1250000.00",
     "additionalTonnageRate": "20000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "50.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1804,7 +1942,8 @@
     "defaultSangu": "1105137.00",
     "additionalTonnageRate": "20000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "50.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1817,7 +1956,8 @@
     "defaultSangu": "1600000.00",
     "additionalTonnageRate": "30000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "220.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1830,7 +1970,8 @@
     "defaultSangu": "2543473.00",
     "additionalTonnageRate": "40000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "270.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1843,7 +1984,8 @@
     "defaultSangu": "2307580.00",
     "additionalTonnageRate": "40000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "210.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1856,7 +1998,8 @@
     "defaultSangu": "1755691.00",
     "additionalTonnageRate": "40000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "200.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1869,7 +2012,8 @@
     "defaultSangu": "2667763.00",
     "additionalTonnageRate": "40000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "175.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1882,7 +2026,8 @@
     "defaultSangu": "2624296.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "310.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1895,7 +2040,8 @@
     "defaultSangu": "2043747.00",
     "additionalTonnageRate": "30000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "240.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1908,7 +2054,8 @@
     "defaultSangu": "2600000.00",
     "additionalTonnageRate": "40000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "310.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1921,7 +2068,8 @@
     "defaultSangu": "2562693.00",
     "additionalTonnageRate": "40000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "310.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1934,7 +2082,8 @@
     "defaultSangu": "1450090.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "130.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1947,7 +2096,8 @@
     "defaultSangu": "2896957.00",
     "additionalTonnageRate": "40000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "440.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1960,7 +2110,8 @@
     "defaultSangu": "1850000.00",
     "additionalTonnageRate": "30000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "230.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1973,7 +2124,8 @@
     "defaultSangu": "2224411.00",
     "additionalTonnageRate": "30000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "270.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1986,7 +2138,8 @@
     "defaultSangu": "3200000.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "290.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -1999,7 +2152,8 @@
     "defaultSangu": "1700000.00",
     "additionalTonnageRate": "30000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "140.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -2012,7 +2166,8 @@
     "defaultSangu": "1311120.00",
     "additionalTonnageRate": "30000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "150.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -2025,7 +2180,8 @@
     "defaultSangu": "3252307.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "400.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -2038,7 +2194,8 @@
     "defaultSangu": "3563109.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "470.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -2051,7 +2208,8 @@
     "defaultSangu": "1575420.00",
     "additionalTonnageRate": "25000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "130.00"
   },
   {
     "originPlant": "Semen Indonesia (SI) - Tuban",
@@ -2064,7 +2222,8 @@
     "defaultSangu": "3050400.00",
     "additionalTonnageRate": "50000.00",
     "hasSpecialDeductions": false,
-    "isActive": true
+    "isActive": true,
+    "distanceKm": "400.00"
   },
   {
     "originPlant": "Solusi Bangun Indonesia (SBI) - Tuban",

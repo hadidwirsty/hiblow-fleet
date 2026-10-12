@@ -15,7 +15,10 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { FactoryIcon } from "@/components/icons"
-import { resolveRowFinancialMetrics } from "@/features/rates/rates.calculations"
+import {
+  calculateDistanceCostMetrics,
+  resolveRowFinancialMetrics,
+} from "@/features/rates/rates.calculations"
 import {
   cn,
   formatCityWithCode,
@@ -45,6 +48,12 @@ export function RateMobileCard({
   const additionalRate = parseFloat(rate.additionalTonnageRate || "0")
 
   const distanceNum = rate.distanceKm ? parseFloat(rate.distanceKm) : 0
+  const distanceMetrics = calculateDistanceCostMetrics({
+    distanceKm: rate.distanceKm,
+    rowJumlah,
+    rowSangu,
+    rowProfit,
+  })
   const cleanCity = rate.city.trim().toLowerCase()
   const cleanDest = rate.destination.trim().toLowerCase()
   const cleanCityWithCode = formatCityWithCode(rate.city, rate.cityCode)
@@ -176,6 +185,11 @@ export function RateMobileCard({
               >
                 {formatCurrency(rowProfit)}
               </div>
+              {distanceMetrics.profitPerKm !== null && (
+                <div className="mt-0.5 font-mono text-[10px] text-muted-foreground">
+                  ({formatCurrency(distanceMetrics.profitPerKm)}/km)
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -5,6 +5,7 @@ import {
   resolveActiveRateDetail,
   resolveAdditionalTonnageCalculation,
 } from "../rate-detail-sheet"
+import { calculateDistanceCostMetrics } from "../rates.calculations"
 import type { RateReference } from "@/db/schema"
 
 const mockRate: RateReference = {
@@ -107,5 +108,18 @@ describe("RateDetailSheet Animation & Lifecycle Logic", () => {
     const fixedCalc = resolveAdditionalTonnageCalculation(214500, 25000)
     expect(fixedCalc.isPercentage).toBe(false)
     expect(fixedCalc.percentage).toBe(0)
+  })
+
+  it("harus menghitung metrik efisiensi per kilometer jika distanceKm valid", () => {
+    const metrics = calculateDistanceCostMetrics({
+      distanceKm: mockRate.distanceKm,
+      rowJumlah: 3100000,
+      rowSangu: 1620000,
+      rowProfit: 1480000,
+    })
+    expect(metrics.distanceKm).toBe(120)
+    expect(metrics.revenuePerKm).toBe(25833) // 3100000 / 120
+    expect(metrics.sanguPerKm).toBe(13500) // 1620000 / 120
+    expect(metrics.profitPerKm).toBe(12333) // 1480000 / 120
   })
 })

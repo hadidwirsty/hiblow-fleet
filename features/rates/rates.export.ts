@@ -1,4 +1,7 @@
-import { resolveRowFinancialMetrics } from "@/features/rates/rates.calculations"
+import {
+  calculateDistanceCostMetrics,
+  resolveRowFinancialMetrics,
+} from "@/features/rates/rates.calculations"
 import { formatCityWithCode, formatPercentage } from "@/lib/utils"
 
 import type { RateReference } from "@/db/schema"
@@ -10,6 +13,7 @@ export function formatRatesForExport(rates: RateReference[]): ExcelSheetData {
     "Pabrik Asal",
     "Kota Tujuan",
     "Tujuan Bongkar (Proyek / BP)",
+    "Jarak (Km)",
     "Tarif OA / Ton (Rp)",
     "Tonase Standar (Ton)",
     "Estimasi Jumlah (Rp)",
@@ -17,6 +21,8 @@ export function formatRatesForExport(rates: RateReference[]): ExcelSheetData {
     "Sangu Supir (Rp)",
     "Tarif Lebih Tonase (Rp)",
     "Estimasi Profit (Rp)",
+    "Pendapatan / Km (Rp)",
+    "Estimasi Profit / Km (Rp)",
     "Potongan Khusus",
     "Status Rute",
   ]
@@ -24,6 +30,12 @@ export function formatRatesForExport(rates: RateReference[]): ExcelSheetData {
   const rows = rates.map((rate, index) => {
     const { numRate, numTon, rowJumlah, rowSangu, rowProfit } =
       resolveRowFinancialMetrics(rate)
+    const distanceMetrics = calculateDistanceCostMetrics({
+      distanceKm: rate.distanceKm,
+      rowJumlah,
+      rowSangu,
+      rowProfit,
+    })
     const addRate = parseFloat(rate.additionalTonnageRate || "0")
 
     return [
@@ -31,6 +43,7 @@ export function formatRatesForExport(rates: RateReference[]): ExcelSheetData {
       rate.originPlant || rate.clientName,
       formatCityWithCode(rate.city, rate.cityCode),
       rate.destination,
+      distanceMetrics.distanceKm ?? "-",
       numRate,
       numTon,
       rowJumlah,
@@ -38,6 +51,8 @@ export function formatRatesForExport(rates: RateReference[]): ExcelSheetData {
       rowSangu,
       addRate,
       rowProfit,
+      distanceMetrics.revenuePerKm ?? "-",
+      distanceMetrics.profitPerKm ?? "-",
       rate.hasSpecialDeductions ? "LJU (1%, 2%, 5%)" : "-",
       rate.isActive ? "Aktif" : "Nonaktif",
     ]

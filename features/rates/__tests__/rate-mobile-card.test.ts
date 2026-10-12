@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 
+import { calculateDistanceCostMetrics } from "@/features/rates/rates.calculations"
 import { formatPercentage } from "@/lib/utils"
 
 describe("RateMobileCard logic and formatters", () => {
@@ -49,5 +50,17 @@ describe("RateMobileCard logic and formatters", () => {
     expect(calculateAdditionalTonnageRate("102539.5", 30)).toBe(30762)
     // Custom persentase 35%
     expect(calculateAdditionalTonnageRate("102539.5", 35)).toBe(35889)
+  })
+
+  it("calculates profit per km for mobile card display", () => {
+    const metrics = calculateDistanceCostMetrics({
+      distanceKm: "130",
+      rowJumlah: 3410000,
+      rowSangu: 1705000,
+      rowProfit: 1705000,
+    })
+
+    expect(metrics.profitPerKm).toBe(13115)
+    expect(metrics.distanceKm).toBe(130)
   })
 })

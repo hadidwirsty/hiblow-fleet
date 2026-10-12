@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  calculateDistanceCostMetrics,
   resolveAdditionalTonnageCalculation,
   resolveRowFinancialMetrics,
 } from "../rates.calculations"
@@ -99,6 +100,54 @@ describe("rates.calculations", () => {
       expect(res1.isLegacyThousandRounding).toBe(true)
       expect(res1.isManualOverride).toBe(false)
       expect(res1.rowSangu).toBe(1612000)
+    })
+  })
+
+  describe("calculateDistanceCostMetrics", () => {
+    it("harus menghitung revenuePerKm, sanguPerKm, profitPerKm, dan costPerKm dengan benar", () => {
+      const res = calculateDistanceCostMetrics({
+        distanceKm: "310",
+        rowJumlah: 5489827,
+        rowSangu: 2744914,
+        rowProfit: 2744914,
+      })
+      expect(res.distanceKm).toBe(310)
+      expect(res.revenuePerKm).toBe(17709) // 5489827 / 310 = 17709,119 -> 17709
+      expect(res.sanguPerKm).toBe(8855) // 2744914 / 310 = 8854,56 -> 8855
+      expect(res.profitPerKm).toBe(8855) // 2744914 / 310 = 8854,56 -> 8855
+      expect(res.costPerKm).toBe(8855) // (5489827 - 2744914) / 310 = 8855
+    })
+
+    it("harus mengembalikan null untuk semua metrik jika jarak null, 0, undefined, atau negatif", () => {
+      const resNull = calculateDistanceCostMetrics({
+        distanceKm: null,
+        rowJumlah: 5000000,
+        rowSangu: 2500000,
+        rowProfit: 2500000,
+      })
+      expect(resNull.distanceKm).toBeNull()
+      expect(resNull.revenuePerKm).toBeNull()
+      expect(resNull.sanguPerKm).toBeNull()
+      expect(resNull.profitPerKm).toBeNull()
+      expect(resNull.costPerKm).toBeNull()
+
+      const resZero = calculateDistanceCostMetrics({
+        distanceKm: "0",
+        rowJumlah: 5000000,
+        rowSangu: 2500000,
+        rowProfit: 2500000,
+      })
+      expect(resZero.distanceKm).toBeNull()
+      expect(resZero.revenuePerKm).toBeNull()
+
+      const resNeg = calculateDistanceCostMetrics({
+        distanceKm: -15,
+        rowJumlah: 5000000,
+        rowSangu: 2500000,
+        rowProfit: 2500000,
+      })
+      expect(resNeg.distanceKm).toBeNull()
+      expect(resNeg.revenuePerKm).toBeNull()
     })
   })
 })

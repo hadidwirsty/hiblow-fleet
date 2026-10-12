@@ -108,3 +108,58 @@ export function resolveRowFinancialMetrics(
     rowProfit,
   }
 }
+
+/**
+ * Hasil kalkulasi metrik efisiensi biaya dan laba berbasis jarak tempuh (Cost per Kilometer).
+ */
+export interface DistanceCostMetrics {
+  distanceKm: number | null
+  revenuePerKm: number | null
+  sanguPerKm: number | null
+  profitPerKm: number | null
+  costPerKm: number | null
+}
+
+/**
+ * Menghitung metrik efisiensi logistik per kilometer (unit economics):
+ * - revenuePerKm: pendapatan per km (rowJumlah / distanceKm)
+ * - sanguPerKm: sangu supir per km (rowSangu / distanceKm)
+ * - profitPerKm: estimasi laba bersih per km (rowProfit / distanceKm)
+ * - costPerKm: total beban jalan per km ((rowJumlah - rowProfit) / distanceKm)
+ *
+ * Mengembalikan null untuk semua metrik jika jarak kosong, <= 0, atau tidak valid (division-by-zero guard).
+ */
+export function calculateDistanceCostMetrics(input: {
+  distanceKm: string | number | null | undefined
+  rowJumlah: number
+  rowSangu: number
+  rowProfit: number
+}): DistanceCostMetrics {
+  const dist =
+    typeof input.distanceKm === "number"
+      ? input.distanceKm
+      : parseFloat(input.distanceKm || "0")
+
+  if (!dist || dist <= 0 || isNaN(dist)) {
+    return {
+      distanceKm: null,
+      revenuePerKm: null,
+      sanguPerKm: null,
+      profitPerKm: null,
+      costPerKm: null,
+    }
+  }
+
+  const revenuePerKm = Math.round(input.rowJumlah / dist)
+  const sanguPerKm = Math.round(input.rowSangu / dist)
+  const profitPerKm = Math.round(input.rowProfit / dist)
+  const costPerKm = Math.round((input.rowJumlah - input.rowProfit) / dist)
+
+  return {
+    distanceKm: dist,
+    revenuePerKm,
+    sanguPerKm,
+    profitPerKm,
+    costPerKm,
+  }
+}

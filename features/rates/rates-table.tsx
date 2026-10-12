@@ -56,7 +56,10 @@ import {
   deleteRateReference,
   toggleRateReferenceStatus,
 } from "@/features/rates/rates.actions"
-import { resolveRowFinancialMetrics } from "@/features/rates/rates.calculations"
+import {
+  calculateDistanceCostMetrics,
+  resolveRowFinancialMetrics,
+} from "@/features/rates/rates.calculations"
 import { RateDetailSheet } from "@/features/rates/rate-detail-sheet"
 import { RateFormDialog } from "@/features/rates/rate-form-dialog"
 import { RateMobileCard } from "@/features/rates/rate-mobile-card"
@@ -578,6 +581,12 @@ export function RatesTable({
               paginatedRates.map((rate, idx) => {
                 const { numRate, numTon, rowJumlah, rowSangu, rowProfit } =
                   resolveRowFinancialMetrics(rate)
+                const distanceMetrics = calculateDistanceCostMetrics({
+                  distanceKm: rate.distanceKm,
+                  rowJumlah,
+                  rowSangu,
+                  rowProfit,
+                })
                 const rowNumber = (currentPage - 1) * pageSize + idx + 1
 
                 return (
@@ -597,11 +606,14 @@ export function RatesTable({
                       <div className="font-semibold text-foreground">
                         {formatCityWithCode(rate.city, rate.cityCode)}
                       </div>
-                      {rate.zoneCode && (
-                        <div className="font-mono text-[10px] text-muted-foreground">
-                          Zone: {rate.zoneCode}
-                        </div>
-                      )}
+                      <div className="flex items-center gap-1.5 font-mono text-[10px] text-muted-foreground">
+                        {rate.zoneCode && <span>Zone: {rate.zoneCode}</span>}
+                        {rate.zoneCode &&
+                          distanceMetrics.distanceKm !== null && <span>•</span>}
+                        {distanceMetrics.distanceKm !== null && (
+                          <span>{distanceMetrics.distanceKm} km</span>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="text-left font-medium whitespace-nowrap text-foreground">
                       {rate.destination}
@@ -630,7 +642,12 @@ export function RatesTable({
                             : "text-muted-foreground"
                       }`}
                     >
-                      {formatCurrency(rowProfit)}
+                      <div>{formatCurrency(rowProfit)}</div>
+                      {distanceMetrics.profitPerKm !== null && (
+                        <div className="text-[10px] font-normal text-muted-foreground">
+                          {formatCurrency(distanceMetrics.profitPerKm)}/km
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell className="text-center whitespace-nowrap">
                       {rate.hasSpecialDeductions ? (
