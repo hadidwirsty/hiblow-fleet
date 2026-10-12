@@ -422,7 +422,13 @@ export async function runSync() {
   // ----------------------------------------------------
   console.log("🗺️ 4. Menambahkan 31 Rute Baru Pabrik SI Rembang...")
   const rates = JSON.parse(fs.readFileSync(ratesJsonPath, "utf-8"))
-  const fileRembang = "PERHITUNGAN HIBLOW HW Trans.xlsx - SI Rembang.csv"
+  const fileRembangNew =
+    "PERHITUNGAN HIBLOW HW Trans.xlsx - Semen Indonesia (SI) - Rembang.csv"
+  const fileRembangOld = "PERHITUNGAN HIBLOW HW Trans.xlsx - SI Rembang.csv"
+  const fileRembang = fs.existsSync(path.join(csvDir, fileRembangNew))
+    ? fileRembangNew
+    : fileRembangOld
+
   const wbRembang = XLSX.read(
     fs.readFileSync(path.join(csvDir, fileRembang), "utf-8"),
     { type: "string", raw: true }
@@ -437,32 +443,30 @@ export async function runSync() {
     const r = rowsRembang[i]
     if (!r || !r[1]) continue
     const city = String(r[1]).trim()
-    const destination = r[2] ? String(r[2]).trim() : `SI REMBANG - ${city}`
+    const destination = r[2] ? String(r[2]).trim() : city
     const ratePerTon = parseTarif(r[3])
     const standardTonnage = parseTonnage(r[4]) || "31.00"
+    const defaultSangu = r[6] ? parseTarif(r[6]) : "0.00"
     const additionalTonnageRate = parseTarif(r[8]) || "25000.00"
 
     const exists = rates.some(
-      (rt: { clientName: string; city: string }) =>
-        rt.clientName === "SI Rembang" &&
-        rt.city.toLowerCase() === city.toLowerCase()
+      (rt: { clientName: string; city: string; standardTonnage?: string }) =>
+        (rt.clientName === "Semen Indonesia - Rembang" ||
+          rt.clientName === "SI Rembang") &&
+        rt.city.toLowerCase() === city.toLowerCase() &&
+        (rt.standardTonnage === undefined ||
+          parseFloat(rt.standardTonnage) === parseFloat(standardTonnage))
     )
     if (!exists) {
-      const sTonnage = parseFloat(standardTonnage) || 31
-      const rPerTon = parseFloat(ratePerTon) || 0
-      const dSangu = (
-        Math.round((rPerTon * sTonnage * 0.5) / 1000) * 1000
-      ).toFixed(2)
-
       rates.push({
         originPlant: "Semen Indonesia (SI) - Rembang",
-        clientName: "SI Rembang",
+        clientName: "Semen Indonesia - Rembang",
         city,
         destination,
         ratePerTon,
         standardTonnage,
         sanguPercentage: "0.5000",
-        defaultSangu: dSangu,
+        defaultSangu,
         additionalTonnageRate,
         hasSpecialDeductions: false,
         isActive: true,
