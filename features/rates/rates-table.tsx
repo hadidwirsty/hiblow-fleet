@@ -56,6 +56,7 @@ import {
   deleteRateReference,
   toggleRateReferenceStatus,
 } from "@/features/rates/rates.actions"
+import { resolveRowFinancialMetrics } from "@/features/rates/rates.calculations"
 import { RateDetailSheet } from "@/features/rates/rate-detail-sheet"
 import { RateFormDialog } from "@/features/rates/rate-form-dialog"
 import { RateMobileCard } from "@/features/rates/rate-mobile-card"
@@ -171,7 +172,9 @@ export function RatesTable({
       distinctOriginPlants && distinctOriginPlants.length > 0
         ? distinctOriginPlants
         : distinctClients
-    return Array.from(new Set(list))
+    return Array.from(new Set(list)).sort((a, b) =>
+      a.localeCompare(b, "id", { sensitivity: "base" })
+    )
   }, [distinctOriginPlants, distinctClients])
 
   // Filtered dataset
@@ -293,7 +296,7 @@ export function RatesTable({
       {/* Search & Filter Toolbar Terpadu */}
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         {/* Search Bar Instan (Tinggi h-10 setara pembungkus filter) */}
-        <div className="relative w-full xl:max-w-md xl:shrink-0">
+        <div className="relative w-full xl:max-w-xs xl:shrink-0 2xl:max-w-md">
           <RiSearchLine className="absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}
@@ -342,7 +345,7 @@ export function RatesTable({
               }
             }}
           >
-            <SelectTrigger className="h-8.5 w-full rounded-lg border-border/60 bg-background px-2.5 text-xs font-medium text-foreground shadow-2xs hover:bg-accent/50 sm:h-7.5 sm:min-w-0 sm:flex-1 xl:w-56 xl:flex-none">
+            <SelectTrigger className="h-8.5 w-full rounded-lg border-border/60 bg-background px-2.5 text-xs font-medium text-foreground shadow-2xs hover:bg-accent/50 sm:h-7.5 sm:min-w-0 sm:flex-1 xl:w-76 xl:flex-none 2xl:w-80">
               <SelectValue>
                 {selectedClient === "ALL" ? "Semua Pabrik" : selectedClient}
               </SelectValue>
@@ -350,7 +353,7 @@ export function RatesTable({
             <SelectContent
               align="start"
               alignItemWithTrigger={false}
-              className="w-auto max-w-[calc(100vw-2rem)] min-w-56 sm:min-w-70"
+              className="w-auto max-w-[calc(100vw-2rem)] min-w-56 sm:min-w-72 xl:min-w-76 2xl:min-w-80"
             >
               <SelectItem value="ALL" className="text-xs font-medium">
                 Semua Pabrik
@@ -570,32 +573,8 @@ export function RatesTable({
               </TableRow>
             ) : (
               paginatedRates.map((rate, idx) => {
-                const numRate = parseFloat(rate.ratePerTon)
-                const numPct = parseFloat(rate.sanguPercentage)
-                const numTon = parseFloat(rate.standardTonnage || "31")
-                const rowJumlah = rate.estimatedRevenue
-                  ? parseFloat(rate.estimatedRevenue)
-                  : Math.round(numRate * numTon)
-                const formulaSangu = Math.round(rowJumlah * numPct)
-
-                const parsedDefaultSangu = rate.defaultSangu
-                  ? parseFloat(rate.defaultSangu)
-                  : 0
-                const isLegacyThousandRounding =
-                  parsedDefaultSangu > 0 &&
-                  formulaSangu > 0 &&
-                  Math.abs(
-                    parsedDefaultSangu - Math.round(formulaSangu / 1000) * 1000
-                  ) === 0 &&
-                  Math.abs(parsedDefaultSangu - formulaSangu) < 1000
-
-                const rowSangu =
-                  parsedDefaultSangu > 0 && !isLegacyThousandRounding
-                    ? parsedDefaultSangu
-                    : formulaSangu
-                const rowProfit = rate.estimatedProfitTotal
-                  ? parseFloat(rate.estimatedProfitTotal)
-                  : rowJumlah - rowSangu
+                const { numRate, rowJumlah, rowSangu, rowProfit } =
+                  resolveRowFinancialMetrics(rate)
                 const rowNumber = (currentPage - 1) * pageSize + idx + 1
 
                 return (

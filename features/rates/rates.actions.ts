@@ -9,6 +9,7 @@ import { rateReferences, trips } from "@/db/schema"
 import { assertAdmin } from "@/lib/rbac"
 import { getCurrentSession } from "@/lib/session"
 
+import { isIndocementRoute } from "./rates.indocement"
 import {
   createRateReferenceSchema,
   updateRateReferenceSchema,
@@ -49,11 +50,7 @@ export async function createRateReference(input: CreateRateReferenceInput) {
       }
     }
 
-    const isIndocement = Boolean(
-      parsed.data.originPlant &&
-      (parsed.data.originPlant.toLowerCase().includes("indocement") ||
-        parsed.data.originPlant.toLowerCase().includes("grobogan"))
-    )
+    const isIndocement = isIndocementRoute(parsed.data.originPlant)
     const effectiveHasSpecialDeductions = isIndocement
       ? true
       : (parsed.data.hasSpecialDeductions ?? false)
@@ -104,11 +101,9 @@ export async function updateRateReference(input: UpdateRateReferenceInput) {
 
     let effectiveHasSpecialDeductions = dataToUpdate.hasSpecialDeductions
     if (dataToUpdate.originPlant !== undefined) {
-      const isIndocement = Boolean(
-        dataToUpdate.originPlant.toLowerCase().includes("indocement") ||
-        dataToUpdate.originPlant.toLowerCase().includes("grobogan")
+      effectiveHasSpecialDeductions = isIndocementRoute(
+        dataToUpdate.originPlant
       )
-      effectiveHasSpecialDeductions = isIndocement
     }
 
     const payload = {

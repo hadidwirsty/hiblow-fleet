@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { FactoryIcon } from "@/components/icons"
-import { isIndocementRoute } from "@/features/rates/rates.indocement"
+import { resolveRowFinancialMetrics } from "@/features/rates/rates.calculations"
 import {
   cn,
   formatCityWithCode,
@@ -39,38 +39,8 @@ export function RateMobileCard({
   onToggleStatus,
   onDelete,
 }: RateMobileCardProps) {
-  const numRate = parseFloat(rate.ratePerTon)
-  const numPct = parseFloat(rate.sanguPercentage)
-  const numTon = parseFloat(rate.standardTonnage || "31")
-
-  const isIndocement = isIndocementRoute(rate)
-
-  const rowJumlah =
-    isIndocement && rate.estimatedRevenue
-      ? parseFloat(rate.estimatedRevenue)
-      : Math.round(numRate * numTon)
-
-  const formulaSangu = Math.round(rowJumlah * numPct)
-
-  const parsedDefaultSangu = rate.defaultSangu
-    ? parseFloat(rate.defaultSangu)
-    : 0
-  const isLegacyThousandRounding =
-    parsedDefaultSangu > 0 &&
-    formulaSangu > 0 &&
-    Math.abs(parsedDefaultSangu - Math.round(formulaSangu / 1000) * 1000) ===
-      0 &&
-    Math.abs(parsedDefaultSangu - formulaSangu) < 1000
-
-  const rowSangu =
-    parsedDefaultSangu > 0 && !isLegacyThousandRounding
-      ? parsedDefaultSangu
-      : formulaSangu
-
-  const rowProfit =
-    isIndocement && rate.estimatedProfitTotal
-      ? parseFloat(rate.estimatedProfitTotal)
-      : rowJumlah - rowSangu
+  const { numRate, numTon, rowJumlah, rowSangu, rowProfit } =
+    resolveRowFinancialMetrics(rate)
 
   const additionalRate = parseFloat(rate.additionalTonnageRate || "0")
 

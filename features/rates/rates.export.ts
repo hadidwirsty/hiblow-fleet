@@ -1,3 +1,4 @@
+import { resolveRowFinancialMetrics } from "@/features/rates/rates.calculations"
 import { formatCityWithCode, formatPercentage } from "@/lib/utils"
 
 import type { RateReference } from "@/db/schema"
@@ -21,32 +22,8 @@ export function formatRatesForExport(rates: RateReference[]): ExcelSheetData {
   ]
 
   const rows = rates.map((rate, index) => {
-    const numRate = parseFloat(rate.ratePerTon || "0")
-    const numTon = parseFloat(rate.standardTonnage || "31")
-    const numPct = parseFloat(rate.sanguPercentage || "0")
-    const rowJumlah = rate.estimatedRevenue
-      ? parseFloat(rate.estimatedRevenue)
-      : Math.round(numRate * numTon)
-    const formulaSangu = Math.round(rowJumlah * numPct)
-
-    const parsedDefaultSangu = rate.defaultSangu
-      ? parseFloat(rate.defaultSangu)
-      : 0
-    const isLegacyThousandRounding =
-      parsedDefaultSangu > 0 &&
-      formulaSangu > 0 &&
-      Math.abs(parsedDefaultSangu - Math.round(formulaSangu / 1000) * 1000) ===
-        0 &&
-      Math.abs(parsedDefaultSangu - formulaSangu) < 1000
-
-    const rowSangu =
-      parsedDefaultSangu > 0 && !isLegacyThousandRounding
-        ? parsedDefaultSangu
-        : formulaSangu
-
-    const rowProfit = rate.estimatedProfitTotal
-      ? parseFloat(rate.estimatedProfitTotal)
-      : rowJumlah - rowSangu
+    const { numRate, numTon, rowJumlah, rowSangu, rowProfit } =
+      resolveRowFinancialMetrics(rate)
     const addRate = parseFloat(rate.additionalTonnageRate || "0")
 
     return [

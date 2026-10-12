@@ -24,7 +24,10 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { FactoryIcon } from "@/components/icons"
-import { resolveAdditionalTonnageCalculation } from "@/features/rates/rates.calculations"
+import {
+  resolveAdditionalTonnageCalculation,
+  resolveRowFinancialMetrics,
+} from "@/features/rates/rates.calculations"
 import { isIndocementRoute } from "@/features/rates/rates.indocement"
 import { cn, formatCurrency, formatPercentage } from "@/lib/utils"
 import type { RateReference } from "@/db/schema"
@@ -71,37 +74,19 @@ export function RateDetailSheet({
   const rate = resolveActiveRateDetail(propRate, cachedRate)
   if (!rate) return null
 
-  const numRate = parseFloat(rate.ratePerTon || "0")
-  const numTon = parseFloat(rate.standardTonnage || "31")
-  const numPct = parseFloat(rate.sanguPercentage || "0")
-  const rowJumlah = Math.round(numRate * numTon)
-  const formulaSangu = Math.round(rowJumlah * numPct)
-
-  const parsedDefaultSangu = rate.defaultSangu
-    ? parseFloat(rate.defaultSangu)
-    : 0
-  const isLegacyThousandRounding =
-    parsedDefaultSangu > 0 &&
-    formulaSangu > 0 &&
-    Math.abs(parsedDefaultSangu - Math.round(formulaSangu / 1000) * 1000) ===
-      0 &&
-    Math.abs(parsedDefaultSangu - formulaSangu) < 1000
-
-  const isManualOverride = parsedDefaultSangu > 0 && !isLegacyThousandRounding
-  const rowSangu = isManualOverride ? parsedDefaultSangu : formulaSangu
-  const rowProfit = rowJumlah - rowSangu
-
   const isIndocement = isIndocementRoute(rate)
+  const {
+    numRate,
+    numTon,
+    numPct,
+    rowJumlah,
+    rowSangu,
+    rowProfit,
+    isManualOverride,
+  } = resolveRowFinancialMetrics(rate)
 
-  const effectiveRevenue =
-    isIndocement && rate.estimatedRevenue
-      ? parseFloat(rate.estimatedRevenue)
-      : rowJumlah
-
-  const effectiveProfit =
-    isIndocement && rate.estimatedProfitTotal
-      ? parseFloat(rate.estimatedProfitTotal)
-      : rowProfit
+  const effectiveRevenue = rowJumlah
+  const effectiveProfit = rowProfit
 
   const profitMarginPct =
     effectiveRevenue > 0
