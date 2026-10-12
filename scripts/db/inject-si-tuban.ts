@@ -171,7 +171,7 @@ async function runInjection() {
 
   // 2. Kategorikan: Rute untuk Update vs Rute Baru untuk Insert
   const toUpdate: { id: string; row: ParsedTubanRow; reason: string }[] = []
-  const toInsert: typeof rateReferences.$inferInsert[] = []
+  const toInsert: (typeof rateReferences.$inferInsert)[] = []
   const retainedUnmatched: typeof existingTuban = []
 
   const matchedExistingIds = new Set<string>()
@@ -304,7 +304,7 @@ async function runInjection() {
   // 6. Sinkronisasi ke db/data/rates.json
   if (fs.existsSync(RATES_JSON_PATH)) {
     console.log("💾 Memperbarui data acuan di db/data/rates.json...")
-    const currentRatesJson: typeof rateReferences.$inferInsert[] = JSON.parse(
+    const currentRatesJson: (typeof rateReferences.$inferInsert)[] = JSON.parse(
       fs.readFileSync(RATES_JSON_PATH, "utf-8")
     )
 
@@ -317,7 +317,7 @@ async function runInjection() {
         r.clientName !== "SI"
     )
 
-    const updatedTubanRates: typeof rateReferences.$inferInsert[] =
+    const updatedTubanRates: (typeof rateReferences.$inferInsert)[] =
       finalTuban.map((r) => ({
         originPlant: ORIGIN_PLANT,
         clientName: CLIENT_NAME,

@@ -496,6 +496,9 @@ export function RatesTable({
               <TableHead className="min-w-32 py-3 text-right text-xs font-semibold whitespace-nowrap text-foreground">
                 Tarif OA / Ton
               </TableHead>
+              <TableHead className="min-w-24 py-3 text-right text-xs font-semibold whitespace-nowrap text-foreground">
+                Tonase
+              </TableHead>
               <TableHead className="min-w-32 py-3 text-right text-xs font-semibold whitespace-nowrap text-foreground">
                 Est. Jumlah
               </TableHead>
@@ -522,7 +525,7 @@ export function RatesTable({
           <TableBody>
             {paginatedRates.length === 0 ? (
               <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={12} className="p-0">
+                <TableCell colSpan={13} className="p-0">
                   <Empty className="w-full border-0 py-20 sm:py-24 md:py-28 lg:py-32">
                     <EmptyMedia
                       variant="icon"
@@ -573,7 +576,7 @@ export function RatesTable({
               </TableRow>
             ) : (
               paginatedRates.map((rate, idx) => {
-                const { numRate, rowJumlah, rowSangu, rowProfit } =
+                const { numRate, numTon, rowJumlah, rowSangu, rowProfit } =
                   resolveRowFinancialMetrics(rate)
                 const rowNumber = (currentPage - 1) * pageSize + idx + 1
 
@@ -605,6 +608,9 @@ export function RatesTable({
                     </TableCell>
                     <TableCell className="text-right font-mono font-medium whitespace-nowrap text-foreground">
                       {formatCurrency(numRate)}
+                    </TableCell>
+                    <TableCell className="text-right font-mono font-medium whitespace-nowrap text-foreground">
+                      {numTon} Ton
                     </TableCell>
                     <TableCell className="text-right font-mono font-medium whitespace-nowrap text-foreground">
                       {formatCurrency(rowJumlah)}

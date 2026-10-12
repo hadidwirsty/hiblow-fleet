@@ -123,46 +123,59 @@ export function RateMobileCard({
           </div>
         </div>
 
-        {/* Rate, Jumlah, Sangu & Profit Details Grid */}
-        <div className="grid grid-cols-2 gap-2 text-xs">
-          <div className="rounded-lg border border-border/60 bg-muted/20 p-2.5">
-            <span className="text-[10px] text-muted-foreground">
-              Tarif OA / Ton
-            </span>
-            <div className="font-mono font-medium text-foreground">
-              {formatCurrency(numRate)}
+        {/* Rate, Tonase, Jumlah, Sangu & Profit Details */}
+        <div className="space-y-2 text-xs">
+          {/* Baris 1: Tarif OA / Ton, Tonase, Est. Jumlah */}
+          <div className="grid grid-cols-3 gap-2">
+            <div className="rounded-lg border border-border/60 bg-muted/20 p-2 sm:p-2.5">
+              <span className="text-[10px] text-muted-foreground">
+                Tarif OA / Ton
+              </span>
+              <div className="font-mono text-xs font-medium text-foreground">
+                {formatCurrency(numRate)}
+              </div>
+            </div>
+            <div className="rounded-lg border border-border/60 bg-muted/20 p-2 sm:p-2.5">
+              <span className="text-[10px] text-muted-foreground">Tonase</span>
+              <div className="font-mono text-xs font-medium text-foreground">
+                {numTon} Ton
+              </div>
+            </div>
+            <div className="rounded-lg border border-border/60 bg-muted/20 p-2 sm:p-2.5">
+              <span className="text-[10px] text-muted-foreground">
+                Est. Jumlah
+              </span>
+              <div className="font-mono text-xs font-medium text-foreground">
+                {formatCurrency(rowJumlah)}
+              </div>
             </div>
           </div>
-          <div className="rounded-lg border border-border/60 bg-muted/20 p-2.5">
-            <span className="text-[10px] text-muted-foreground">
-              Est. Jumlah ({numTon}t)
-            </span>
-            <div className="font-mono font-medium text-foreground">
-              {formatCurrency(rowJumlah)}
+
+          {/* Baris 2: Sangu Supir & Est. Profit */}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-lg border border-border/60 bg-muted/20 p-2.5">
+              <span className="text-[10px] text-muted-foreground">
+                Sangu Supir ({formatPercentage(rate.sanguPercentage)})
+              </span>
+              <div className="font-mono font-semibold text-primary">
+                {formatCurrency(rowSangu)}
+              </div>
             </div>
-          </div>
-          <div className="rounded-lg border border-border/60 bg-muted/20 p-2.5">
-            <span className="text-[10px] text-muted-foreground">
-              Sangu Supir ({formatPercentage(rate.sanguPercentage)})
-            </span>
-            <div className="font-mono font-semibold text-primary">
-              {formatCurrency(rowSangu)}
-            </div>
-          </div>
-          <div className="rounded-lg border border-border/60 bg-muted/20 p-2.5">
-            <span className="text-[10px] text-muted-foreground">
-              Est. Profit
-            </span>
-            <div
-              className={`font-mono font-semibold ${
-                rowProfit > 0
-                  ? "text-emerald-600 dark:text-emerald-400"
-                  : rowProfit < 0
-                    ? "text-destructive"
-                    : "text-foreground"
-              }`}
-            >
-              {formatCurrency(rowProfit)}
+            <div className="rounded-lg border border-border/60 bg-muted/20 p-2.5">
+              <span className="text-[10px] text-muted-foreground">
+                Est. Profit
+              </span>
+              <div
+                className={`font-mono font-semibold ${
+                  rowProfit > 0
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : rowProfit < 0
+                      ? "text-destructive"
+                      : "text-foreground"
+                }`}
+              >
+                {formatCurrency(rowProfit)}
+              </div>
             </div>
           </div>
         </div>

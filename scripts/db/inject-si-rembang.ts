@@ -102,7 +102,7 @@ async function runInjection() {
   console.log("")
 
   // 2. Filter data baru yang belum ada di database
-  const rowsToInsert: typeof rateReferences.$inferInsert[] = []
+  const rowsToInsert: (typeof rateReferences.$inferInsert)[] = []
   const skippedRows: CsvRowData[] = []
 
   for (const row of csvRows) {
@@ -133,9 +133,13 @@ async function runInjection() {
     }
   }
 
-  console.log(`⏭️  Dilewati (Sudah ada di database): ${skippedRows.length} rute:`)
+  console.log(
+    `⏭️  Dilewati (Sudah ada di database): ${skippedRows.length} rute:`
+  )
   for (const s of skippedRows) {
-    console.log(`   - No.${s.no} ${s.city} (Rp${parseFloat(s.ratePerTon).toLocaleString("id-ID")})`)
+    console.log(
+      `   - No.${s.no} ${s.city} (Rp${parseFloat(s.ratePerTon).toLocaleString("id-ID")})`
+    )
   }
   console.log("")
 
@@ -143,8 +147,13 @@ async function runInjection() {
 
   if (rowsToInsert.length > 0) {
     console.log("⏳ Mengunggah rute baru ke database...")
-    const inserted = await db.insert(rateReferences).values(rowsToInsert).returning()
-    console.log(`✅ Berhasil menginjeksi ${inserted.length} rute baru ke database!\n`)
+    const inserted = await db
+      .insert(rateReferences)
+      .values(rowsToInsert)
+      .returning()
+    console.log(
+      `✅ Berhasil menginjeksi ${inserted.length} rute baru ke database!\n`
+    )
   } else {
     console.log("ℹ️ Tidak ada rute baru yang perlu diinjeksi.\n")
   }
@@ -152,7 +161,7 @@ async function runInjection() {
   // 3. Sinkronisasi data ke canonical rates.json
   if (fs.existsSync(RATES_JSON_PATH)) {
     console.log("💾 Memperbarui data acuan di db/data/rates.json...")
-    const currentRatesJson: typeof rateReferences.$inferInsert[] = JSON.parse(
+    const currentRatesJson: (typeof rateReferences.$inferInsert)[] = JSON.parse(
       fs.readFileSync(RATES_JSON_PATH, "utf-8")
     )
 
@@ -164,8 +173,8 @@ async function runInjection() {
         r.clientName !== "SI Rembang"
     )
 
-    const updatedRembangRates: typeof rateReferences.$inferInsert[] = csvRows.map(
-      (row) => ({
+    const updatedRembangRates: (typeof rateReferences.$inferInsert)[] =
+      csvRows.map((row) => ({
         originPlant: ORIGIN_PLANT,
         clientName: CLIENT_NAME,
         city: row.city,
@@ -177,8 +186,7 @@ async function runInjection() {
         additionalTonnageRate: row.additionalTonnageRate,
         hasSpecialDeductions: false,
         isActive: true,
-      })
-    )
+      }))
 
     const newRatesJson = [...otherRates, ...updatedRembangRates]
     fs.writeFileSync(
@@ -209,7 +217,14 @@ async function runInjection() {
     .sort((a, b) => a.city.localeCompare(b.city))
     .forEach((r, idx) => {
       console.log(
-        `   ${(idx + 1).toString().padStart(2, " ")}. Kota: ${r.city.padEnd(14, " ")} | Dest: ${r.destination.padEnd(14, " ")} | Tarif: Rp${parseFloat(r.ratePerTon).toLocaleString("id-ID").padStart(8, " ")} | Ton: ${parseFloat(r.standardTonnage)}t | Sangu: Rp${parseFloat(r.defaultSangu || "0").toLocaleString("id-ID").padStart(10, " ")} | +Ton: Rp${parseFloat(r.additionalTonnageRate).toLocaleString("id-ID").padStart(7, " ")}`
+        `   ${(idx + 1).toString().padStart(2, " ")}. Kota: ${r.city.padEnd(14, " ")} | Dest: ${r.destination.padEnd(14, " ")} | Tarif: Rp${parseFloat(r.ratePerTon).toLocaleString("id-ID").padStart(8, " ")} | Ton: ${parseFloat(r.standardTonnage)}t | Sangu: Rp${parseFloat(
+          r.defaultSangu || "0"
+        )
+          .toLocaleString("id-ID")
+          .padStart(
+            10,
+            " "
+          )} | +Ton: Rp${parseFloat(r.additionalTonnageRate).toLocaleString("id-ID").padStart(7, " ")}`
       )
     })
 
