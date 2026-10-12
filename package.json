@@ -24,6 +24,7 @@
     "db:clear-all": "tsx --env-file=.env.local scripts/db/clear-all.ts",
     "db:inject-si-rembang": "tsx --env-file=.env.local scripts/db/inject-si-rembang.ts",
     "db:inject-si-tuban": "tsx --env-file=.env.local scripts/db/inject-si-tuban.ts",
+    "db:inject-sbi-tuban": "tsx --env-file=.env.local scripts/db/inject-sbi-tuban.ts",
     "verify:deployment": "tsx scripts/verify-deployment.ts"
   },
   "dependencies": {
