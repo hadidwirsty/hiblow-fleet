@@ -19,6 +19,7 @@ const mockPeriodReturning = vi.fn().mockResolvedValue([
     fleetValuation: "580000000.00",
     managerProfit: "36935345.00",
     managerTakeHome: "39435345.00",
+    totalSavings: "4000000.00",
     status: "draft",
   },
 ])
@@ -50,6 +51,7 @@ vi.mock("@/db", () => ({
 vi.mock("@/features/profit-sharing/profit-sharing.queries", () => ({
   getIncomeForPeriod: vi.fn().mockResolvedValue(80000000),
   getExpensesForPeriod: vi.fn().mockResolvedValue(30000000),
+  getSavingsForPeriod: vi.fn().mockResolvedValue(4000000),
 }))
 
 vi.mock("@/lib/session", () => ({
@@ -85,6 +87,7 @@ describe("profit-sharing.actions", () => {
     if (result.success) {
       expect(result.totalIncome).toBe(80000000)
       expect(result.totalExpenses).toBe(30000000)
+      expect(result.totalSavings).toBe(4000000)
       expect(result.calculation.grossBalance).toBe(50000000)
       expect(result.calculation.distributableProfit).toBe(47500000)
       expect(result.calculation.partnerShares).toHaveLength(3)

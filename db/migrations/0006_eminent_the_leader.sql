@@ -1,0 +1,1 @@
+ALTER TABLE "profit_sharing_periods" ADD COLUMN "total_savings" numeric(15, 2) DEFAULT '0.00' NOT NULL;

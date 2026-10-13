@@ -1,9 +1,15 @@
-import { RiHandCoinLine, RiPieChartLine, RiTimeLine } from "@remixicon/react"
+import {
+  RiHandCoinLine,
+  RiPieChartLine,
+  RiShieldCheckLine,
+  RiTimeLine,
+} from "@remixicon/react"
 
 import { Badge } from "@/components/ui/badge"
 import { PeriodCard } from "@/features/profit-sharing/period-card"
-import type { ProfitSharingPeriodDetail } from "@/features/profit-sharing/profit-sharing.queries"
 import { formatCurrency } from "@/lib/utils"
+
+import type { ProfitSharingPeriodDetail } from "@/features/profit-sharing/profit-sharing.queries"
 
 interface PartnerProfitSharingViewProps {
   user?: {
@@ -26,6 +32,11 @@ export function PartnerProfitSharingView({
 
   const totalDistributed = finalizedPeriods.reduce(
     (sum, p) => sum + parseFloat(p.distributableProfit || "0"),
+    0
+  )
+
+  const totalFleetSavings = finalizedPeriods.reduce(
+    (sum, p) => sum + parseFloat(p.totalSavings || "0"),
     0
   )
 
@@ -96,7 +107,7 @@ export function PartnerProfitSharingView({
             )}
 
             {/* Top Stat Cards */}
-            <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
+            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-4">
               <div className="rounded-xl border bg-card p-3 shadow-xs sm:p-4">
                 <div className="flex items-center justify-between text-muted-foreground">
                   <span className="text-[11px] font-medium sm:text-xs">
@@ -127,6 +138,25 @@ export function PartnerProfitSharingView({
                   </span>
                 </div>
               </div>
+
+              {totalFleetSavings > 0 && (
+                <div className="col-span-2 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3 shadow-xs sm:col-span-1 sm:p-4">
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span className="text-[11px] font-medium sm:text-xs">
+                      Cadangan Tabungan Armada
+                    </span>
+                    <RiShieldCheckLine className="size-3.5 text-emerald-500 sm:size-4" />
+                  </div>
+                  <div className="mt-1.5 flex items-baseline gap-1.5 sm:mt-2 sm:gap-2">
+                    <span className="text-lg font-bold text-emerald-600 sm:text-2xl dark:text-emerald-400">
+                      {formatCurrency(totalFleetSavings)}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[10px] text-muted-foreground">
+                    Dana cadangan kas armada di PT LJU
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Grid of Finalized Periods */}

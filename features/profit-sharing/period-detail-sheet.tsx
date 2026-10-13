@@ -63,6 +63,7 @@ export function PeriodDetailSheet({
   const managerProfit = parseFloat(period.managerProfit)
   const managerTakeHome = parseFloat(period.managerTakeHome)
   const fleetValuation = parseFloat(period.fleetValuation)
+  const totalSavings = parseFloat(period.totalSavings || "0")
 
   const handleToggleStatus = async () => {
     setIsUpdatingStatus(true)
@@ -278,6 +279,23 @@ export function PeriodDetailSheet({
                 </span>
               </div>
             </div>
+
+            {totalSavings > 0 && (
+              <div className="flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs">
+                <div className="space-y-0.5">
+                  <span className="font-semibold text-emerald-900 dark:text-emerald-200">
+                    Cadangan Tabungan Kas Armada (Saving 5% Indocement)
+                  </span>
+                  <p className="text-[10.5px] text-muted-foreground">
+                    Tabungan kas armada di PT LJU selama periode ini
+                    (dicadangkan terpisah dari dividen yang dibagi).
+                  </p>
+                </div>
+                <span className="font-mono text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                  +{formatCurrency(totalSavings)}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Section 2: Partner Distribution Breakdown */}

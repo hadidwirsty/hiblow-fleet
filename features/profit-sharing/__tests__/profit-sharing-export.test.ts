@@ -22,6 +22,7 @@ describe("profit-sharing.export", () => {
     fleetValuation: "580000000.00",
     managerProfit: "22112068.97",
     managerTakeHome: "23612068.97",
+    totalSavings: "0.00",
     status: "finalized",
     createdAt: new Date(),
     shares: [

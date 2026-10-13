@@ -37,6 +37,11 @@ export const createPeriodSchema = z
       .number({ message: "Valuasi armada harus berupa angka" })
       .positive("Valuasi armada harus lebih dari 0")
       .default(DEFAULT_FLEET_VALUATION),
+    totalSavings: z
+      .number({ message: "Tabungan armada harus berupa angka" })
+      .nonnegative("Tabungan armada tidak boleh negatif")
+      .optional()
+      .default(0),
     partners: z
       .array(partnerInputSchema)
       .min(1, "Minimal harus menyertakan 1 pemodal"),
@@ -68,5 +73,5 @@ export const previewPeriodSchema = z
   })
 
 export type PartnerInput = z.infer<typeof partnerInputSchema>
-export type CreatePeriodInput = z.infer<typeof createPeriodSchema>
-export type PreviewPeriodInput = z.infer<typeof previewPeriodSchema>
+export type CreatePeriodInput = z.input<typeof createPeriodSchema>
+export type PreviewPeriodInput = z.input<typeof previewPeriodSchema>

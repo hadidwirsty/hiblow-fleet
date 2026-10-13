@@ -57,6 +57,29 @@ export async function getExpensesForPeriod(
 }
 
 /**
+ * Mendapatkan total cadangan tabungan kas armada (saving 5% Indocement)
+ * pada rentang tanggal bongkar ritase.
+ */
+export async function getSavingsForPeriod(
+  startDate: string,
+  endDate: string
+): Promise<number> {
+  const [result] = await db
+    .select({
+      totalSavings: sql<number>`coalesce(sum(${trips.savings}::numeric), 0)::float`,
+    })
+    .from(trips)
+    .where(
+      and(
+        gte(trips.unloadingDate, startDate),
+        lte(trips.unloadingDate, endDate)
+      )
+    )
+
+  return result?.totalSavings ?? 0
+}
+
+/**
  * Mengambil seluruh periode bagi hasil yang tersimpan.
  */
 export async function listProfitSharingPeriods(): Promise<

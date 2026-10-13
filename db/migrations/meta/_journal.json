@@ -43,6 +43,13 @@
       "when": 1791528828614,
       "tag": "0005_burly_sebastian_shaw",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791882230723,
+      "tag": "0006_eminent_the_leader",
+      "breakpoints": true
     }
   ]
 }

@@ -17,6 +17,7 @@ vi.mock("@/db", () => ({
 describe("profit-sharing.queries - getMyTotalDividend", () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockWhere.mockResolvedValue([{ total: 15000000, totalSavings: 525000 }])
   })
 
   it("harus mengembalikan angka number untuk valid userId", async () => {
@@ -40,5 +41,13 @@ describe("profit-sharing.queries - getMyTotalDividend", () => {
       await import("@/features/profit-sharing/profit-sharing.queries")
     const result = await getMyTotalDividend("user-empty")
     expect(result).toBe(0)
+  })
+
+  it("harus mengembalikan total cadangan tabungan kas armada (saving 5%) untuk getSavingsForPeriod", async () => {
+    mockWhere.mockResolvedValueOnce([{ totalSavings: 525000 }])
+    const { getSavingsForPeriod } =
+      await import("@/features/profit-sharing/profit-sharing.queries")
+    const result = await getSavingsForPeriod("2026-10-01", "2026-10-31")
+    expect(result).toBe(525000)
   })
 })

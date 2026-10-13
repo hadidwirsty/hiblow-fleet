@@ -44,6 +44,9 @@ export const profitSharingPeriods = pgTable("profit_sharing_periods", {
     precision: 15,
     scale: 2,
   }).notNull(),
+  totalSavings: numeric("total_savings", { precision: 15, scale: 2 })
+    .default("0.00")
+    .notNull(),
   status: varchar("status", { length: 20 }).default("draft").notNull(), // 'draft', 'finalized'
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })

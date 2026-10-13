@@ -13,6 +13,7 @@ import { getCurrentSession } from "@/lib/session"
 import {
   getExpensesForPeriod,
   getIncomeForPeriod,
+  getSavingsForPeriod,
 } from "./profit-sharing.queries"
 import {
   createPeriodSchema,
@@ -44,9 +45,10 @@ export async function previewPeriodCalculation(input: PreviewPeriodInput) {
       partners,
     } = parsed.data
 
-    const [totalIncome, totalExpenses] = await Promise.all([
+    const [totalIncome, totalExpenses, totalSavings] = await Promise.all([
       getIncomeForPeriod(startDate, endDate),
       getExpensesForPeriod(startDate, endDate, "DP/Cicilan"),
+      getSavingsForPeriod(startDate, endDate),
     ])
 
     const calculation = calculateProfitSharing({
@@ -65,6 +67,7 @@ export async function previewPeriodCalculation(input: PreviewPeriodInput) {
       success: true as const,
       totalIncome,
       totalExpenses,
+      totalSavings,
       calculation,
     }
   } catch (error) {
@@ -109,9 +112,10 @@ export async function createProfitSharingPeriod(input: CreatePeriodInput) {
       partners,
     } = parsed.data
 
-    const [totalIncome, totalExpenses] = await Promise.all([
+    const [totalIncome, totalExpenses, totalSavings] = await Promise.all([
       getIncomeForPeriod(startDate, endDate),
       getExpensesForPeriod(startDate, endDate, "DP/Cicilan"),
+      getSavingsForPeriod(startDate, endDate),
     ])
 
     const calc = calculateProfitSharing({
@@ -142,6 +146,10 @@ export async function createProfitSharingPeriod(input: CreatePeriodInput) {
           fleetValuation: calc.fleetValuation.toFixed(2),
           managerProfit: calc.managerProfit.toFixed(2),
           managerTakeHome: calc.managerTakeHome.toFixed(2),
+          totalSavings: (parsed.data.totalSavings > 0
+            ? parsed.data.totalSavings
+            : totalSavings
+          ).toFixed(2),
           status: "draft",
         })
         .returning()

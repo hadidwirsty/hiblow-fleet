@@ -121,6 +121,7 @@ export function PeriodWizardDialog({
   // Live pulled figures from DB
   const [totalIncome, setTotalIncome] = React.useState<number>(0)
   const [totalExpenses, setTotalExpenses] = React.useState<number>(0)
+  const [totalSavings, setTotalSavings] = React.useState<number>(0)
 
   // Step 2 states: Partners list
   const [partners, setPartners] = React.useState<EditablePartner[]>(() =>
@@ -190,6 +191,7 @@ export function PeriodWizardDialog({
 
       setTotalIncome(res.totalIncome)
       setTotalExpenses(res.totalExpenses)
+      setTotalSavings(res.totalSavings ?? 0)
       setStep(2)
     } catch {
       toast.error("Gagal menarik data transaksi dari database")
@@ -251,6 +253,7 @@ export function PeriodWizardDialog({
         endDate,
         managerCommissionRate: commissionRate / 100,
         fleetValuation,
+        totalSavings,
         partners: validPartners,
       })
 
@@ -510,6 +513,27 @@ export function PeriodWizardDialog({
                     </span>
                   </div>
                 </div>
+
+                {totalSavings > 0 && (
+                  <div className="flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs">
+                    <div className="flex items-center gap-2">
+                      <RiMoneyDollarCircleLine className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                      <div>
+                        <span className="font-semibold text-emerald-900 dark:text-emerald-200">
+                          Cadangan Tabungan Kas Armada (Saving 5% Indocement):
+                        </span>
+                        <p className="text-[10.5px] text-muted-foreground">
+                          Dana tabungan kas armada yang terkumpul di PT LJU
+                          selama periode ini (dicadangkan terpisah dari laba
+                          operasional).
+                        </p>
+                      </div>
+                    </div>
+                    <span className="font-mono text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                      +{formatCurrency(totalSavings)}
+                    </span>
+                  </div>
+                )}
 
                 {/* Partners Configuration Table */}
                 <div className="space-y-3">
