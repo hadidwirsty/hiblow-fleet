@@ -26,6 +26,8 @@ import {
 import { FactoryIcon } from "@/components/icons"
 import { isDoFeePaid } from "@/features/trips/trips.filter"
 import { cn, formatCurrency, formatDateIndonesian } from "@/lib/utils"
+import { calculateTripClaim } from "@/domain/calculators/trip-claim"
+import { calculateTripIncentive } from "@/domain/calculators/trip-incentive"
 
 import type { TripRecord } from "@/features/trips/trips-table"
 
@@ -59,6 +61,25 @@ export function TripDetailSheet({
   const shrinkageTon =
     unloadedTon !== null ? Math.max(0, loadedTon - unloadedTon) : null
 
+  const claimCalc =
+    unloadedTon !== null
+      ? calculateTripClaim({
+          loadedTonnage: loadedTon,
+          unloadedTonnage: unloadedTon,
+          ratePerTon: parseFloat(trip.ratePerTon || "0"),
+        })
+      : null
+
+  const incentiveCalc =
+    unloadedTon !== null
+      ? calculateTripIncentive({
+          loadedTonnage: loadedTon,
+          unloadedTonnage: unloadedTon,
+          standardTonnage: 31.0,
+          additionalTonnageRate: parseFloat(trip.incentiveRate || "35000"),
+        })
+      : null
+
   const ratePerTon = parseFloat(trip.ratePerTon || "0")
   const omset = parseFloat(trip.omset || "0")
   const sangu = parseFloat(trip.sangu || "0")
@@ -73,8 +94,8 @@ export function TripDetailSheet({
   const savings = parseFloat(trip.savings || "0")
   const claim = parseFloat(trip.claim || "0")
   const claimDriver = parseFloat(trip.claimDriver || "0")
-  const totalDeductions =
-    tax1 + ded2Lju + ded5Uj + meal + savings + claim + claimDriver
+  const totalDeductions = tax1 + ded2Lju + ded5Uj + meal + claim + claimDriver
+  const totalArmadaValue = profit + savings
 
   // Incentives
   const incentivePaid = parseFloat(trip.incentivePaid || "0")
@@ -325,6 +346,113 @@ export function TripDetailSheet({
                 </span>
               </div>
             </div>
+
+            {/* Analisis Toleransi Susut Semen (0.3%) */}
+            {unloadedTon !== null && claimCalc && (
+              <div
+                className={cn(
+                  "rounded-xl border p-3.5 text-xs shadow-2xs",
+                  claimCalc.isOverTolerance
+                    ? "border-destructive/30 bg-destructive/5"
+                    : shrinkageTon !== null && shrinkageTon > 0
+                      ? "border-amber-500/30 bg-amber-500/5"
+                      : "border-emerald-500/30 bg-emerald-500/5"
+                )}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-foreground">
+                    Analisis Susut Semen (Toleransi 0.3%):
+                  </span>
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "px-2 py-0 text-[10px] font-semibold",
+                      claimCalc.isOverTolerance
+                        ? "border-destructive/40 bg-destructive/10 text-destructive"
+                        : shrinkageTon !== null && shrinkageTon > 0
+                          ? "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                          : "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                    )}
+                  >
+                    {claimCalc.isOverTolerance
+                      ? "Melebihi Toleransi (Klaim 50:50)"
+                      : shrinkageTon !== null && shrinkageTon > 0
+                        ? "Susut Wajar (≤ 0.3%)"
+                        : unloadedTon > loadedTon
+                          ? `Muatan Bertambah (+${(unloadedTon - loadedTon).toFixed(2)}T)`
+                          : "Sesuai Muatan"}
+                  </Badge>
+                </div>
+                <div className="mt-2.5 grid grid-cols-2 gap-2 text-[11px] text-muted-foreground sm:grid-cols-4">
+                  <div>
+                    <span>Susut Riil:</span>
+                    <p className="font-mono font-medium text-foreground">
+                      {Math.max(
+                        0,
+                        Math.round((loadedTon - unloadedTon) * 1000)
+                      )}{" "}
+                      kg
+                    </p>
+                  </div>
+                  <div>
+                    <span>Batas Toleransi:</span>
+                    <p className="font-mono font-medium text-foreground">
+                      {Math.round(claimCalc.toleranceTonnage * 1000)} kg
+                    </p>
+                  </div>
+                  <div>
+                    <span>Susut Diklaim:</span>
+                    <p
+                      className={cn(
+                        "font-mono font-medium",
+                        claimCalc.claimableTonnage > 0
+                          ? "font-bold text-destructive"
+                          : "text-foreground"
+                      )}
+                    >
+                      {Math.round(claimCalc.claimableTonnage * 1000)} kg
+                    </p>
+                  </div>
+                  <div>
+                    <span>Total Klaim:</span>
+                    <p
+                      className={cn(
+                        "font-mono font-medium",
+                        claimCalc.totalClaimAmount > 0
+                          ? "font-bold text-destructive"
+                          : "text-foreground"
+                      )}
+                    >
+                      {formatCurrency(claimCalc.totalClaimAmount)}
+                    </p>
+                  </div>
+                </div>
+                {claimCalc.isOverTolerance && (
+                  <p className="mt-2 border-t border-destructive/20 pt-2 text-[10.5px] text-muted-foreground">
+                    Alokasi tanggung renteng (50:50): Kantor{" "}
+                    <strong className="text-destructive">
+                      {formatCurrency(claimCalc.companyClaim)}
+                    </strong>{" "}
+                    dan Supir{" "}
+                    <strong className="text-destructive">
+                      {formatCurrency(claimCalc.driverClaim)}
+                    </strong>
+                    .
+                  </p>
+                )}
+                {incentiveCalc &&
+                  incentiveCalc.excessTonnage > 0 &&
+                  unloadedTon !== null && (
+                    <p className="mt-2 border-t border-emerald-500/20 pt-2 text-[10.5px] text-emerald-600 dark:text-emerald-400">
+                      Supir tetap berhak atas insentif muatan +
+                      {incentiveCalc.excessTonnage} ton (
+                      {formatCurrency(incentivePaid)}) karena tonase bongkar (
+                      {unloadedTon.toFixed(2)}T) melampaui kapasitas standar
+                      armada ({incentiveCalc.baseTonnage}T).
+                    </p>
+                  )}
+              </div>
+            )}
           </div>
 
           {/* Section 3: Keuangan & Operasional */}
@@ -344,7 +472,10 @@ export function TripDetailSheet({
                     {formatCurrency(omset)}
                   </p>
                   <span className="text-[10px] text-muted-foreground">
-                    {loadedTon.toFixed(0)} Ton × {formatCurrency(ratePerTon)}
+                    {(unloadedTon !== null ? unloadedTon : loadedTon).toFixed(
+                      2
+                    )}{" "}
+                    Ton × {formatCurrency(ratePerTon)}
                   </span>
                 </div>
 
@@ -371,6 +502,15 @@ export function TripDetailSheet({
                         <span className="text-muted-foreground">
                           Insentif Supir:
                         </span>
+                        {incentiveCalc && incentiveCalc.excessTonnage > 0 && (
+                          <Badge
+                            variant="outline"
+                            className="border-emerald-500/40 bg-emerald-500/10 px-1.5 py-0 text-[10px] text-emerald-600 dark:text-emerald-400"
+                          >
+                            +{incentiveCalc.excessTonnage} Ton (Basis Standar{" "}
+                            {incentiveCalc.baseTonnage}T)
+                          </Badge>
+                        )}
                         {trip.incentiveStatus && (
                           <Badge
                             variant="outline"
@@ -490,7 +630,9 @@ export function TripDetailSheet({
                 )}
                 {meal > 0 && (
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Uang Makan:</span>
+                    <span className="text-muted-foreground">
+                      Uang Makan Supir (UM):
+                    </span>
                     <span className="font-mono font-medium text-foreground">
                       {formatCurrency(meal)}
                     </span>
@@ -498,18 +640,23 @@ export function TripDetailSheet({
                 )}
                 {savings > 0 && (
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">
-                      Tabungan Supir:
-                    </span>
-                    <span className="font-mono font-medium text-foreground">
-                      {formatCurrency(savings)}
+                    <div>
+                      <span className="font-medium text-emerald-600 dark:text-emerald-400">
+                        Tabungan Kas Armada (Saving 5% Indocement):
+                      </span>
+                      <p className="text-[10px] text-muted-foreground">
+                        Cadangan tabungan armada tersimpan di PT LJU
+                      </p>
+                    </div>
+                    <span className="font-mono font-semibold text-emerald-600 dark:text-emerald-400">
+                      +{formatCurrency(savings)}
                     </span>
                   </div>
                 )}
                 {claim > 0 && (
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">
-                      Klaim Perusahaan:
+                      Klaim Susut Beban Kantor (50%):
                     </span>
                     <span className="font-mono font-medium text-destructive">
                       {formatCurrency(claim)}
@@ -518,18 +665,30 @@ export function TripDetailSheet({
                 )}
                 {claimDriver > 0 && (
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Klaim Supir:</span>
+                    <span className="text-muted-foreground">
+                      Klaim Susut Potong Supir (50%):
+                    </span>
                     <span className="font-mono font-medium text-destructive">
                       {formatCurrency(claimDriver)}
                     </span>
                   </div>
                 )}
                 <div className="flex items-center justify-between border-t border-border/60 pt-2 font-semibold">
-                  <span>Total Potongan:</span>
+                  <span>Total Beban Operasional:</span>
                   <span className="font-mono text-destructive">
                     {formatCurrency(totalDeductions)}
                   </span>
                 </div>
+                {savings > 0 && (
+                  <div className="flex items-center justify-between border-t border-dashed border-border/60 pt-2 font-semibold">
+                    <span className="text-emerald-700 dark:text-emerald-400">
+                      Total Nilai Armada (Laba + Tabungan):
+                    </span>
+                    <span className="font-mono text-emerald-600 dark:text-emerald-400">
+                      {formatCurrency(totalArmadaValue)}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           )}

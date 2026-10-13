@@ -185,9 +185,19 @@ export function TripMobileCard({
 
         {/* Profit Highlight Banner */}
         <div className="flex items-center justify-between rounded-lg bg-emerald-500/10 px-3 py-2 text-xs dark:bg-emerald-500/15">
-          <span className="font-semibold text-emerald-800 dark:text-emerald-300">
-            Laba Bersih:
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="font-semibold text-emerald-800 dark:text-emerald-300">
+              Laba Bersih:
+            </span>
+            {parseFloat(trip.savings || "0") > 0 && (
+              <Badge
+                variant="outline"
+                className="border-emerald-500/40 bg-emerald-500/10 px-1 py-0 text-[9px] font-medium text-emerald-600 dark:text-emerald-400"
+              >
+                +Saving {formatCurrency(parseFloat(trip.savings || "0"))}
+              </Badge>
+            )}
+          </div>
           <span className="font-mono text-sm font-bold text-emerald-700 dark:text-emerald-400">
             {formatCurrency(profitNum)}
           </span>

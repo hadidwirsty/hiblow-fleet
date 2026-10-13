@@ -13,7 +13,7 @@ import {
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
-import { format } from "date-fns"
+import { differenceInCalendarDays, format, parseISO } from "date-fns"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -46,6 +46,8 @@ import {
 } from "@/lib/utils"
 import { calculateOmset } from "@/domain/calculators/omset"
 import { calculateSangu } from "@/domain/calculators/sangu"
+import { calculateTripClaim } from "@/domain/calculators/trip-claim"
+import { calculateTripIncentive } from "@/domain/calculators/trip-incentive"
 import { calculateTripProfit } from "@/domain/calculators/trip-profit"
 
 import {
@@ -113,6 +115,12 @@ export function TripFormDialog({
   const [hasSpecialDeductions, setHasSpecialDeductions] =
     React.useState<boolean>(false)
   const [isSanguManuallyEdited, setIsSanguManuallyEdited] =
+    React.useState<boolean>(false)
+  const [isIncentiveManuallyEdited, setIsIncentiveManuallyEdited] =
+    React.useState<boolean>(false)
+  const [isClaimManuallyEdited, setIsClaimManuallyEdited] =
+    React.useState<boolean>(false)
+  const [isMealAllowanceManuallyEdited, setIsMealAllowanceManuallyEdited] =
     React.useState<boolean>(false)
 
   const {
@@ -206,6 +214,18 @@ export function TripFormDialog({
           setHasSpecialDeductions(ref.hasSpecialDeductions)
         }
         setIsSanguManuallyEdited(true)
+        setIsIncentiveManuallyEdited(
+          Boolean(trip.incentivePaid && parseFloat(trip.incentivePaid) > 0)
+        )
+        setIsClaimManuallyEdited(
+          Boolean(
+            (trip.claim && parseFloat(trip.claim) > 0) ||
+            (trip.claimDriver && parseFloat(trip.claimDriver) > 0)
+          )
+        )
+        setIsMealAllowanceManuallyEdited(
+          Boolean(trip.mealAllowance && parseFloat(trip.mealAllowance) > 0)
+        )
       } else if (mode === "create") {
         reset({
           truckId: "" as unknown as "W8187UA" | "H8133OF",
@@ -241,6 +261,9 @@ export function TripFormDialog({
         setSanguPercentage(0.52)
         setHasSpecialDeductions(false)
         setIsSanguManuallyEdited(false)
+        setIsIncentiveManuallyEdited(false)
+        setIsClaimManuallyEdited(false)
+        setIsMealAllowanceManuallyEdited(false)
       }
     }
   }, [open, mode, trip, reset, rateReferences])
@@ -257,6 +280,7 @@ export function TripFormDialog({
   const watchedThirdPartyName = watch("thirdPartyName")
   const watchedThirdPartyStatus = watch("thirdPartyStatus")
   const watchedIncentiveStatus = watch("incentiveStatus")
+  const watchedIncentiveRate = watch("incentiveRate")
   const watchedIncentivePaid = watch("incentivePaid")
   const watchedMealAllowance = watch("mealAllowance")
   const watchedSavings = watch("savings")
@@ -324,6 +348,129 @@ export function TripFormDialog({
     }
   }, [recommendedSangu, isSanguManuallyEdited, selectedRate, setValue])
 
+  // Kalkulasi insentif lebih tonase bertingkat (threshold 0.85 ton dari standar armada)
+  const incentiveCalc = React.useMemo(() => {
+    const incRate =
+      parseFloat(
+        watchedIncentiveRate ?? selectedRate?.additionalTonnageRate ?? "0"
+      ) || 35000
+    const stdTon =
+      selectedRate?.standardTonnage &&
+      parseFloat(selectedRate.standardTonnage) > 0
+        ? parseFloat(selectedRate.standardTonnage)
+        : 31.0
+    return calculateTripIncentive({
+      loadedTonnage: loadedTonnageNum,
+      unloadedTonnage: unloadedTonnageNum,
+      standardTonnage: stdTon,
+      additionalTonnageRate: incRate,
+    })
+  }, [loadedTonnageNum, unloadedTonnageNum, watchedIncentiveRate, selectedRate])
+
+  // Kalkulasi toleransi susut semen (0.3%) dan klaim (50:50)
+  const claimCalc = React.useMemo(() => {
+    const rateNum = parseFloat(watchedRatePerTon ?? "0") || 0
+    return calculateTripClaim({
+      loadedTonnage: loadedTonnageNum,
+      unloadedTonnage: unloadedTonnageNum,
+      ratePerTon: rateNum,
+    })
+  }, [loadedTonnageNum, unloadedTonnageNum, watchedRatePerTon])
+
+  // Sinkronisasi otomatis insentif lebih tonase jika belum diedit manual
+  React.useEffect(() => {
+    if (
+      !isIncentiveManuallyEdited &&
+      isUnloadingDateSelected &&
+      loadedTonnageNum > 0 &&
+      unloadedTonnageNum > 0
+    ) {
+      if (incentiveCalc.excessTonnage > 0) {
+        setValue("incentivePaid", incentiveCalc.incentivePaid.toString())
+        if (!watchedIncentiveStatus) {
+          setValue("incentiveStatus", "Belum Bayar")
+        }
+      } else {
+        setValue("incentivePaid", "")
+      }
+    }
+  }, [
+    incentiveCalc,
+    isIncentiveManuallyEdited,
+    isUnloadingDateSelected,
+    loadedTonnageNum,
+    unloadedTonnageNum,
+    watchedIncentiveStatus,
+    setValue,
+  ])
+
+  // Sinkronisasi otomatis klaim susut muatan (50:50) jika belum diedit manual
+  React.useEffect(() => {
+    if (
+      !isClaimManuallyEdited &&
+      isUnloadingDateSelected &&
+      loadedTonnageNum > 0 &&
+      unloadedTonnageNum > 0
+    ) {
+      if (claimCalc.isOverTolerance) {
+        setValue("claim", claimCalc.companyClaim.toString())
+        setValue("claimDriver", claimCalc.driverClaim.toString())
+      } else {
+        setValue("claim", "0.00")
+        setValue("claimDriver", "0.00")
+      }
+    }
+  }, [
+    claimCalc,
+    isClaimManuallyEdited,
+    isUnloadingDateSelected,
+    loadedTonnageNum,
+    unloadedTonnageNum,
+    setValue,
+  ])
+
+  // Kalkulasi estimasi hari menginap supir berdasarkan tanggal order s.d. tanggal bongkar
+  const overnightDays = React.useMemo(() => {
+    if (!watchedOrderDate || !watchedUnloadingDate) return 0
+    try {
+      const start = parseISO(watchedOrderDate)
+      const end = parseISO(watchedUnloadingDate)
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) return 0
+      const diff = differenceInCalendarDays(end, start)
+      return diff > 0 ? diff : 0
+    } catch {
+      return 0
+    }
+  }, [watchedOrderDate, watchedUnloadingDate])
+
+  const suggestedMealAllowance = overnightDays * 50000
+
+  // Sinkronisasi otomatis uang makan supir (UM) berdasarkan hari inap jika belum diedit manual
+  React.useEffect(() => {
+    if (!isMealAllowanceManuallyEdited && isUnloadingDateSelected) {
+      if (overnightDays > 0) {
+        setValue("mealAllowance", suggestedMealAllowance.toString())
+      } else {
+        setValue("mealAllowance", "0.00")
+      }
+    }
+  }, [
+    overnightDays,
+    suggestedMealAllowance,
+    isMealAllowanceManuallyEdited,
+    isUnloadingDateSelected,
+    setValue,
+  ])
+
+  const handleResetMealAllowanceToRecommendation = () => {
+    setIsMealAllowanceManuallyEdited(false)
+    if (overnightDays > 0) {
+      setValue("mealAllowance", suggestedMealAllowance.toString())
+    } else {
+      setValue("mealAllowance", "0.00")
+    }
+  }
+
   // Live calculation effect for profit and deductions
   const liveCalc = React.useMemo(() => {
     const rateNum = parseFloat(watchedRatePerTon ?? "0") || 0
@@ -343,11 +490,13 @@ export function TripFormDialog({
     let tax1Pct = 0
     let deduction2PctLju = 0
     let deduction5PctUjGrb = 0
+    let savings = savingsNum
 
     if (hasSpecialDeductions && omset > 0) {
-      tax1Pct = Math.round(0.01 * omset)
+      tax1Pct = 0 // Dihapus sesuai konfirmasi resmi Mas Hafidz
       deduction2PctLju = Math.round(0.02 * omset)
-      deduction5PctUjGrb = Math.round(0.05 * omset)
+      deduction5PctUjGrb = 0
+      savings = Math.round(0.05 * omset) // Komponen 5% adalah Tabungan Kas Armada (Saving)
     }
 
     const profitResult = calculateTripProfit({
@@ -358,10 +507,11 @@ export function TripFormDialog({
       tax1Pct,
       deduction2PctLju,
       deduction5PctUjGrb,
+      savings,
       mealAllowance: mealNum,
-      savings: savingsNum,
       claim: claimNum,
       claimDriver: claimDriverNum,
+      hasSpecialDeductions,
     })
 
     return {
@@ -370,7 +520,9 @@ export function TripFormDialog({
       tax1Pct,
       deduction2PctLju,
       deduction5PctUjGrb,
+      savings: profitResult.savings,
       profit: profitResult.profit,
+      totalArmadaValue: profitResult.totalArmadaValue,
     }
   }, [
     watchedRatePerTon,
@@ -392,7 +544,10 @@ export function TripFormDialog({
     setValue("tax1Pct", liveCalc.tax1Pct.toFixed(2))
     setValue("deduction2PctLju", liveCalc.deduction2PctLju.toFixed(2))
     setValue("deduction5PctUjGrb", liveCalc.deduction5PctUjGrb.toFixed(2))
-  }, [liveCalc, setValue])
+    if (hasSpecialDeductions) {
+      setValue("savings", liveCalc.savings.toFixed(2))
+    }
+  }, [liveCalc, hasSpecialDeductions, setValue])
 
   // Handle route selection from combobox
   function handleRouteSelect(rateRef: RateReferenceRecord) {
@@ -405,12 +560,32 @@ export function TripFormDialog({
     setSanguPercentage(parseFloat(rateRef.sanguPercentage))
     setHasSpecialDeductions(rateRef.hasSpecialDeductions)
 
+    // Isi tonase muatan otomatis dari standar rute acuan (default 31.00 ton)
+    const stdTon =
+      rateRef.standardTonnage && parseFloat(rateRef.standardTonnage) > 0
+        ? parseFloat(rateRef.standardTonnage).toFixed(2)
+        : "31.00"
+    setValue("loadedTonnage", stdTon, { shouldValidate: true })
+
+    if (
+      rateRef.additionalTonnageRate &&
+      parseFloat(rateRef.additionalTonnageRate) > 0
+    ) {
+      setValue(
+        "incentiveRate",
+        parseFloat(rateRef.additionalTonnageRate).toString()
+      )
+    }
+
     setIsSanguManuallyEdited(false)
+    setIsIncentiveManuallyEdited(false)
+    setIsClaimManuallyEdited(false)
+
     let initialSangu = 0
     if (rateRef.defaultSangu && parseFloat(rateRef.defaultSangu) > 0) {
       initialSangu = Math.round(parseFloat(rateRef.defaultSangu))
     } else {
-      const tonnageNum = activeTonnage > 0 ? activeTonnage : 31.0
+      const tonnageNum = parseFloat(stdTon) > 0 ? parseFloat(stdTon) : 31.0
       initialSangu = calculateSangu({
         ratePerTon: parseFloat(rateRef.ratePerTon) || 0,
         unloadedTonnage: tonnageNum,
@@ -421,7 +596,7 @@ export function TripFormDialog({
 
     // Aturan Pihak Ketiga:
     // Jika selain Indocement: pasti SILOG - Mas Wawan dengan Biaya Rp 100.000.
-    // Jika Indocement: manual input / fleksibel (modal sendiri, Mas Wawan, atau 5%).
+    // Jika Indocement: Mas Wawan tetap dibayar Rp 100.000 (default modal sendiri atau dengan opsi talangan 5%).
     const plant = (rateRef.originPlant || "").toLowerCase()
     const client = (rateRef.clientName || "").toLowerCase()
     const isIndo =
@@ -434,8 +609,8 @@ export function TripFormDialog({
       setValue("thirdPartyName", "SILOG - Mas Wawan")
       setValue("thirdPartyFee", "100000")
     } else {
-      setValue("thirdPartyName", "")
-      setValue("thirdPartyFee", "")
+      setValue("thirdPartyName", "SILOG - Mas Wawan (Modal Sendiri)")
+      setValue("thirdPartyFee", "100000")
     }
   }
 
@@ -443,6 +618,28 @@ export function TripFormDialog({
   function handleResetSanguToRecommendation() {
     setIsSanguManuallyEdited(false)
     setValue("sangu", recommendedSangu.toString())
+  }
+
+  // Reset insentif to system recommendation
+  function handleResetIncentiveToRecommendation() {
+    setIsIncentiveManuallyEdited(false)
+    if (incentiveCalc.excessTonnage > 0) {
+      setValue("incentivePaid", incentiveCalc.incentivePaid.toString())
+    } else {
+      setValue("incentivePaid", "")
+    }
+  }
+
+  // Reset klaim susut to system recommendation (50:50)
+  function handleResetClaimToRecommendation() {
+    setIsClaimManuallyEdited(false)
+    if (claimCalc.isOverTolerance) {
+      setValue("claim", claimCalc.companyClaim.toString())
+      setValue("claimDriver", claimCalc.driverClaim.toString())
+    } else {
+      setValue("claim", "0.00")
+      setValue("claimDriver", "0.00")
+    }
   }
 
   // Handle form submission
@@ -807,33 +1004,56 @@ export function TripFormDialog({
                 >
                   Tonase Bongkar
                 </Label>
-                {tonnageDifference !== null ? (
-                  <Badge
-                    variant="outline"
-                    className={cn(
-                      "h-4 px-1 py-0 text-[9px] font-semibold",
-                      tonnageDifference > 0
-                        ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                <div className="flex flex-wrap items-center gap-1">
+                  {tonnageDifference !== null && (
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "h-4 px-1.5 py-0 text-[9px] font-semibold",
+                        tonnageDifference > 0
+                          ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                          : tonnageDifference < 0
+                            ? claimCalc.isOverTolerance
+                              ? "border-destructive/40 bg-destructive/10 text-destructive"
+                              : "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                            : "border-border text-muted-foreground"
+                      )}
+                    >
+                      {tonnageDifference > 0
+                        ? `+${tonnageDifference.toFixed(2)}T (Muatan Bertambah)`
                         : tonnageDifference < 0
-                          ? "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                          : "border-border text-muted-foreground"
+                          ? claimCalc.isOverTolerance
+                            ? `Susut ${Math.round(claimCalc.shrinkageTonnage * 1000)} kg (Klaim ${Math.round(claimCalc.claimableTonnage * 1000)} kg — 50:50)`
+                            : `Susut ${Math.round(claimCalc.shrinkageTonnage * 1000)} kg (Wajar ≤0.3%)`
+                          : "0.00T (Sesuai Muatan)"}
+                    </Badge>
+                  )}
+
+                  {/* Jika bongkaran melebihi standar normal armada tapi susut terhadap surat muat */}
+                  {incentiveCalc.excessTonnage > 0 &&
+                    tonnageDifference !== null &&
+                    tonnageDifference <= 0 && (
+                      <Badge
+                        variant="outline"
+                        className="h-4 border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400"
+                        title={`Supir tetap berhak insentif +${incentiveCalc.excessTonnage} ton karena muatan bongkar (${unloadedTonnageNum}T) melebihi standar armada (${incentiveCalc.baseTonnage}T)`}
+                      >
+                        +{incentiveCalc.excessTonnage} Ton Insentif Supir (Basis
+                        Standar {incentiveCalc.baseTonnage}T)
+                      </Badge>
                     )}
-                  >
-                    {tonnageDifference > 0
-                      ? `+${tonnageDifference.toFixed(2)}T (Plus)`
-                      : tonnageDifference < 0
-                        ? `${tonnageDifference.toFixed(2)}T (Susut)`
-                        : "0.00T (Pas)"}
-                  </Badge>
-                ) : !isUnloadingDateSelected ? (
-                  <span className="text-[10px] font-medium text-amber-600 dark:text-amber-400">
-                    Isi tanggal bongkar terlebih dahulu
-                  </span>
-                ) : (
-                  <span className="text-[10px] text-muted-foreground">
-                    Masukkan tonase riil bongkar
-                  </span>
-                )}
+
+                  {!isUnloadingDateSelected && (
+                    <span className="text-[10px] font-medium text-amber-600 dark:text-amber-400">
+                      Isi tanggal bongkar terlebih dahulu
+                    </span>
+                  )}
+                  {isUnloadingDateSelected && tonnageDifference === null && (
+                    <span className="text-[10px] text-muted-foreground">
+                      Masukkan tonase riil bongkar
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="relative">
                 <Input
@@ -942,73 +1162,147 @@ export function TripFormDialog({
             )}
           </div>
 
-          {/* Baris 7: Card Kalkulasi Otomatis (Live) */}
-          <div className="space-y-2 rounded-xl border border-primary/20 bg-primary/5 p-3.5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-primary">
-                <RiCalculatorLine className="size-4" />
-                <span>Kalkulasi Otomatis (Live)</span>
+          {/* Uang Makan Supir (UM) / Inap */}
+          <div className="space-y-2 rounded-lg border border-border/80 bg-muted/20 p-3">
+            <div className="flex flex-wrap items-center justify-between gap-1">
+              <div className="flex items-center gap-1.5">
+                <Label
+                  htmlFor="mealAllowance"
+                  className="text-xs font-semibold"
+                >
+                  Uang Makan Supir (UM)
+                </Label>
+                {overnightDays > 0 ? (
+                  isMealAllowanceManuallyEdited ? (
+                    <Badge
+                      variant="outline"
+                      className="border-amber-500/40 bg-amber-500/10 text-[9px] font-medium text-amber-600 dark:text-amber-400"
+                    >
+                      Disesuaikan Manual
+                    </Badge>
+                  ) : (
+                    <Badge
+                      variant="outline"
+                      className="border-emerald-500/40 bg-emerald-500/10 text-[9px] font-medium text-emerald-600 dark:text-emerald-400"
+                    >
+                      Acuan {overnightDays} Hari Inap
+                    </Badge>
+                  )
+                ) : parseFloat(watchedMealAllowance || "0") > 0 ? (
+                  <Badge
+                    variant="outline"
+                    className="border-emerald-500/40 bg-emerald-500/10 text-[9px] font-medium text-emerald-600 dark:text-emerald-400"
+                  >
+                    {parseFloat(watchedMealAllowance || "0") === 50000
+                      ? "1 Hari Menginap"
+                      : `${Math.round(parseFloat(watchedMealAllowance || "0") / 50000)} Hari Menginap`}
+                  </Badge>
+                ) : null}
               </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3 border-t border-primary/10 pt-1 text-center">
-              <div>
-                <span className="block text-[10px] text-muted-foreground">
-                  Omset Bruto{" "}
-                  {isUsingLoadedTonnage ? (
-                    <span className="font-medium text-amber-600 dark:text-amber-400">
-                      (Sementara)
-                    </span>
-                  ) : isBongkarFilled ? (
-                    <span className="font-medium text-emerald-600 dark:text-emerald-400">
-                      (Bongkar)
-                    </span>
-                  ) : null}
-                </span>
-                <span className="font-mono text-sm font-bold">
-                  {liveCalc.omset > 0 ? formatCurrency(liveCalc.omset) : "Rp -"}
-                </span>
-              </div>
-              <div>
-                <span className="block text-[10px] text-muted-foreground">
-                  Sangu Supir {isSanguManuallyEdited ? "(Manual)" : "(Acuan)"}
-                </span>
-                <span className="font-mono text-sm font-bold text-amber-600 dark:text-amber-400">
-                  {liveCalc.sangu > 0 ? formatCurrency(liveCalc.sangu) : "Rp -"}
-                </span>
-              </div>
-              <div>
-                <span className="block text-[10px] text-muted-foreground">
-                  Laba Ritase
-                </span>
-                <span className="font-mono text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                  {liveCalc.profit !== 0
-                    ? formatCurrency(liveCalc.profit)
-                    : "Rp -"}
-                </span>
-              </div>
-            </div>
-
-            {hasSpecialDeductions && (
-              <div className="mt-2 flex items-center justify-between border-t border-dashed border-primary/10 pt-2 text-[11px] text-muted-foreground">
-                <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
-                  <RiInformationLine className="size-3.5" />
-                  Potongan Khusus Grobogan/LJU (8% dari Omset):
-                </span>
-                <span className="font-mono font-medium">
-                  {liveCalc.omset > 0
-                    ? formatCurrency(
-                        liveCalc.tax1Pct +
-                          liveCalc.deduction2PctLju +
-                          liveCalc.deduction5PctUjGrb
+              <div className="flex flex-wrap items-center gap-1">
+                {isMealAllowanceManuallyEdited && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleResetMealAllowanceToRecommendation}
+                    className="h-6 gap-1 px-2 text-[10px] text-muted-foreground hover:text-foreground"
+                    title="Kembalikan nilai uang makan ke rekomendasi selisih hari tanggal order dan bongkar"
+                  >
+                    <RiRefreshLine className="size-3" />
+                    <span>
+                      Reset ke Acuan (
+                      {overnightDays > 0
+                        ? `${overnightDays} Hari: ${formatCurrency(suggestedMealAllowance)}`
+                        : "Rp 0"}
                       )
-                    : "Rp -"}
-                </span>
+                    </span>
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setIsMealAllowanceManuallyEdited(true)
+                    setValue("mealAllowance", "50000")
+                  }}
+                  className="h-6 px-2 text-[10px]"
+                >
+                  Menginap (Rp 50.000)
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setIsMealAllowanceManuallyEdited(true)
+                    const current = parseFloat(watchedMealAllowance || "0")
+                    setValue("mealAllowance", (current + 50000).toString())
+                  }}
+                  className="h-6 px-2 text-[10px]"
+                >
+                  +1 Hari
+                </Button>
+                {parseFloat(watchedMealAllowance || "0") > 0 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setIsMealAllowanceManuallyEdited(true)
+                      setValue("mealAllowance", "0.00")
+                    }}
+                    className="h-6 px-2 text-[10px] text-muted-foreground hover:text-destructive"
+                  >
+                    Reset (Rp 0)
+                  </Button>
+                )}
               </div>
+            </div>
+            <div className="relative">
+              <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-xs font-semibold text-muted-foreground">
+                Rp
+              </span>
+              <Input
+                id="mealAllowance"
+                type="text"
+                inputMode="decimal"
+                value={formatCurrencyInput(watchedMealAllowance || "")}
+                onChange={(e) => {
+                  setIsMealAllowanceManuallyEdited(true)
+                  setValue("mealAllowance", parseCurrencyInput(e.target.value))
+                }}
+                className="h-9! pl-9 font-mono text-xs font-medium"
+                placeholder="mis. 50.000"
+              />
+            </div>
+            {isUnloadingDateSelected && overnightDays > 0 ? (
+              <p className="text-[11px] leading-relaxed text-muted-foreground">
+                <span className="font-medium text-emerald-600 dark:text-emerald-400">
+                  💡 Terdeteksi perjalanan {overnightDays} hari kalender (
+                  {overnightDays} hari menginap).
+                </span>{" "}
+                Standar acuan UM Rp 50.000/hari (
+                {formatCurrency(suggestedMealAllowance)}). Tetap bebas
+                disesuaikan manual.
+              </p>
+            ) : isUnloadingDateSelected && overnightDays === 0 ? (
+              <p className="text-[11px] leading-relaxed text-muted-foreground">
+                Bongkar di hari yang sama dengan tanggal order (tanpa inap).
+                Uang makan acuan Rp 0, tetap dapat diisi manual jika ada biaya
+                inap khusus.
+              </p>
+            ) : (
+              <p className="text-[11px] text-muted-foreground">
+                Uang makan tambahan jika supir menginap di perjalanan (standar
+                Rp 50.000/hari, terhitung otomatis saat tanggal bongkar diisi
+                atau dapat diedit manual).
+              </p>
             )}
           </div>
 
-          {/* Baris 8: Biaya Pihak Ketiga & Nama Pihak Ketiga (2 Kolom) */}
+          {/* Baris 7: Biaya Pihak Ketiga & Nama Pihak Ketiga (2 Kolom) */}
           <div className="space-y-2 pt-1">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
@@ -1103,78 +1397,66 @@ export function TripFormDialog({
               <div className="space-y-1.5 rounded-lg border border-border/60 bg-muted/20 p-2.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-medium text-foreground">
-                    Pilihan Biaya DO Indocement:
+                    Pilihan Biaya DO Indocement Grobogan:
                   </span>
                   <span className="text-[10px] text-muted-foreground">
-                    Dapat modal sendiri atau ditalangi pihak lain
+                    Biaya dasar Mas Wawan Rp 100.000 tetap dibayar
                   </span>
                 </div>
-                <div className="grid grid-cols-3 gap-1.5 sm:flex sm:flex-wrap sm:items-center sm:gap-2">
+                <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-2">
                   <Button
                     type="button"
                     variant={
                       watchedThirdPartyFee === "100000" &&
-                      watchedThirdPartyName === "SILOG - Mas Wawan"
+                      (watchedThirdPartyName?.includes("Modal Sendiri") ||
+                        watchedThirdPartyName === "SILOG - Mas Wawan")
                         ? "default"
                         : "outline"
                     }
                     size="sm"
                     onClick={() => {
-                      setValue("thirdPartyName", "SILOG - Mas Wawan")
+                      setValue(
+                        "thirdPartyName",
+                        "SILOG - Mas Wawan (Modal Sendiri)"
+                      )
                       setValue("thirdPartyFee", "100000")
                     }}
-                    className="h-7 px-1 text-[10px] font-normal sm:px-2.5 sm:text-[11px]"
+                    className="h-7 justify-start px-2 text-[10px] sm:text-[11px]"
                   >
-                    <span className="truncate sm:hidden">Mas Wawan</span>
-                    <span className="hidden sm:inline">
-                      Mas Wawan (Rp 100.000)
+                    <span className="truncate">
+                      Mas Wawan (Modal Sendiri) — Rp 100.000
                     </span>
                   </Button>
                   <Button
                     type="button"
                     variant={
+                      watchedThirdPartyName?.includes("Talangan 5%") ||
                       watchedThirdPartyName?.includes("5%") ||
                       (liveCalc.omset > 0 &&
                         watchedThirdPartyFee ===
-                          Math.round(liveCalc.omset * 0.05).toString())
+                          (
+                            100000 + Math.round(liveCalc.omset * 0.05)
+                          ).toString())
                         ? "default"
                         : "outline"
                     }
                     size="sm"
                     onClick={() => {
                       const fee5Pct = Math.round(liveCalc.omset * 0.05)
-                      setValue("thirdPartyName", "Talangan Pihak Ketiga (5%)")
-                      setValue("thirdPartyFee", fee5Pct.toString())
+                      const total = 100000 + fee5Pct
+                      setValue(
+                        "thirdPartyName",
+                        "SILOG - Mas Wawan + Talangan 5%"
+                      )
+                      setValue("thirdPartyFee", total.toString())
                     }}
-                    className="h-7 px-1 text-[10px] font-normal sm:px-2.5 sm:text-[11px]"
+                    className="h-7 justify-start px-2 text-[10px] sm:text-[11px]"
                   >
-                    <span className="truncate sm:hidden">Biaya 5%</span>
-                    <span className="hidden sm:inline">
-                      Biaya 5%{" "}
+                    <span className="truncate">
+                      Mas Wawan + Talangan 5%{" "}
                       {liveCalc.omset > 0
-                        ? `(${formatCurrency(Math.round(liveCalc.omset * 0.05))})`
-                        : "(5% Omset)"}
-                    </span>
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={
-                      watchedThirdPartyFee === "0" &&
-                      (watchedThirdPartyName === "Modal Sendiri" ||
-                        watchedThirdPartyName === "-")
-                        ? "default"
-                        : "outline"
-                    }
-                    size="sm"
-                    onClick={() => {
-                      setValue("thirdPartyName", "Modal Sendiri")
-                      setValue("thirdPartyFee", "0")
-                    }}
-                    className="h-7 px-1 text-[10px] font-normal sm:px-2.5 sm:text-[11px]"
-                  >
-                    <span className="truncate sm:hidden">Modal Sendiri</span>
-                    <span className="hidden sm:inline">
-                      Modal Sendiri (Rp 0)
+                        ? `(${formatCurrency(100000 + Math.round(liveCalc.omset * 0.05))})`
+                        : "(Rp 100.000 + 5%)"}
                     </span>
                   </Button>
                 </div>
@@ -1182,7 +1464,7 @@ export function TripFormDialog({
             )}
           </div>
 
-          {/* Baris 9: Status Pembayaran Biaya DO, Status Insentif Supir & Insentif Dibayarkan (3 Kolom) */}
+          {/* Baris 8: Status Pembayaran Biaya DO, Status Insentif Supir & Insentif Dibayarkan (3 Kolom) */}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {/* Status Pembayaran Biaya DO */}
             <div className="space-y-1.5">
@@ -1257,12 +1539,36 @@ export function TripFormDialog({
             {/* Insentif Dibayarkan */}
             <div className="space-y-1.5">
               <div className="flex h-5 items-center justify-between">
-                <Label
-                  htmlFor="incentivePaid"
-                  className="text-xs font-semibold text-muted-foreground"
-                >
-                  Insentif Dibayarkan
-                </Label>
+                <div className="flex items-center gap-1">
+                  <Label
+                    htmlFor="incentivePaid"
+                    className="text-xs font-semibold text-muted-foreground"
+                  >
+                    Insentif Dibayarkan
+                  </Label>
+                  {incentiveCalc.excessTonnage > 0 && (
+                    <Badge
+                      variant="outline"
+                      className="border-emerald-500/40 bg-emerald-500/10 px-1 py-0 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400"
+                    >
+                      +{incentiveCalc.excessTonnage} Ton (+
+                      {formatCurrency(incentiveCalc.incentivePaid)})
+                    </Badge>
+                  )}
+                </div>
+                {isIncentiveManuallyEdited && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleResetIncentiveToRecommendation}
+                    className="h-5 px-1.5 text-[9px] text-muted-foreground hover:text-foreground"
+                    title="Kembalikan ke hitungan sistem"
+                  >
+                    <RiRefreshLine className="mr-0.5 size-2.5" />
+                    <span>Reset</span>
+                  </Button>
+                )}
               </div>
               <div className="relative">
                 <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-xs font-semibold text-muted-foreground">
@@ -1274,6 +1580,7 @@ export function TripFormDialog({
                   inputMode="decimal"
                   value={formatCurrencyInput(watchedIncentivePaid || "")}
                   onChange={(e) => {
+                    setIsIncentiveManuallyEdited(true)
                     const parsed = parseCurrencyInput(e.target.value)
                     setValue("incentivePaid", parsed, { shouldValidate: true })
                   }}
@@ -1299,6 +1606,220 @@ export function TripFormDialog({
                 </p>
               )}
             </div>
+          </div>
+
+          {/* Card Klaim Susut Muatan Semen (Jika Ada Susut Melebihi Toleransi 0.3%) */}
+          {(claimCalc.isOverTolerance ||
+            parseFloat(watchedClaim || "0") > 0 ||
+            parseFloat(watchedClaimDriver || "0") > 0) && (
+            <div className="space-y-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+              <div className="flex flex-wrap items-center justify-between gap-1">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-destructive">
+                  <RiInformationLine className="size-4" />
+                  <span>
+                    Klaim Susut Muatan (Toleransi 0.3% & Alokasi 50:50)
+                  </span>
+                </div>
+                {isClaimManuallyEdited ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleResetClaimToRecommendation}
+                    className="h-6 gap-1 px-2 text-[10px] text-muted-foreground hover:text-foreground"
+                  >
+                    <RiRefreshLine className="size-3" />
+                    <span>Reset ke Hitungan Sistem</span>
+                  </Button>
+                ) : (
+                  <Badge
+                    variant="outline"
+                    className="border-destructive/40 bg-destructive/10 text-[9px] font-medium text-destructive"
+                  >
+                    Acuan Sistem 50:50
+                  </Badge>
+                )}
+              </div>
+
+              <p className="text-[11px] leading-relaxed text-muted-foreground">
+                Susut aktual:{" "}
+                <span className="font-semibold text-foreground">
+                  {(claimCalc.shrinkageTonnage * 1000).toFixed(0)} kg
+                </span>
+                . Batas toleransi wajar (0.3%):{" "}
+                <span className="font-semibold text-foreground">
+                  {(claimCalc.toleranceTonnage * 1000).toFixed(0)} kg
+                </span>
+                . Kelebihan susut diklaim:{" "}
+                <strong className="text-destructive">
+                  {(claimCalc.claimableTonnage * 1000).toFixed(0)} kg
+                </strong>{" "}
+                (Total: {formatCurrency(claimCalc.totalClaimAmount)}).
+              </p>
+
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <Label
+                    htmlFor="claim"
+                    className="text-[11px] font-semibold text-muted-foreground"
+                  >
+                    Klaim Beban Kantor (50%)
+                  </Label>
+                  <div className="relative">
+                    <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-xs font-semibold text-muted-foreground">
+                      Rp
+                    </span>
+                    <Input
+                      id="claim"
+                      type="text"
+                      inputMode="decimal"
+                      value={formatCurrencyInput(watchedClaim || "")}
+                      onChange={(e) => {
+                        setIsClaimManuallyEdited(true)
+                        setValue("claim", parseCurrencyInput(e.target.value))
+                      }}
+                      className="h-8! pl-9 font-mono text-xs font-semibold text-destructive"
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <Label
+                    htmlFor="claimDriver"
+                    className="text-[11px] font-semibold text-muted-foreground"
+                  >
+                    Klaim Potong Supir (50%)
+                  </Label>
+                  <div className="relative">
+                    <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-xs font-semibold text-muted-foreground">
+                      Rp
+                    </span>
+                    <Input
+                      id="claimDriver"
+                      type="text"
+                      inputMode="decimal"
+                      value={formatCurrencyInput(watchedClaimDriver || "")}
+                      onChange={(e) => {
+                        setIsClaimManuallyEdited(true)
+                        setValue(
+                          "claimDriver",
+                          parseCurrencyInput(e.target.value)
+                        )
+                      }}
+                      className="h-8! pl-9 font-mono text-xs font-semibold text-destructive"
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Baris 9: Card Kalkulasi Otomatis (Live) */}
+          <div className="space-y-2 rounded-xl border border-primary/20 bg-primary/5 p-3.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-primary">
+                <RiCalculatorLine className="size-4" />
+                <span>Kalkulasi Otomatis (Live)</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3 border-t border-primary/10 pt-1 text-center">
+              <div>
+                <span className="block text-[10px] text-muted-foreground">
+                  Omset Bruto{" "}
+                  {isUsingLoadedTonnage ? (
+                    <span className="font-medium text-amber-600 dark:text-amber-400">
+                      (Sementara)
+                    </span>
+                  ) : isBongkarFilled ? (
+                    <span className="font-medium text-emerald-600 dark:text-emerald-400">
+                      (Bongkar)
+                    </span>
+                  ) : null}
+                </span>
+                <span className="font-mono text-sm font-bold">
+                  {liveCalc.omset > 0 ? formatCurrency(liveCalc.omset) : "Rp -"}
+                </span>
+              </div>
+              <div>
+                <span className="block text-[10px] text-muted-foreground">
+                  Sangu Supir {isSanguManuallyEdited ? "(Manual)" : "(Acuan)"}
+                </span>
+                <span className="font-mono text-sm font-bold text-amber-600 dark:text-amber-400">
+                  {liveCalc.sangu > 0 ? formatCurrency(liveCalc.sangu) : "Rp -"}
+                </span>
+              </div>
+              <div>
+                <span className="block text-[10px] text-muted-foreground">
+                  Laba Ritase
+                </span>
+                <span className="font-mono text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                  {liveCalc.profit !== 0
+                    ? formatCurrency(liveCalc.profit)
+                    : "Rp -"}
+                </span>
+              </div>
+            </div>
+
+            {hasSpecialDeductions && (
+              <div className="mt-2 space-y-2 border-t border-dashed border-primary/20 pt-2 text-xs">
+                <div className="flex items-center justify-between text-[11px] font-semibold text-primary">
+                  <span className="flex items-center gap-1">
+                    <RiInformationLine className="size-3.5" />
+                    Potongan Khusus Grobogan/LJU (7% dari Omset):
+                  </span>
+                  <Badge
+                    variant="outline"
+                    className="border-primary/40 bg-primary/10 px-1.5 py-0 text-[9.5px] font-semibold text-primary"
+                  >
+                    Formula Resmi (Pilihan A)
+                  </Badge>
+                </div>
+
+                <div className="space-y-1.5 rounded-lg border border-primary/20 bg-background/70 p-2.5 text-[11px]">
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span>• Potongan Operasional LJU (2%):</span>
+                    <span className="font-mono font-medium text-foreground">
+                      {liveCalc.omset > 0
+                        ? formatCurrency(liveCalc.deduction2PctLju)
+                        : "Rp -"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span className="flex items-center gap-1 font-medium text-emerald-600 dark:text-emerald-400">
+                      • Tabungan Kas Armada (Saving 5%):
+                    </span>
+                    <span className="font-mono font-semibold text-emerald-600 dark:text-emerald-400">
+                      {liveCalc.omset > 0
+                        ? `+${formatCurrency(liveCalc.savings)}`
+                        : "Rp -"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between border-t border-dashed border-border/70 pt-1 text-muted-foreground">
+                    <span className="text-[10px]">
+                      Total Beban Memotong Kas Operasional:
+                    </span>
+                    <span className="font-mono text-[10px] font-medium text-amber-600 dark:text-amber-400">
+                      {liveCalc.omset > 0
+                        ? formatCurrency(liveCalc.deduction2PctLju)
+                        : "Rp -"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between pt-0.5 text-muted-foreground">
+                    <span className="text-[10.5px] font-semibold text-foreground">
+                      Total Nilai Armada (Laba + Tabungan):
+                    </span>
+                    <span className="font-mono text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                      {liveCalc.omset > 0
+                        ? formatCurrency(liveCalc.totalArmadaValue)
+                        : "Rp -"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Baris 10: Catatan Tambahan (Full Width) */}

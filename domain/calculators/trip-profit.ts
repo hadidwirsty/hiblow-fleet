@@ -18,14 +18,20 @@ export interface TripProfitResult {
   tax1Pct: number
   deduction2PctLju: number
   deduction5PctUjGrb: number
+  savings: number
   totalDeductions: number
+  totalArmadaValue: number
 }
 
 /**
- * Calculates net profit for a single trip.
- * Design Decision #3:
- *   Special deductions (tax 1%, pot 2% LJU, 5% UJ GRB) only apply for Grobogan / PT LJU routes
- *   and explicitly deduct from company profit, never from driver's sangu.
+ * Calculates net profit and fleet value for a single trip.
+ * Design Decision #3 & Konfirmasi Resmi Mas Hafidz (Pilihan A):
+ *   - Special deductions rute Indocement Grobogan / PT LJU (total 7%):
+ *     1. Potongan Operasional LJU 2% (omset * 0.02) -> Memotong laba operasional tunai
+ *     2. Tabungan Kas Armada (Saving 5%) (omset * 0.05) -> Dicatat sebagai tabungan armada di PT LJU
+ *     3. Pajak PPh 1% -> Dihapus (0%)
+ *   - Laba Operasional Bersih = Omset - Beban Operasional Langsung
+ *   - Total Nilai Armada = Laba Operasional Bersih + Tabungan Kas Armada (Saving 5%)
  */
 export function calculateTripProfit(
   input: CalculateTripProfitInput
@@ -36,7 +42,6 @@ export function calculateTripProfit(
     incentivePaid = 0,
     thirdPartyFee = 0,
     mealAllowance = 0,
-    savings = 0,
     claim = 0,
     claimDriver = 0,
     hasSpecialDeductions = false,
@@ -45,16 +50,20 @@ export function calculateTripProfit(
   let tax1Pct = input.tax1Pct ?? 0
   let deduction2PctLju = input.deduction2PctLju ?? 0
   let deduction5PctUjGrb = input.deduction5PctUjGrb ?? 0
+  let savings = input.savings ?? 0
 
   if (hasSpecialDeductions) {
     if (input.tax1Pct === undefined) {
-      tax1Pct = Math.round(omset * 0.01 * 100) / 100
+      tax1Pct = 0
     }
     if (input.deduction2PctLju === undefined) {
       deduction2PctLju = Math.round(omset * 0.02 * 100) / 100
     }
     if (input.deduction5PctUjGrb === undefined) {
-      deduction5PctUjGrb = Math.round(sangu * 0.05 * 100) / 100
+      deduction5PctUjGrb = 0
+    }
+    if (input.savings === undefined) {
+      savings = Math.round(omset * 0.05 * 100) / 100
     }
   } else {
     // If not special deductions route and not explicitly provided, keep 0
@@ -71,17 +80,19 @@ export function calculateTripProfit(
     deduction2PctLju +
     deduction5PctUjGrb +
     mealAllowance +
-    savings +
     claim +
     claimDriver
 
   const profit = Math.round((omset - directExpenses) * 100) / 100
+  const totalArmadaValue = Math.round((profit + savings) * 100) / 100
 
   return {
     profit,
     tax1Pct,
     deduction2PctLju,
     deduction5PctUjGrb,
+    savings,
     totalDeductions: directExpenses,
+    totalArmadaValue,
   }
 }
