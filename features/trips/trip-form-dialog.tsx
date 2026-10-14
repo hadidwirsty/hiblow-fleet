@@ -212,6 +212,17 @@ export function TripFormDialog({
           setSelectedRate(ref)
           setSanguPercentage(parseFloat(ref.sanguPercentage))
           setHasSpecialDeductions(ref.hasSpecialDeductions)
+        } else {
+          // Fallback defensif jika rateReferenceId belum terhubung / null (mis. data historis):
+          // Deteksi apakah trip tersimpan ini merupakan rute Indocement Grobogan
+          const isGroboganTrip =
+            parseFloat(trip.deduction2PctLju || "0") > 0 ||
+            parseFloat(trip.savings || "0") > 0 ||
+            parseFloat(trip.deduction5PctUjGrb || "0") > 0 ||
+            (trip.destinationName || "").toLowerCase().includes("indocement") ||
+            (trip.destinationName || "").toLowerCase().includes("grobogan") ||
+            (trip.destinationCity || "").toLowerCase().includes("grobogan")
+          setHasSpecialDeductions(isGroboganTrip)
         }
         setIsSanguManuallyEdited(true)
         setIsIncentiveManuallyEdited(
@@ -497,6 +508,12 @@ export function TripFormDialog({
       deduction2PctLju = Math.round(0.02 * omset)
       deduction5PctUjGrb = 0
       savings = Math.round(0.05 * omset) // Komponen 5% adalah Tabungan Kas Armada (Saving)
+    } else if (omset > 0) {
+      // Pabrik selain Indocement Grobogan (SI Tuban, SI Rembang, SBI Tuban):
+      // Dikenakan Pajak PPh 1% dari Omset Bruto
+      tax1Pct = Math.round(0.01 * omset)
+      deduction2PctLju = 0
+      deduction5PctUjGrb = 0
     }
 
     const profitResult = calculateTripProfit({
@@ -544,10 +561,8 @@ export function TripFormDialog({
     setValue("tax1Pct", liveCalc.tax1Pct.toFixed(2))
     setValue("deduction2PctLju", liveCalc.deduction2PctLju.toFixed(2))
     setValue("deduction5PctUjGrb", liveCalc.deduction5PctUjGrb.toFixed(2))
-    if (hasSpecialDeductions) {
-      setValue("savings", liveCalc.savings.toFixed(2))
-    }
-  }, [liveCalc, hasSpecialDeductions, setValue])
+    setValue("savings", liveCalc.savings.toFixed(2))
+  }, [liveCalc, setValue])
 
   // Handle route selection from combobox
   function handleRouteSelect(rateRef: RateReferenceRecord) {
@@ -1817,6 +1832,32 @@ export function TripFormDialog({
                         : "Rp -"}
                     </span>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {!hasSpecialDeductions && liveCalc.tax1Pct > 0 && (
+              <div className="mt-2 space-y-1.5 border-t border-dashed border-primary/20 pt-2 text-xs">
+                <div className="flex items-center justify-between text-[11px] font-semibold text-primary">
+                  <span className="flex items-center gap-1">
+                    <RiInformationLine className="size-3.5" />
+                    Potongan Pajak Pabrik (PPh 1% dari Omset):
+                  </span>
+                  <Badge
+                    variant="outline"
+                    className="border-primary/40 bg-primary/10 px-1.5 py-0 text-[9.5px] font-semibold text-primary"
+                  >
+                    PPh 1%
+                  </Badge>
+                </div>
+
+                <div className="flex items-center justify-between rounded-lg border border-primary/20 bg-background/70 px-2.5 py-1.5 text-[11px]">
+                  <span className="text-muted-foreground">
+                    • Pajak PPh (1%):
+                  </span>
+                  <span className="font-mono font-medium text-destructive">
+                    -{formatCurrency(liveCalc.tax1Pct)}
+                  </span>
                 </div>
               </div>
             )}

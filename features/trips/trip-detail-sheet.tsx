@@ -591,7 +591,7 @@ export function TripDetailSheet({
           </div>
 
           {/* Section 4: Rincian Potongan & Beban Khusus (Jika Ada) */}
-          {totalDeductions > 0 && (
+          {(totalDeductions > 0 || savings > 0) && (
             <div className="space-y-2">
               <h4 className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                 <RiPercentLine className="size-3.5 text-primary" />
@@ -600,21 +600,31 @@ export function TripDetailSheet({
               <div className="space-y-2 rounded-xl border border-border/80 bg-card p-3.5 text-xs shadow-2xs">
                 {tax1 > 0 && (
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">
-                      Pajak PPh (1%):
-                    </span>
-                    <span className="font-mono font-medium text-foreground">
-                      {formatCurrency(tax1)}
+                    <div>
+                      <span className="text-muted-foreground">
+                        Pajak PPh (1%):
+                      </span>
+                      <p className="text-[10px] text-muted-foreground">
+                        PPh omset bruto pabrik non-Grobogan
+                      </p>
+                    </div>
+                    <span className="font-mono font-medium text-destructive">
+                      -{formatCurrency(tax1)}
                     </span>
                   </div>
                 )}
                 {ded2Lju > 0 && (
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">
-                      Potongan LJU (2%):
-                    </span>
-                    <span className="font-mono font-medium text-foreground">
-                      {formatCurrency(ded2Lju)}
+                    <div>
+                      <span className="text-muted-foreground">
+                        Potongan LJU (2%):
+                      </span>
+                      <p className="text-[10px] text-muted-foreground">
+                        Potongan operasional PT LJU (Indocement Grobogan)
+                      </p>
+                    </div>
+                    <span className="font-mono font-medium text-destructive">
+                      -{formatCurrency(ded2Lju)}
                     </span>
                   </div>
                 )}

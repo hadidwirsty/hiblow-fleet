@@ -51,7 +51,9 @@ describe("trips.export", () => {
     expect(data.headers).toContain("Kota Tujuan")
     expect(data.headers).toContain("Omset Bruto (Rp)")
     expect(data.headers).toContain("Sangu Supir (Rp)")
+    expect(data.headers).toContain("Tabungan Kas Armada 5% (Rp)")
     expect(data.headers).toContain("Laba Bersih (Rp)")
+    expect(data.headers).toContain("Total Nilai Armada (Rp)")
 
     expect(data.rows).toHaveLength(1)
     const row = data.rows[0]
@@ -65,7 +67,9 @@ describe("trips.export", () => {
     expect(row[7]).toBe(31.2) // Unloaded tonnage
     expect(row[8]).toBe(2964000) // Omset
     expect(row[9]).toBe(1532000) // Sangu
+    expect(row[17]).toBe(0) // Savings
     expect(row[18]).toBe(1347000) // Profit
+    expect(row[19]).toBe(1347000) // Total Armada Value (profit + savings)
   })
 
   it("should generate descriptive filenames based on active filter", () => {

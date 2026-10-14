@@ -26,33 +26,41 @@ export function formatTripsForExport(trips: Trip[]): ExcelSheetData {
     "Status Biaya DO",
     "Pajak 1% (Rp)",
     "Pot 2% LJU (Rp)",
-    "Pot 5% UJ GRB (Rp)",
+    "Tabungan Kas Armada 5% (Rp)",
     "Laba Bersih (Rp)",
+    "Total Nilai Armada (Rp)",
     "Catatan",
   ]
 
-  const rows = trips.map((t) => [
-    t.orderNumber,
-    formatTruckPlate(t.truckId),
-    t.orderDate,
-    t.unloadingDate ?? "-",
-    t.destinationCity,
-    t.destinationName,
-    parseFloat(t.ratePerTon || "0"),
-    parseFloat(t.unloadedTonnage || "0"),
-    parseFloat(t.omset || "0"),
-    parseFloat(t.sangu || "0"),
-    parseFloat(t.incentivePaid || "0"),
-    t.incentiveStatus ?? "-",
-    parseFloat(t.thirdPartyFee || "0"),
-    t.thirdPartyName ?? "-",
-    t.thirdPartyStatus ?? "-",
-    parseFloat(t.tax1Pct || "0"),
-    parseFloat(t.deduction2PctLju || "0"),
-    parseFloat(t.deduction5PctUjGrb || "0"),
-    parseFloat(t.profit || "0"),
-    t.notes ?? "-",
-  ])
+  const rows = trips.map((t) => {
+    const savingsVal = parseFloat(t.savings || t.deduction5PctUjGrb || "0")
+    const profitVal = parseFloat(t.profit || "0")
+    const totalArmadaVal = profitVal + savingsVal
+
+    return [
+      t.orderNumber,
+      formatTruckPlate(t.truckId),
+      t.orderDate,
+      t.unloadingDate ?? "-",
+      t.destinationCity,
+      t.destinationName,
+      parseFloat(t.ratePerTon || "0"),
+      parseFloat(t.unloadedTonnage || "0"),
+      parseFloat(t.omset || "0"),
+      parseFloat(t.sangu || "0"),
+      parseFloat(t.incentivePaid || "0"),
+      t.incentiveStatus ?? "-",
+      parseFloat(t.thirdPartyFee || "0"),
+      t.thirdPartyName ?? "-",
+      t.thirdPartyStatus ?? "-",
+      parseFloat(t.tax1Pct || "0"),
+      parseFloat(t.deduction2PctLju || "0"),
+      savingsVal,
+      profitVal,
+      totalArmadaVal,
+      t.notes ?? "-",
+    ]
+  })
 
   return {
     sheetName: "Rekap Ritase",

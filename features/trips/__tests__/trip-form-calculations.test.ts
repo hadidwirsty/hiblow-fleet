@@ -58,7 +58,7 @@ describe("Trip form live calculation integration", () => {
     expect(profitResult.profit).toBe(3087500 - 1531000)
   })
 
-  it("correctly deducts Grobogan / PT LJU special deductions from company profit, not sangu", () => {
+  it("correctly calculates Grobogan / PT LJU special deductions based on Option A (0% tax, 2% LJU, 5% fleet savings) without affecting sangu", () => {
     const ratePerTon = 110000
     const unloadedTonnage = 31.0
     const sanguPct = 0.5
@@ -70,25 +70,23 @@ describe("Trip form live calculation integration", () => {
       sanguPercentage: sanguPct,
     })
 
-    const tax1Pct = Math.round(0.01 * omset)
-    const deduction2PctLju = Math.round(0.02 * omset)
-    const deduction5PctUjGrb = Math.round(0.05 * omset)
-
     const profitResult = calculateTripProfit({
       omset,
       sangu,
       thirdPartyFee: 0,
-      tax1Pct,
-      deduction2PctLju,
-      deduction5PctUjGrb,
+      hasSpecialDeductions: true,
     })
 
     expect(omset).toBe(3410000)
     expect(sangu).toBe(1705000) // Sangu remains untouched!
-    expect(tax1Pct).toBe(34100)
-    expect(deduction2PctLju).toBe(68200)
-    expect(deduction5PctUjGrb).toBe(170500)
-    expect(profitResult.profit).toBe(3410000 - 1705000 - 34100 - 68200 - 170500)
+    expect(profitResult.tax1Pct).toBe(0) // 0% PPh
+    expect(profitResult.deduction2PctLju).toBe(68200) // 2% LJU
+    expect(profitResult.deduction5PctUjGrb).toBe(0)
+    expect(profitResult.savings).toBe(170500) // 5% Tabungan Armada
+    expect(profitResult.profit).toBe(3410000 - 1705000 - 68200)
+    expect(profitResult.totalArmadaValue).toBe(
+      profitResult.profit + profitResult.savings
+    )
   })
 
   it("calculates profit correctly when driver sangu is manually overridden (e.g. extra ton or special case)", () => {
@@ -149,8 +147,9 @@ describe("Trip form live calculation integration", () => {
     })
 
     expect(omset).toBe(2945000)
-    // Profit = Omset - Sangu - Biaya Pihak Ketiga (100.000)
-    expect(profitResult.profit).toBe(2945000 - 1531000 - 100000)
+    expect(profitResult.tax1Pct).toBe(29450)
+    // Profit = Omset - Sangu - Biaya Pihak Ketiga (100.000) - Pajak 1% (29.450)
+    expect(profitResult.profit).toBe(2945000 - 1531000 - 100000 - 29450)
   })
 
   it("handles Indocement third-party fee of 5% omset when funded by third party", () => {
@@ -164,9 +163,12 @@ describe("Trip form live calculation integration", () => {
       omset,
       sangu,
       thirdPartyFee: fee5Pct,
+      tax1Pct: 0,
+      deduction2PctLju: 0,
     })
 
     expect(fee5Pct).toBe(170500)
+    expect(profitResult.tax1Pct).toBe(0)
     expect(profitResult.profit).toBe(3410000 - 1705000 - 170500)
   })
 
@@ -181,8 +183,11 @@ describe("Trip form live calculation integration", () => {
       omset,
       sangu,
       thirdPartyFee,
+      tax1Pct: 0,
+      deduction2PctLju: 0,
     })
 
+    expect(profitResult.tax1Pct).toBe(0)
     expect(profitResult.profit).toBe(3410000 - 1705000)
   })
 
@@ -198,9 +203,12 @@ describe("Trip form live calculation integration", () => {
       omset,
       sangu,
       thirdPartyFee: totalDoIndo,
+      tax1Pct: 0,
+      deduction2PctLju: 0,
     })
 
     expect(totalDoIndo).toBe(270500)
+    expect(profitResult.tax1Pct).toBe(0)
     expect(profitResult.profit).toBe(3410000 - 1705000 - 270500)
   })
 
@@ -215,9 +223,12 @@ describe("Trip form live calculation integration", () => {
       omset,
       sangu,
       thirdPartyFee: totalDoIndo,
+      tax1Pct: 0,
+      deduction2PctLju: 0,
     })
 
     expect(totalDoIndo).toBe(100000)
+    expect(profitResult.tax1Pct).toBe(0)
     expect(profitResult.profit).toBe(3410000 - 1705000 - 100000)
   })
 
@@ -235,7 +246,8 @@ describe("Trip form live calculation integration", () => {
       thirdPartyFee: 100000,
     })
 
-    expect(profitResult.profit).toBe(2945000 - 1531000 - 100000 - 50000)
+    expect(profitResult.tax1Pct).toBe(29450)
+    expect(profitResult.profit).toBe(2945000 - 1531000 - 100000 - 50000 - 29450)
   })
 
   it("calculates shrinkage claim (50:50) and integrates into trip profit", () => {
@@ -263,7 +275,10 @@ describe("Trip form live calculation integration", () => {
       thirdPartyFee: 100000,
     })
 
-    expect(profitResult.profit).toBe(3050000 - 1550000 - 100000 - 20350 - 20350)
+    expect(profitResult.tax1Pct).toBe(30500)
+    expect(profitResult.profit).toBe(
+      3050000 - 1550000 - 100000 - 20350 - 20350 - 30500
+    )
   })
 
   it("calculates excess tonnage incentive and integrates into trip profit", () => {
@@ -290,7 +305,8 @@ describe("Trip form live calculation integration", () => {
       thirdPartyFee: 100000,
     })
 
-    expect(profitResult.profit).toBe(omset - sangu - 100000 - 100000)
+    expect(profitResult.tax1Pct).toBe(31350)
+    expect(profitResult.profit).toBe(omset - sangu - 100000 - 100000 - 31350)
   })
 
   it("handles Case 2 end-to-end: loaded 32T, unloaded 31.86T, driver gets 1T incentive (standard 31T), shrinkage 140kg, tolerance 96kg, claim 44kg (Rp 44.000)", () => {
@@ -331,7 +347,7 @@ describe("Trip form live calculation integration", () => {
     expect(incentiveRes.excessTonnage).toBe(1)
     expect(incentiveRes.incentivePaid).toBe(50000)
 
-    // 4. Laba Ritase Perusahaan: Omset (31.86T) - Sangu - Insentif - Klaim Kantor - Klaim Supir - Fee DO
+    // 4. Laba Ritase Perusahaan: Omset (31.86T) - Sangu - Insentif - Klaim Kantor - Klaim Supir - Fee DO - Pajak 1% (318.600)
     const profitResult = calculateTripProfit({
       omset,
       sangu,
@@ -341,8 +357,9 @@ describe("Trip form live calculation integration", () => {
       thirdPartyFee: 100000,
     })
 
+    expect(profitResult.tax1Pct).toBe(318600)
     expect(profitResult.profit).toBe(
-      31860000 - 1600000 - 50000 - 22000 - 22000 - 100000
+      31860000 - 1600000 - 50000 - 22000 - 22000 - 100000 - 318600
     )
   })
 
@@ -408,8 +425,11 @@ describe("Trip form live calculation integration", () => {
         mealAllowance: activeUM,
       })
 
-      // Laba harus terpotong nilai manual Rp 75.000
-      expect(profitWithManualUM.profit).toBe(3100000 - 1600000 - 100000 - 75000)
+      // Laba harus terpotong nilai manual Rp 75.000 dan Pajak 1% (Rp 31.000)
+      expect(profitWithManualUM.tax1Pct).toBe(31000)
+      expect(profitWithManualUM.profit).toBe(
+        3100000 - 1600000 - 100000 - 75000 - 31000
+      )
 
       // User menekan tombol "Reset ke Acuan"
       isMealAllowanceManuallyEdited = false
@@ -422,9 +442,12 @@ describe("Trip form live calculation integration", () => {
         mealAllowance: activeUM,
       })
 
-      // Laba kembali terpotong nilai acuan Rp 50.000
+      // Laba kembali terpotong nilai acuan Rp 50.000 dan Pajak 1% (Rp 31.000)
       expect(isMealAllowanceManuallyEdited).toBe(false)
-      expect(profitWithResetUM.profit).toBe(3100000 - 1600000 - 100000 - 50000)
+      expect(profitWithResetUM.tax1Pct).toBe(31000)
+      expect(profitWithResetUM.profit).toBe(
+        3100000 - 1600000 - 100000 - 50000 - 31000
+      )
     })
   })
 
@@ -448,6 +471,29 @@ describe("Trip form live calculation integration", () => {
       expect(profitResult.totalArmadaValue).toBe(
         profitResult.profit + profitResult.savings
       )
+    })
+  })
+
+  describe("Non-Grobogan cement plant routes (SI Tuban, SI Rembang, SBI Tuban) 1% tax alignment", () => {
+    it("automatically applies 1% PPh tax deduction for non-Grobogan routes in live calculations", () => {
+      const ratePerTon = 95000
+      const unloadedTonnage = 31.0
+      const sangu = 1531000
+      const omset = calculateOmset({ ratePerTon, unloadedTonnage })
+
+      const res = calculateTripProfit({
+        omset,
+        sangu,
+        hasSpecialDeductions: false,
+      })
+
+      // Pajak 1% dari 2.945.000 = 29.450
+      expect(res.tax1Pct).toBe(29450)
+      expect(res.deduction2PctLju).toBe(0)
+      expect(res.savings).toBe(0)
+      // Laba = 2.945.000 - 1.531.000 - 29.450 = 1.384.550
+      expect(res.profit).toBe(2945000 - 1531000 - 29450)
+      expect(res.totalArmadaValue).toBe(res.profit)
     })
   })
 })
