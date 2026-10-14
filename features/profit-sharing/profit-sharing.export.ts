@@ -19,10 +19,7 @@ export function formatProfitSharingForExcel(
     ["Judul Periode", period.title],
     ["Tanggal Mulai", period.startDate],
     ["Tanggal Selesai", period.endDate],
-    [
-      "Status Periode",
-      period.status === "finalized" ? "Finalized (Resmi)" : "Draft",
-    ],
+    ["Status Periode", period.status === "finalized" ? "Resmi" : "Draf"],
     ["Total Omset Ritase", totalIncome],
     ["Beban Operasional Riil", totalExpenses],
     ["Laba Kotor (Gross)", grossBalance],

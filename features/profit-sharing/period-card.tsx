@@ -92,12 +92,12 @@ export function PeriodCard({
               {isFinalized ? (
                 <span className="flex items-center gap-1">
                   <RiLockLine className="size-3" />
-                  Finalized
+                  Resmi
                 </span>
               ) : (
                 <span className="flex items-center gap-1">
                   <RiLockUnlockLine className="size-3" />
-                  Draft
+                  Draf
                 </span>
               )}
             </Badge>

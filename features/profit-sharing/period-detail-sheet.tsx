@@ -73,8 +73,8 @@ export function PeriodDetailSheet({
       if (res.success) {
         toast.success(
           nextStatus === "finalized"
-            ? "Periode berhasil dikunci (Finalized)"
-            : "Periode diubah menjadi Draft"
+            ? "Periode berhasil dikunci (Resmi)"
+            : "Periode diubah menjadi Draf"
         )
       } else {
         toast.error(res.error)
@@ -142,12 +142,12 @@ export function PeriodDetailSheet({
                   {isFinalized ? (
                     <span className="flex items-center gap-1">
                       <RiLockLine className="size-3" />
-                      Finalized
+                      Resmi
                     </span>
                   ) : (
                     <span className="flex items-center gap-1">
                       <RiLockUnlockLine className="size-3" />
-                      Draft
+                      Draf
                     </span>
                   )}
                 </Badge>
