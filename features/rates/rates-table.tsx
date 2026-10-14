@@ -653,13 +653,18 @@ export function RatesTable({
                       {rate.hasSpecialDeductions ? (
                         <Badge
                           variant="secondary"
-                          className="bg-purple-500/10 text-[10px] text-purple-700 dark:text-purple-300"
+                          className="bg-purple-500/10 text-[10px] font-medium text-purple-700 dark:text-purple-300"
                         >
                           <RiPercentLine className="mr-0.5 size-3" />
-                          LJU
+                          LJU (7%)
                         </Badge>
                       ) : (
-                        <span className="text-muted-foreground/50">-</span>
+                        <Badge
+                          variant="outline"
+                          className="border-primary/20 bg-primary/5 text-[10px] font-medium text-primary"
+                        >
+                          PPh 1%
+                        </Badge>
                       )}
                     </TableCell>
                     <TableCell className="text-center whitespace-nowrap">

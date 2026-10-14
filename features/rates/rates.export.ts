@@ -53,7 +53,7 @@ export function formatRatesForExport(rates: RateReference[]): ExcelSheetData {
       rowProfit,
       distanceMetrics.revenuePerKm ?? "-",
       distanceMetrics.profitPerKm ?? "-",
-      rate.hasSpecialDeductions ? "LJU (1%, 2%, 5%)" : "-",
+      rate.hasSpecialDeductions ? "LJU (2% Operasional + 5% Saving)" : "PPh 1%",
       rate.isActive ? "Aktif" : "Nonaktif",
     ]
   })

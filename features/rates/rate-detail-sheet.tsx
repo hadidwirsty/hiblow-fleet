@@ -683,8 +683,8 @@ export function RateDetailSheet({
                   </span>
                   <p className="text-[11px] text-muted-foreground">
                     {rate.hasSpecialDeductions
-                      ? "Rute ini menerapkan pajak 1%, potongan LJU 2%, atau potongan UJ Grobogan 5%."
-                      : "Rute ini menggunakan ketentuan tarif standar tanpa potongan khusus."}
+                      ? "Rute Indocement Grobogan menerapkan potongan operasional LJU 2% dan tabungan kas armada 5% (bebas pajak 1%)."
+                      : "Rute pabrik semen non-Grobogan menerapkan potongan Pajak PPh 1% dari omset bruto."}
                   </p>
                 </div>
                 {rate.hasSpecialDeductions ? (
@@ -693,14 +693,15 @@ export function RateDetailSheet({
                     className="w-fit gap-1 bg-purple-500/10 text-xs font-semibold text-purple-700 dark:text-purple-300"
                   >
                     <RiPercentLine className="size-3" />
-                    <span>Berlaku (LJU)</span>
+                    <span>Berlaku (LJU 7%)</span>
                   </Badge>
                 ) : (
                   <Badge
-                    variant="outline"
-                    className="w-fit text-xs text-muted-foreground"
+                    variant="secondary"
+                    className="w-fit gap-1 bg-primary/10 text-xs font-semibold text-primary"
                   >
-                    Tidak Berlaku
+                    <RiPercentLine className="size-3" />
+                    <span>PPh 1%</span>
                   </Badge>
                 )}
               </div>

@@ -67,7 +67,7 @@ describe("rates.export", () => {
     expect(row[11]).toBe(1705000) // Estimasi Profit
     expect(row[12]).toBe("-") // Pendapatan / Km (null jika jarak null)
     expect(row[13]).toBe("-") // Profit / Km (null jika jarak null)
-    expect(row[14]).toBe("LJU (1%, 2%, 5%)")
+    expect(row[14]).toBe("LJU (2% Operasional + 5% Saving)")
     expect(row[15]).toBe("Aktif")
   })
 

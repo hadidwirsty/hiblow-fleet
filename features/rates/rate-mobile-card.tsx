@@ -84,13 +84,20 @@ export function RateMobileCard({
             </div>
 
             <div className="flex shrink-0 items-center gap-1">
-              {rate.hasSpecialDeductions && (
+              {rate.hasSpecialDeductions ? (
                 <Badge
                   variant="secondary"
                   className="bg-purple-500/10 text-[10px] font-medium text-purple-700 dark:text-purple-300"
                 >
                   <RiPercentLine className="mr-0.5 size-3" />
-                  LJU
+                  LJU (7%)
+                </Badge>
+              ) : (
+                <Badge
+                  variant="outline"
+                  className="border-primary/20 bg-primary/5 text-[10px] font-medium text-primary"
+                >
+                  PPh 1%
                 </Badge>
               )}
               <Badge
