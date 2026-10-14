@@ -66,8 +66,11 @@ export function calculateTripProfit(
       savings = Math.round(omset * 0.05 * 100) / 100
     }
   } else {
-    // If not special deductions route and not explicitly provided, keep 0
-    if (input.tax1Pct === undefined) tax1Pct = 0
+    // Pabrik selain Indocement Grobogan (SI Tuban, SI Rembang, SBI Tuban):
+    // Dikenakan Pajak PPh 1% dari Omset Bruto jika tidak ditentukan manual
+    if (input.tax1Pct === undefined) {
+      tax1Pct = Math.round(omset * 0.01 * 100) / 100
+    }
     if (input.deduction2PctLju === undefined) deduction2PctLju = 0
     if (input.deduction5PctUjGrb === undefined) deduction5PctUjGrb = 0
   }

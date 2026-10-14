@@ -3,12 +3,13 @@ import { describe, expect, it } from "vitest"
 import { calculateTripProfit } from "@/domain/calculators/trip-profit"
 
 describe("calculateTripProfit", () => {
-  it("calculates normal trip profit without special deductions", () => {
+  it("calculates 1% tax deduction for standard non-Grobogan cement plant routes (SI Tuban, SI Rembang, SBI Tuban)", () => {
     // Omset: 2,400,000
     // Sangu: 1,200,000
     // Incentive: 35,000
     // Third party fee: 50,000
-    // Expected Profit = 2,400,000 - 1,200,000 - 35,000 - 50,000 = 1,115,000
+    // Pajak PPh 1%: 2,400,000 * 0.01 = 24,000
+    // Expected Profit = 2,400,000 - 1,200,000 - 35,000 - 50,000 - 24,000 = 1,091,000
     const result = calculateTripProfit({
       omset: 2400000,
       sangu: 1200000,
@@ -17,10 +18,10 @@ describe("calculateTripProfit", () => {
       hasSpecialDeductions: false,
     })
 
-    expect(result.profit).toBe(1115000)
-    expect(result.tax1Pct).toBe(0)
+    expect(result.tax1Pct).toBe(24000)
     expect(result.deduction2PctLju).toBe(0)
     expect(result.deduction5PctUjGrb).toBe(0)
+    expect(result.profit).toBe(1091000)
   })
 
   it("calculates special deductions for Grobogan/LJU route according to Option A (7% total: 2% LJU + 5% fleet savings, 0% tax)", () => {
@@ -60,11 +61,12 @@ describe("calculateTripProfit", () => {
       claimDriver: 10000,
     })
 
-    // 2500000 - 1250000 - 35000 - 50000 - 40000 - 10000 = 1,115,000 (profit operasional)
-    // Total armada value = 1,115,000 + 25,000 (savings) = 1,140,000
-    expect(result.profit).toBe(1115000)
+    // 2500000 - 1250000 - 35000 - 50000 - 40000 - 10000 - 25000 (pajak 1%) = 1,090,000 (profit operasional)
+    // Total armada value = 1,090,000 + 25,000 (savings) = 1,115,000
+    expect(result.tax1Pct).toBe(25000)
+    expect(result.profit).toBe(1090000)
     expect(result.savings).toBe(25000)
-    expect(result.totalArmadaValue).toBe(1140000)
+    expect(result.totalArmadaValue).toBe(1115000)
   })
 
   it("allows custom overrides for special deductions if explicitly provided (e.g. historical data)", () => {
