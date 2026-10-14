@@ -247,18 +247,22 @@ Sumber acuan absolut: Workbook Excel `docs/references/PERHITUNGAN HIBLOW HW Tran
     *(Dibulatkan ke kelipatan Rp 1.000 terdekat sesuai rumus Excel `ROUND(..., -3)`)*
   - **Fleksibilitas Uang Sangu (UJ Riil):** Nominal sangu supir pada formulir pencatatan ritase **tidak dikunci (editable)**. Sistem memberikan rekomendasi otomatis saat rute dipilih, namun admin dapat mengubah atau mengetikkan manual nominal UJ riil (misal saat tonase riil > 31 ton atau rute khusus). Nilai tersimpan resmi ke transaksi.
   - **Kebijakan Biaya Tol (All-in):** Biaya tol sudah termasuk di dalam uang jalan / sangu supir. Tidak ada potongan tol terpisah yang mengurangi laba perusahaan.
-- **Potongan Khusus Rute Grobogan / PT LJU (`hasSpecialDeductions = true`):**
-  - Pajak PPh 1%: $\text{tax1Pct} = \text{omset} \times 0.01$
-  - Potongan 2% LJU: $\text{deduction2PctLju} = \text{omset} \times 0.02$
-  - Uang Jalan 5% Grobogan: $\text{deduction5PctUjGrb} = \text{sangu} \times 0.05$
-  - *Aturan Krusial:* Potongan khusus ini **memotong laba operasional perusahaan/truk, BUKAN memotong sangu supir**.
+- **Pajak PPh 1% Rute Pabrik Non-Grobogan (SI Tuban, SI Rembang, SBI Tuban):**
+  - Seluruh rute pabrik semen selain Grobogan dikenakan Pajak PPh 1%: $\text{tax1Pct} = \operatorname{ROUND}(\text{omset} \times 0.01, 2)$.
+  - *Aturan Krusial:* Pajak PPh 1% ini **memotong laba operasional perusahaan/armada, BUKAN memotong sangu supir**.
+- **Potongan Khusus Rute Grobogan / PT LJU (`hasSpecialDeductions = true` - Pilihan A Mas Hafidz):**
+  - Pajak PPh 1%: **Rp 0 (0% / Bebas Pajak 1%)**.
+  - Potongan Operasional LJU: $\text{deduction2PctLju} = \operatorname{ROUND}(\text{omset} \times 0.02, 2)$ (beban operasional memotong kas).
+  - Tabungan Kas Armada (Saving): $\text{savings} = \operatorname{ROUND}(\text{omset} \times 0.05, 2)$ (akumulasi cadangan kas di PT LJU).
+  - Total Nilai Armada: $\text{totalArmadaValue} = \text{profit} + \text{savings}$.
 - **Biaya Pihak Ketiga (*Third Party DO Fee*):**
   - Biaya jasa perolehan DO (contoh: Mas Mawan / CV. Satria Perwira, Mbah Man / SILOG).
   - Status pembayaran dilacak tersendiri (`thirdPartyStatus`, misal: "Sudah dibayar 12 Sep 2025").
-- **Insentif Rit Supir:**
-  - Standar `incentiveRate`: Rp 35.000 / rit (dapat diubah sesuai rute/perjanjian).
+- **Insentif Rit Supir & Uang Makan (UM):**
+  - Standar `incentiveRate`: Rp 35.000 / rit (dapat diubah sesuai rute/perjanjian) atau insentif muatan lebih tonase.
+  - Uang Makan Supir (UM): Rekomendasi Rp 50.000 / hari inap, dapat di-override manual oleh admin.
 - **Laba Bersih Surat Jalan (`profit`):**
-  $$\text{Deductions} = \text{sangu} + \text{incentivePaid} + \text{thirdPartyFee} + \text{tax1Pct} + \text{deduction2PctLju} + \text{deduction5PctUjGrb} + \text{lainnya}$$
+  $$\text{Deductions} = \text{sangu} + \text{incentivePaid} + \text{thirdPartyFee} + \text{tax1Pct} + \text{deduction2PctLju} + \text{mealAllowance} + \text{claim} + \text{claimDriver}$$
   $$\text{profit} = \text{omset} - \text{Deductions}$$
 
 ### 4.3 Modul Pengeluaran Truk (`expenses`)
