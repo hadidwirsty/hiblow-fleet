@@ -101,4 +101,43 @@ describe("createTripSchema", () => {
     })
     expect(result.success).toBe(false)
   })
+
+  it("accepts valid tax withholding number and date", () => {
+    const result = createTripSchema.safeParse({
+      truckId: "W8187UA",
+      orderNumber: "7911-ZLF-2014002386",
+      orderDate: "2025-06-10",
+      destinationCity: "Tuban",
+      destinationName: "SI Tuban",
+      ratePerTon: "95000.00",
+      unloadedTonnage: "31.00",
+      omset: "2945000.00",
+      sangu: "1531000.00",
+      profit: "1414000.00",
+      taxWithholdingNumber: "BP-SI-2026-00123",
+      taxWithholdingDate: "2026-10-14",
+    })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.taxWithholdingNumber).toBe("BP-SI-2026-00123")
+      expect(result.data.taxWithholdingDate).toBe("2026-10-14")
+    }
+  })
+
+  it("rejects invalid date format for taxWithholdingDate", () => {
+    const result = createTripSchema.safeParse({
+      truckId: "W8187UA",
+      orderNumber: "7911-ZLF-2014002386",
+      orderDate: "2025-06-10",
+      destinationCity: "Tuban",
+      destinationName: "SI Tuban",
+      ratePerTon: "95000.00",
+      unloadedTonnage: "31.00",
+      omset: "2945000.00",
+      sangu: "1531000.00",
+      profit: "1414000.00",
+      taxWithholdingDate: "14-10-2026",
+    })
+    expect(result.success).toBe(false)
+  })
 })

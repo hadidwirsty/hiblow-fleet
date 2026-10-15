@@ -37,6 +37,8 @@ describe("trips.export", () => {
       claimDriver: "0.00",
       profit: "1347000.00",
       notes: "Aman lancar",
+      taxWithholdingNumber: null,
+      taxWithholdingDate: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     },

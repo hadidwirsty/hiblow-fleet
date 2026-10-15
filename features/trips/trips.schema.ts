@@ -50,6 +50,18 @@ export const createTripSchema = z.object({
   claim: z.string().default("0.00"),
   claimDriver: z.string().default("0.00"),
   profit: z.string().min(1, "Laba ritase harus terhitung"),
+  taxWithholdingNumber: z
+    .string()
+    .max(100, "Nomor bukti potong maksimal 100 karakter")
+    .optional()
+    .nullable(),
+  taxWithholdingDate: z
+    .string()
+    .optional()
+    .nullable()
+    .refine((v) => !v || /^\d{4}-\d{2}-\d{2}$/.test(v), {
+      message: "Format tanggal harus YYYY-MM-DD",
+    }),
   notes: z.string().optional().nullable(),
 })
 

@@ -39,6 +39,17 @@ interface TripDetailSheetProps {
   onEdit?: (trip: TripRecord) => void
 }
 
+export function formatWithholdingReceiptDisplay(
+  number?: string | null,
+  date?: string | null
+): string {
+  if (!number) return "Belum diinput"
+  if (date) {
+    return `${number} (${formatDateIndonesian(date, true)})`
+  }
+  return number
+}
+
 export function TripDetailSheet({
   trip,
   open,
@@ -599,18 +610,31 @@ export function TripDetailSheet({
               </h4>
               <div className="space-y-2 rounded-xl border border-border/80 bg-card p-3.5 text-xs shadow-2xs">
                 {tax1 > 0 && (
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-muted-foreground">
-                        Pajak PPh (1%):
+                  <div className="space-y-1.5 border-b border-border/40 pb-2">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-muted-foreground">
+                          Pajak PPh (1%):
+                        </span>
+                        <p className="text-[10px] text-muted-foreground">
+                          PPh omset bruto pabrik non-Grobogan
+                        </p>
+                      </div>
+                      <span className="font-mono font-medium text-destructive">
+                        -{formatCurrency(tax1)}
                       </span>
-                      <p className="text-[10px] text-muted-foreground">
-                        PPh omset bruto pabrik non-Grobogan
-                      </p>
                     </div>
-                    <span className="font-mono font-medium text-destructive">
-                      -{formatCurrency(tax1)}
-                    </span>
+                    <div className="flex items-center justify-between rounded-lg bg-muted/40 px-2 py-1.5 text-[11px]">
+                      <span className="text-muted-foreground">
+                        Bukti Potong PPh 1%:
+                      </span>
+                      <span className="font-medium text-foreground">
+                        {formatWithholdingReceiptDisplay(
+                          trip.taxWithholdingNumber,
+                          trip.taxWithholdingDate
+                        )}
+                      </span>
+                    </div>
                   </div>
                 )}
                 {ded2Lju > 0 && (

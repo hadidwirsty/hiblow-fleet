@@ -161,6 +161,8 @@ export function TripFormDialog({
       claimDriver: "0.00",
       notes: "",
       thirdPartyName: "SILOG - Mas Wawan",
+      taxWithholdingNumber: "",
+      taxWithholdingDate: "",
     },
   })
 
@@ -204,6 +206,8 @@ export function TripFormDialog({
           incentiveStatus: normalizeStatus(trip.incentiveStatus),
           thirdPartyName: trip.thirdPartyName ?? "",
           thirdPartyStatus: normalizeStatus(trip.thirdPartyStatus),
+          taxWithholdingNumber: trip.taxWithholdingNumber ?? "",
+          taxWithholdingDate: trip.taxWithholdingDate ?? "",
         })
         setSelectedRateId(trip.rateReferenceId ?? null)
 
@@ -266,6 +270,8 @@ export function TripFormDialog({
           incentiveStatus: "",
           thirdPartyName: "",
           thirdPartyStatus: "",
+          taxWithholdingNumber: "",
+          taxWithholdingDate: "",
         })
         setSelectedRate(null)
         setSelectedRateId(null)
@@ -1858,6 +1864,37 @@ export function TripFormDialog({
                   <span className="font-mono font-medium text-destructive">
                     -{formatCurrency(liveCalc.tax1Pct)}
                   </span>
+                </div>
+
+                <div className="grid grid-cols-1 gap-2 pt-1 sm:grid-cols-2">
+                  <div className="space-y-1">
+                    <Label
+                      htmlFor="taxWithholdingNumber"
+                      className="text-[11px] font-medium text-muted-foreground"
+                    >
+                      Nomor Bukti Potong PPh 1% (Opsional)
+                    </Label>
+                    <Input
+                      id="taxWithholdingNumber"
+                      {...register("taxWithholdingNumber")}
+                      className="h-8 text-xs"
+                      placeholder="mis. BP-SI-2026-00123"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label
+                      htmlFor="taxWithholdingDate"
+                      className="text-[11px] font-medium text-muted-foreground"
+                    >
+                      Tanggal Bukti Potong (Opsional)
+                    </Label>
+                    <Input
+                      id="taxWithholdingDate"
+                      type="date"
+                      {...register("taxWithholdingDate")}
+                      className="h-8 text-xs"
+                    />
+                  </div>
                 </div>
               </div>
             )}
