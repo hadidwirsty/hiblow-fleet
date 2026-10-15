@@ -1,31 +1,32 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useMemo, useState, useTransition } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import {
-  RiArrowLeftSLine,
-  RiArrowRightSLine,
+  RiArrowDownSLine,
+  RiCloseLine,
   RiDeleteBinLine,
   RiEditLine,
-  RiFilterOffLine,
+  RiEyeLine,
+  RiFilterLine,
   RiMapPinLine,
   RiReceiptLine,
+  RiSearchLine,
 } from "@remixicon/react"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
-import { formatPlateNumber } from "@/domain/trucks"
 import { Button } from "@/components/ui/button"
-import { ExpensesExportButton } from "@/features/expenses/expenses-export-button"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { useUIStore } from "@/stores/theme"
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
@@ -41,9 +42,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { formatPlateNumber, getDriverAndTruck } from "@/domain/trucks"
+import { formatCurrency, formatDateIndonesian } from "@/lib/utils"
+import { useUIStore } from "@/stores/theme"
+import { ExpenseDetailSheet } from "./expense-detail-sheet"
 import { ExpenseFormDialog } from "./expense-form-dialog"
 import { ExpenseMobileCard } from "./expense-mobile-card"
-import { formatCurrency, formatDateIndonesian } from "@/lib/utils"
 import { deleteExpense } from "./expenses.actions"
 import { EXPENSE_CATEGORIES } from "./expenses.schema"
 
@@ -150,12 +154,17 @@ export function ExpensesTable({ expenses, initialFilter }: ExpensesTableProps) {
   const searchParams = useSearchParams()
   const [, startTransition] = useTransition()
 
+  // Client-side search & pagination
+  const [search, setSearch] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
-  const pageSize = 20
+  const [pageSize, setPageSize] = useState(10)
 
   const { setModalDelete, setModalSuccess } = useUIStore()
 
-  // Editing state
+  // State untuk Detail Sheet & Edit Dialog
+  const [selectedDetailExpense, setSelectedDetailExpense] =
+    useState<Expense | null>(null)
+  const [isDetailOpen, setIsDetailOpen] = useState(false)
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
@@ -172,6 +181,7 @@ export function ExpensesTable({ expenses, initialFilter }: ExpensesTableProps) {
     (initialFilter?.year ? String(initialFilter.year) : "ALL")
 
   const hasActiveFilter =
+    Boolean(search.trim()) ||
     currentTruckId !== "ALL" ||
     currentCategory !== "ALL" ||
     currentMonth !== "ALL" ||
@@ -191,11 +201,27 @@ export function ExpensesTable({ expenses, initialFilter }: ExpensesTableProps) {
   }
 
   function handleResetFilters() {
+    setSearch("")
     setCurrentPage(1)
     startTransition(() => {
       router.push(pathname)
     })
   }
+
+  // Filter pencarian instan klien
+  const filteredExpenses = useMemo(() => {
+    if (!search.trim()) return expenses
+    const q = search.toLowerCase()
+    return expenses.filter(
+      (item) =>
+        item.description.toLowerCase().includes(q) ||
+        (item.quantity && item.quantity.toLowerCase().includes(q)) ||
+        (item.location && item.location.toLowerCase().includes(q)) ||
+        (item.repairNotes && item.repairNotes.toLowerCase().includes(q)) ||
+        item.category.toLowerCase().includes(q) ||
+        formatPlateNumber(item.truckId).toLowerCase().includes(q)
+    )
+  }, [expenses, search])
 
   // Handle delete action via global modal
   const promptDeleteExpense = (item: Expense) => {
@@ -205,7 +231,7 @@ export function ExpensesTable({ expenses, initialFilter }: ExpensesTableProps) {
     setModalDelete({
       open: true,
       title: "Hapus Catatan Pengeluaran",
-      message: `Apakah Anda yakin ingin menghapus pengeluaran "${item.description}" (${formatPlateNumber(item.truckId)} - ${formatCurrency(totalAmount)})? Tindakan ini tidak dapat dibatalkan.`,
+      message: `Apakah Anda yakin ingin menghapus catatan pengeluaran "${item.description}" (${formatPlateNumber(item.truckId)} - ${formatCurrency(totalAmount)})? Tindakan ini tidak dapat dibatalkan.`,
       action: async () => {
         try {
           const result = await deleteExpense(item.id)
@@ -232,383 +258,560 @@ export function ExpensesTable({ expenses, initialFilter }: ExpensesTableProps) {
   }
 
   // Pagination calculations
-  const totalPages = Math.ceil(expenses.length / pageSize) || 1
-  const startIndex = (currentPage - 1) * pageSize
-  const endIndex = Math.min(startIndex + pageSize, expenses.length)
-  const paginatedExpenses = expenses.slice(startIndex, endIndex)
+  const totalPages = Math.max(1, Math.ceil(filteredExpenses.length / pageSize))
+  const startIndex =
+    filteredExpenses.length === 0 ? 0 : (currentPage - 1) * pageSize + 1
+  const endIndex = Math.min(currentPage * pageSize, filteredExpenses.length)
+  const paginatedExpenses = filteredExpenses.slice(
+    (currentPage - 1) * pageSize,
+    endIndex
+  )
 
   return (
-    <>
-      <Card className="border border-border shadow-xs">
-        {/* Header & Filter Toolbar */}
-        <CardHeader className="flex flex-col gap-4 p-4 sm:p-6">
-          <div>
-            <CardTitle className="text-base font-semibold">
-              Buku Pengeluaran & Perawatan Truk
-            </CardTitle>
-            <CardDescription className="text-xs">
-              Daftar nota bengkel, onderdil, BBM, dan biaya operasional armada
-            </CardDescription>
-          </div>
+    <div className="space-y-4">
+      {/* 1. Search Bar & Toolbar Filter Kapsul Terpadu (1:1 Standar /rates & /trips) */}
+      <div className="flex flex-col gap-3 2xl:flex-row 2xl:items-center 2xl:justify-between">
+        {/* Search Bar Instan */}
+        <div className="relative w-full 2xl:max-w-xs 2xl:shrink-0">
+          <RiSearchLine className="absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value)
+              setCurrentPage(1)
+            }}
+            placeholder="Cari pengeluaran, vendor, nota, atau kategori..."
+            className="h-10 w-full rounded-xl border-border/70 bg-card/60 pl-9.5 text-xs shadow-2xs focus-visible:ring-1"
+          />
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch("")}
+              className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              <RiCloseLine className="size-4" />
+              <span className="sr-only">Hapus pencarian</span>
+            </button>
+          )}
+        </div>
 
-          {/* Filters */}
-          <div className="grid grid-cols-2 gap-2 pt-1 sm:flex sm:flex-wrap sm:items-center sm:gap-2.5">
-            {/* Truck Filter */}
-            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-1.5">
-              <span className="text-[11px] font-medium text-muted-foreground sm:text-xs">
-                Armada:
-              </span>
-              <Select
-                value={currentTruckId}
-                onValueChange={(val) => val && updateQuery("truckId", val)}
+        {/* Filter Group: Kapsul Terpadu Responsif (Tinggi h-10 di layar sangat lebar, fleksibel wrap di tablet & laptop) */}
+        <div className="flex w-full flex-col gap-2 rounded-xl border border-border/80 bg-muted/40 p-2 shadow-2xs sm:flex-row sm:flex-wrap sm:items-center sm:gap-2 2xl:h-10 2xl:w-auto 2xl:flex-nowrap 2xl:px-2 2xl:py-0">
+          {/* Header Filter di Mobile */}
+          <div className="flex items-center justify-between px-0.5 text-xs font-semibold text-muted-foreground sm:hidden">
+            <span className="flex items-center gap-1.5">
+              <RiFilterLine className="size-3.5 text-primary" />
+              <span>Filter Data:</span>
+            </span>
+            {hasActiveFilter && (
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                className="flex cursor-pointer items-center gap-1 text-[11px] font-medium text-destructive hover:underline"
               >
-                <SelectTrigger className="h-8 w-full text-xs sm:w-34">
-                  <SelectValue placeholder="Semua Armada" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL">Semua Armada</SelectItem>
-                  <SelectItem value="W8187UA">W 8187 UA (Triyono)</SelectItem>
-                  <SelectItem value="H8133OF">H 8133 OF (Khoirul)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Category Filter */}
-            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-1.5">
-              <span className="text-[11px] font-medium text-muted-foreground sm:text-xs">
-                Kategori:
-              </span>
-              <Select
-                value={currentCategory}
-                onValueChange={(val) => val && updateQuery("category", val)}
-              >
-                <SelectTrigger className="h-8 w-full text-xs sm:w-32">
-                  <SelectValue placeholder="Semua Kategori" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL">Semua Kategori</SelectItem>
-                  {EXPENSE_CATEGORIES.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Month Filter */}
-            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-1.5">
-              <span className="text-[11px] font-medium text-muted-foreground sm:text-xs">
-                Bulan:
-              </span>
-              <Select
-                value={currentMonth}
-                onValueChange={(val) => val && updateQuery("month", val)}
-              >
-                <SelectTrigger className="h-8 w-full text-xs sm:w-30">
-                  <SelectValue placeholder="Semua Bulan" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL">Semua Bulan</SelectItem>
-                  {MONTH_NAMES.map((m) => (
-                    <SelectItem key={m.value} value={m.value}>
-                      {m.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Year Filter */}
-            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-1.5">
-              <span className="text-[11px] font-medium text-muted-foreground sm:text-xs">
-                Tahun:
-              </span>
-              <Select
-                value={currentYear}
-                onValueChange={(val) => val && updateQuery("year", val)}
-              >
-                <SelectTrigger className="h-8 w-full text-xs sm:w-26">
-                  <SelectValue placeholder="Semua" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL">Semua</SelectItem>
-                  <SelectItem value="2026">2026</SelectItem>
-                  <SelectItem value="2025">2025</SelectItem>
-                  <SelectItem value="2024">2024</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Reset & Export Actions */}
-            <div className="col-span-2 flex flex-wrap items-center gap-2 sm:col-auto">
-              {hasActiveFilter && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleResetFilters}
-                  className="h-8 gap-1 px-2.5 text-xs text-muted-foreground hover:text-foreground"
-                >
-                  <RiFilterOffLine className="size-3.5" />
-                  <span>Reset</span>
-                </Button>
-              )}
-
-              {/* Export Kas Button */}
-              <ExpensesExportButton
-                expenses={expenses}
-                filter={{
-                  truckId: currentTruckId,
-                  category: currentCategory,
-                  month: currentMonth,
-                  year: currentYear,
-                }}
-              />
-            </div>
-          </div>
-        </CardHeader>
-
-        {/* Table & Cards Content */}
-        <CardContent className="p-4 sm:px-6 sm:pb-4">
-          {/* Mobile View: Cards */}
-          <div className="block space-y-3 md:hidden">
-            {paginatedExpenses.length === 0 ? (
-              <div className="flex flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed border-border py-8 text-center text-muted-foreground">
-                <RiReceiptLine className="size-8 text-muted-foreground/40" />
-                <p className="font-medium text-foreground">
-                  Belum ada catatan pengeluaran
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {hasActiveFilter
-                    ? "Coba sesuaikan atau reset filter di atas"
-                    : "Gunakan tombol 'Catat Pengeluaran' untuk menambahkan data baru"}
-                </p>
-              </div>
-            ) : (
-              paginatedExpenses.map((item) => (
-                <ExpenseMobileCard
-                  key={item.id}
-                  expense={item}
-                  onEdit={(expense) => {
-                    setEditingExpense(expense)
-                    setIsEditDialogOpen(true)
-                  }}
-                  onDelete={promptDeleteExpense}
-                />
-              ))
+                <RiCloseLine className="size-3" />
+                <span>Reset Filter</span>
+              </button>
             )}
           </div>
 
-          {/* Desktop View: Table */}
-          <div className="hidden overflow-hidden rounded-lg border border-border md:block">
-            <Table containerClassName="max-h-[calc(100vh-14rem)]">
-              <TableHeader>
-                <TableRow className="border-border hover:bg-muted/95">
-                  <TableHead className="w-28 pl-6 text-xs font-semibold">
-                    Tanggal
-                  </TableHead>
-                  <TableHead className="w-28 text-xs font-semibold">
-                    Armada
-                  </TableHead>
-                  <TableHead className="w-28 text-xs font-semibold">
-                    Kategori
-                  </TableHead>
-                  <TableHead className="min-w-55 text-xs font-semibold">
-                    Deskripsi & Catatan
-                  </TableHead>
-                  <TableHead className="w-28 text-xs font-semibold">
-                    Lokasi
-                  </TableHead>
-                  <TableHead className="w-32 text-right text-xs font-semibold">
-                    Biaya Pokok
-                  </TableHead>
-                  <TableHead className="w-28 text-right text-xs font-semibold">
-                    Admin Bank
-                  </TableHead>
-                  <TableHead className="w-32 text-right text-xs font-semibold">
-                    Total Beban
-                  </TableHead>
-                  <TableHead className="w-20 pr-6 text-center text-xs font-semibold">
-                    Aksi
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedExpenses.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={9}
-                      className="h-32 text-center text-sm text-muted-foreground"
-                    >
-                      <div className="flex flex-col items-center justify-center gap-1.5 py-6">
-                        <RiReceiptLine className="size-8 text-muted-foreground/40" />
-                        <p className="font-medium text-foreground">
-                          Belum ada catatan pengeluaran
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {hasActiveFilter
-                            ? "Coba sesuaikan atau reset filter di atas"
-                            : "Gunakan tombol 'Catat Pengeluaran' untuk menambahkan data baru"}
-                        </p>
+          {/* Label Filter di Tablet & Desktop */}
+          <div className="hidden shrink-0 items-center gap-1.5 px-1 text-xs font-medium text-muted-foreground sm:flex">
+            <RiFilterLine className="size-3.5 text-primary" />
+            <span>Filter:</span>
+          </div>
+
+          {/* 1. Filter Armada */}
+          <Select
+            value={currentTruckId}
+            onValueChange={(val) => val && updateQuery("truckId", val)}
+          >
+            <SelectTrigger className="h-8.5 w-full rounded-lg border-border/60 bg-background px-2.5 text-xs font-medium text-foreground shadow-2xs hover:bg-accent/50 sm:h-7.5 sm:min-w-0 sm:flex-1 2xl:w-36 2xl:flex-none">
+              <SelectValue>
+                {currentTruckId === "ALL"
+                  ? "Semua Armada"
+                  : formatPlateNumber(currentTruckId)}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent align="start" alignItemWithTrigger={false}>
+              <SelectItem value="ALL" className="text-xs font-medium">
+                Semua Armada
+              </SelectItem>
+              <SelectItem value="W8187UA" className="text-xs">
+                W 8187 UA (Triyono)
+              </SelectItem>
+              <SelectItem value="H8133OF" className="text-xs">
+                H 8133 OF (Khoirul)
+              </SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* 2. Filter Kategori */}
+          <Select
+            value={currentCategory}
+            onValueChange={(val) => val && updateQuery("category", val)}
+          >
+            <SelectTrigger className="h-8.5 w-full rounded-lg border-border/60 bg-background px-2.5 text-xs font-medium text-foreground shadow-2xs hover:bg-accent/50 sm:h-7.5 sm:min-w-0 sm:flex-1 2xl:w-36 2xl:flex-none">
+              <SelectValue>
+                {currentCategory === "ALL" ? "Semua Kategori" : currentCategory}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent align="start" alignItemWithTrigger={false}>
+              <SelectItem value="ALL" className="text-xs font-medium">
+                Semua Kategori
+              </SelectItem>
+              {EXPENSE_CATEGORIES.map((cat) => (
+                <SelectItem key={cat} value={cat} className="text-xs">
+                  {cat}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* 3. Filter Bulan */}
+          <Select
+            value={currentMonth}
+            onValueChange={(val) => val && updateQuery("month", val)}
+          >
+            <SelectTrigger className="h-8.5 w-full rounded-lg border-border/60 bg-background px-2.5 text-xs font-medium text-foreground shadow-2xs hover:bg-accent/50 sm:h-7.5 sm:min-w-0 sm:flex-1 2xl:w-32 2xl:flex-none">
+              <SelectValue>
+                {currentMonth === "ALL"
+                  ? "Semua Bulan"
+                  : MONTH_NAMES.find((m) => m.value === currentMonth)?.label ||
+                    "Bulan"}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent align="start" alignItemWithTrigger={false}>
+              <SelectItem value="ALL" className="text-xs font-medium">
+                Semua Bulan
+              </SelectItem>
+              {MONTH_NAMES.map((m) => (
+                <SelectItem key={m.value} value={m.value} className="text-xs">
+                  {m.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* 4. Filter Tahun */}
+          <Select
+            value={currentYear}
+            onValueChange={(val) => val && updateQuery("year", val)}
+          >
+            <SelectTrigger className="h-8.5 w-full rounded-lg border-border/60 bg-background px-2.5 text-xs font-medium text-foreground shadow-2xs hover:bg-accent/50 sm:h-7.5 sm:min-w-0 sm:flex-1 2xl:w-26 2xl:flex-none">
+              <SelectValue>
+                {currentYear === "ALL" ? "Semua Tahun" : currentYear}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent align="start" alignItemWithTrigger={false}>
+              <SelectItem value="ALL" className="text-xs font-medium">
+                Semua
+              </SelectItem>
+              <SelectItem value="2026" className="text-xs">
+                2026
+              </SelectItem>
+              <SelectItem value="2025" className="text-xs">
+                2025
+              </SelectItem>
+              <SelectItem value="2024" className="text-xs">
+                2024
+              </SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Tombol Reset Filter */}
+          {hasActiveFilter && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleResetFilters}
+              className="hidden h-7.5 shrink-0 px-2 text-xs text-muted-foreground hover:text-foreground sm:inline-flex"
+            >
+              <RiCloseLine className="size-3.5" />
+              <span>Reset</span>
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* 2. Mobile Cards View (< md) */}
+      <div className="block space-y-3 md:hidden">
+        {paginatedExpenses.length === 0 ? (
+          <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border/80 bg-card/60 py-12 text-center">
+            <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <RiReceiptLine className="size-5 text-primary" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-semibold text-foreground">
+                {hasActiveFilter
+                  ? "Tidak Ada Transaksi yang Cocok"
+                  : "Belum Ada Catatan Pengeluaran"}
+              </p>
+              <p className="max-w-xs text-xs text-muted-foreground">
+                {hasActiveFilter
+                  ? "Tidak ada data pengeluaran yang sesuai dengan pencarian atau filter aktif Anda."
+                  : "Daftar pengeluaran armada masih kosong. Mulai catat nota pertama Anda."}
+              </p>
+            </div>
+            {hasActiveFilter && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleResetFilters}
+                className="mt-2 h-8 text-xs"
+              >
+                Reset Filter
+              </Button>
+            )}
+          </div>
+        ) : (
+          paginatedExpenses.map((item) => (
+            <ExpenseMobileCard
+              key={item.id}
+              expense={item}
+              onViewDetail={(expense) => {
+                setSelectedDetailExpense(expense)
+                setIsDetailOpen(true)
+              }}
+              onEdit={(expense) => {
+                setEditingExpense(expense)
+                setIsEditDialogOpen(true)
+              }}
+              onDelete={promptDeleteExpense}
+            />
+          ))
+        )}
+      </div>
+
+      {/* 3. Desktop Table Container (>= md) (1:1 Standar /rates & /trips) */}
+      <div className="hidden w-full max-w-full min-w-0 overflow-hidden rounded-xl border bg-card shadow-xs md:block">
+        <Table containerClassName="max-h-[calc(100vh-14rem)]">
+          <TableHeader>
+            <TableRow className="border-border hover:bg-muted/95">
+              <TableHead className="w-12 py-3 text-center text-xs font-semibold whitespace-nowrap text-foreground">
+                No
+              </TableHead>
+              <TableHead className="min-w-32 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
+                Tanggal
+              </TableHead>
+              <TableHead className="min-w-32 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
+                Armada
+              </TableHead>
+              <TableHead className="min-w-28 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
+                Kategori
+              </TableHead>
+              <TableHead className="min-w-64 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
+                Uraian Pengeluaran & Rincian
+              </TableHead>
+              <TableHead className="min-w-40 py-3 text-left text-xs font-semibold whitespace-nowrap text-foreground">
+                Keterangan / Lokasi
+              </TableHead>
+              <TableHead className="min-w-32 py-3 text-right text-xs font-semibold whitespace-nowrap text-foreground">
+                Biaya Pokok
+              </TableHead>
+              <TableHead className="min-w-28 py-3 text-right text-xs font-semibold whitespace-nowrap text-foreground">
+                Admin Bank
+              </TableHead>
+              <TableHead className="min-w-32 py-3 text-right text-xs font-semibold whitespace-nowrap text-foreground">
+                Total Beban
+              </TableHead>
+              <TableHead className="w-24 min-w-20 py-3 text-center text-xs font-semibold whitespace-nowrap text-foreground">
+                Aksi
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedExpenses.length === 0 ? (
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={10} className="p-0">
+                  <div className="flex flex-col items-center justify-center gap-2 py-16 text-center">
+                    <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                      <RiReceiptLine className="size-6 text-primary" />
+                    </div>
+                    <div className="max-w-md space-y-1">
+                      <p className="text-base font-semibold text-foreground">
+                        {hasActiveFilter
+                          ? "Tidak Ada Catatan yang Cocok"
+                          : "Belum Ada Catatan Pengeluaran"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {hasActiveFilter
+                          ? "Tidak ada data pengeluaran yang sesuai dengan pencarian atau filter aktif Anda. Silakan ubah kata kunci atau klik tombol reset."
+                          : "Buku catatan pengeluaran armada masih kosong. Mulai tambahkan transaksi pengeluaran baru."}
+                      </p>
+                    </div>
+                    {hasActiveFilter && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleResetFilters}
+                        className="mt-3 h-8 gap-1.5 px-3 text-xs shadow-xs"
+                      >
+                        <RiCloseLine className="size-3.5" />
+                        <span>Reset Filter</span>
+                      </Button>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedExpenses.map((item, idx) => {
+                const amountNum = parseFloat(String(item.amount)) || 0
+                const adminNum = parseFloat(String(item.adminFee ?? "0")) || 0
+                const totalBeban = amountNum + adminNum
+                const rowNumber = (currentPage - 1) * pageSize + idx + 1
+                const driverInfo = getDriverAndTruck(item.truckId)
+
+                return (
+                  <TableRow
+                    key={item.id}
+                    className="text-xs transition-colors hover:bg-muted/30"
+                  >
+                    {/* 1. No */}
+                    <TableCell className="text-center font-mono whitespace-nowrap text-muted-foreground">
+                      {rowNumber}
+                    </TableCell>
+
+                    {/* 2. Tanggal */}
+                    <TableCell className="text-left font-medium whitespace-nowrap text-foreground">
+                      {formatDateIndonesian(item.expenseDate, true)}
+                    </TableCell>
+
+                    {/* 3. Armada */}
+                    <TableCell className="text-left whitespace-nowrap">
+                      <div className="flex flex-col items-start gap-0.5">
+                        <span className="font-semibold text-foreground">
+                          {driverInfo.driver}
+                        </span>
+                        <Badge
+                          variant="outline"
+                          className={
+                            item.truckId === "W8187UA"
+                              ? "border-primary/40 bg-primary/10 font-mono text-[10px] font-semibold text-primary"
+                              : "border-amber-500/40 bg-amber-500/10 font-mono text-[10px] font-semibold text-amber-600 dark:text-amber-400"
+                          }
+                        >
+                          {driverInfo.plate}
+                        </Badge>
                       </div>
                     </TableCell>
-                  </TableRow>
-                ) : (
-                  paginatedExpenses.map((item) => {
-                    const amountNum = parseFloat(String(item.amount)) || 0
-                    const adminNum =
-                      parseFloat(String(item.adminFee ?? "0")) || 0
-                    const totalBeban = amountNum + adminNum
 
-                    return (
-                      <TableRow
-                        key={item.id}
-                        className="border-border/60 transition-colors hover:bg-muted/40"
-                      >
-                        {/* Tanggal */}
-                        <TableCell className="pl-6 text-xs font-medium text-muted-foreground">
-                          {formatDateIndonesian(item.expenseDate)}
-                        </TableCell>
+                    {/* 4. Kategori */}
+                    <TableCell className="text-left whitespace-nowrap">
+                      {getCategoryBadge(item.category)}
+                    </TableCell>
 
-                        {/* Armada */}
-                        <TableCell>
-                          <Badge
-                            variant="secondary"
-                            className="text-[11px] font-medium"
+                    {/* 5. Uraian Pengeluaran & Rincian */}
+                    <TableCell className="py-2.5 text-left">
+                      <div className="flex flex-col gap-0.5">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedDetailExpense(item)
+                              setIsDetailOpen(true)
+                            }}
+                            className="cursor-pointer text-left font-semibold text-foreground transition-colors hover:text-primary"
                           >
-                            {formatPlateNumber(item.truckId)}
-                          </Badge>
-                        </TableCell>
-
-                        {/* Kategori */}
-                        <TableCell>{getCategoryBadge(item.category)}</TableCell>
-
-                        {/* Deskripsi & Catatan Perbaikan */}
-                        <TableCell className="py-2.5">
-                          <div className="flex flex-col gap-0.5">
-                            <span className="text-xs font-medium text-foreground">
-                              {item.description}
-                            </span>
-                            {item.repairNotes && (
-                              <span className="line-clamp-1 text-[11px] text-muted-foreground">
-                                📝 {item.repairNotes}
-                              </span>
-                            )}
-                          </div>
-                        </TableCell>
-
-                        {/* Lokasi */}
-                        <TableCell className="text-xs text-muted-foreground">
-                          {item.location ? (
-                            <span className="flex items-center gap-1">
-                              <RiMapPinLine className="size-3 text-muted-foreground" />
-                              {item.location}
-                            </span>
-                          ) : (
-                            <span className="text-muted-foreground/50">-</span>
+                            {item.description}
+                          </button>
+                          {item.quantity && (
+                            <Badge
+                              variant="outline"
+                              className="shrink-0 border-border/80 bg-muted/40 text-[10px] font-medium text-muted-foreground"
+                            >
+                              {item.quantity}
+                            </Badge>
                           )}
-                        </TableCell>
+                        </div>
+                        {item.repairNotes && (
+                          <span className="line-clamp-1 text-[11px] text-muted-foreground">
+                            📝 {item.repairNotes}
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
 
-                        {/* Biaya Pokok */}
-                        <TableCell className="text-right text-xs text-foreground tabular-nums">
-                          {formatCurrency(amountNum)}
-                        </TableCell>
+                    {/* 6. Keterangan / Lokasi */}
+                    <TableCell className="text-left text-muted-foreground">
+                      {item.location ? (
+                        <span className="flex items-center gap-1">
+                          <RiMapPinLine className="size-3 shrink-0 text-muted-foreground" />
+                          <span className="truncate">{item.location}</span>
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground/40">-</span>
+                      )}
+                    </TableCell>
 
-                        {/* Biaya Admin Bank */}
-                        <TableCell className="text-right text-xs text-muted-foreground tabular-nums">
-                          {adminNum > 0 ? (
-                            formatCurrency(adminNum)
-                          ) : (
-                            <span className="text-muted-foreground/40">-</span>
-                          )}
-                        </TableCell>
+                    {/* 7. Biaya Pokok */}
+                    <TableCell className="text-right font-mono whitespace-nowrap text-foreground tabular-nums">
+                      {formatCurrency(amountNum)}
+                    </TableCell>
 
-                        {/* Total Beban */}
-                        <TableCell className="text-right text-xs font-semibold text-rose-600 tabular-nums dark:text-rose-400">
-                          {formatCurrency(totalBeban)}
-                        </TableCell>
+                    {/* 8. Admin Bank */}
+                    <TableCell className="text-right font-mono whitespace-nowrap text-muted-foreground tabular-nums">
+                      {adminNum > 0 ? (
+                        formatCurrency(adminNum)
+                      ) : (
+                        <span className="text-muted-foreground/40">-</span>
+                      )}
+                    </TableCell>
 
-                        {/* Aksi */}
-                        <TableCell className="pr-6 text-center">
-                          <div className="flex items-center justify-center gap-1">
+                    {/* 9. Total Beban */}
+                    <TableCell className="text-right font-mono font-bold whitespace-nowrap text-rose-600 tabular-nums dark:text-rose-400">
+                      {formatCurrency(totalBeban)}
+                    </TableCell>
+
+                    {/* 10. Aksi (DropdownMenu Standar /rates & /trips) */}
+                    <TableCell className="text-center whitespace-nowrap">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          render={
                             <Button
-                              variant="ghost"
-                              size="icon-xs"
-                              className="text-muted-foreground hover:text-foreground"
+                              variant="outline"
+                              size="sm"
+                              className="h-7.5 gap-1.5 rounded-lg border-border/70 px-2.5 text-xs font-medium text-foreground shadow-2xs transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+                            >
+                              <span>Aksi</span>
+                              <RiArrowDownSLine className="size-3.5 text-muted-foreground" />
+                            </Button>
+                          }
+                        />
+                        <DropdownMenuContent align="end" className="w-44">
+                          <DropdownMenuGroup>
+                            <DropdownMenuLabel className="text-xs">
+                              Aksi Pengeluaran
+                            </DropdownMenuLabel>
+                          </DropdownMenuGroup>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuGroup>
+                            <DropdownMenuItem
+                              className="cursor-pointer gap-2 text-xs"
+                              onClick={() => {
+                                setSelectedDetailExpense(item)
+                                setIsDetailOpen(true)
+                              }}
+                            >
+                              <RiEyeLine className="size-3.5 text-muted-foreground" />
+                              <span>Lihat Detail</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="cursor-pointer gap-2 text-xs"
                               onClick={() => {
                                 setEditingExpense(item)
                                 setIsEditDialogOpen(true)
                               }}
-                              title="Edit Pengeluaran"
                             >
-                              <RiEditLine className="size-3.5" />
-                              <span className="sr-only">Edit</span>
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon-xs"
-                              className="text-muted-foreground hover:text-destructive"
+                              <RiEditLine className="size-3.5 text-muted-foreground" />
+                              <span>Ubah Data</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="cursor-pointer gap-2 text-xs text-destructive focus:bg-destructive/10 focus:text-destructive"
                               onClick={() => promptDeleteExpense(item)}
-                              title="Hapus Pengeluaran"
                             >
                               <RiDeleteBinLine className="size-3.5" />
-                              <span className="sr-only">Hapus</span>
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
+                              <span>Hapus Catatan</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuGroup>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                )
+              })
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
-        {/* Footer & Pagination */}
-        <CardFooter className="flex flex-col items-center justify-between gap-3 border-t border-border px-6 py-3.5 sm:flex-row">
-          <div className="text-xs text-muted-foreground">
-            Menampilkan{" "}
-            <span className="font-medium text-foreground">
-              {expenses.length === 0 ? 0 : startIndex + 1}
-            </span>{" "}
-            - <span className="font-medium text-foreground">{endIndex}</span>{" "}
-            dari{" "}
-            <span className="font-medium text-foreground">
-              {expenses.length}
-            </span>{" "}
-            catatan pengeluaran
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 gap-1 px-3 text-xs"
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage <= 1}
-            >
-              <RiArrowLeftSLine className="size-4" />
-              <span>Sebelumnya</span>
-            </Button>
-            <span className="text-xs text-muted-foreground">
-              Halaman {currentPage} dari {totalPages}
+      {/* 4. Pagination Footer (1:1 Standar /rates & /trips) */}
+      <div className="flex flex-col items-center justify-between gap-3 rounded-xl border bg-card p-3 text-xs text-muted-foreground shadow-xs sm:flex-row sm:px-4">
+        <div>
+          Menampilkan <strong>{startIndex}</strong> -{" "}
+          <strong>{endIndex}</strong> dari{" "}
+          <strong>{filteredExpenses.length}</strong> catatan pengeluaran
+          {search.trim() && (
+            <span className="ml-1 text-[11px] text-primary">
+              (dari pencarian &ldquo;{search}&rdquo;)
             </span>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-8 gap-1 px-3 text-xs"
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage >= totalPages}
-            >
-              <span>Berikutnya</span>
-              <RiArrowRightSLine className="size-4" />
-            </Button>
-          </div>
-        </CardFooter>
-      </Card>
+          )}
+        </div>
 
-      {/* Edit Form Dialog */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Pilihan Jumlah Baris per Halaman (Hanya Tampil di Tablet & Desktop) */}
+          <div className="hidden items-center gap-1.5 sm:flex">
+            <span className="text-[11px] text-muted-foreground">Baris:</span>
+            <Select
+              value={pageSize.toString()}
+              onValueChange={(val) => {
+                if (val) {
+                  setPageSize(Number(val))
+                  setCurrentPage(1)
+                }
+              }}
+            >
+              <SelectTrigger className="h-7.5 w-24 rounded-lg border-border/60 bg-background px-2 text-xs font-medium text-foreground shadow-2xs hover:bg-accent/50">
+                <SelectValue>{pageSize} Baris</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10" className="text-xs font-medium">
+                  10 Baris
+                </SelectItem>
+                <SelectItem value="25" className="text-xs font-medium">
+                  25 Baris
+                </SelectItem>
+                <SelectItem value="50" className="text-xs font-medium">
+                  50 Baris
+                </SelectItem>
+                <SelectItem value="100" className="text-xs font-medium">
+                  100 Baris
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7.5 px-2.5 text-xs"
+            disabled={currentPage <= 1}
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+          >
+            Sebelumnya
+          </Button>
+          <span className="px-1 text-xs font-medium text-foreground">
+            {currentPage} / {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7.5 px-2.5 text-xs"
+            disabled={currentPage >= totalPages}
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+          >
+            Selanjutnya
+          </Button>
+        </div>
+      </div>
+
+      {/* 5. Slide-over Sheet: Detail Catatan Pengeluaran */}
+      <ExpenseDetailSheet
+        expense={selectedDetailExpense}
+        open={isDetailOpen}
+        onOpenChange={(open) => {
+          setIsDetailOpen(open)
+          if (!open) setSelectedDetailExpense(null)
+        }}
+        onEdit={(expense) => {
+          setEditingExpense(expense)
+          setIsEditDialogOpen(true)
+        }}
+        onDelete={promptDeleteExpense}
+      />
+
+      {/* 6. Responsive Dialog: Ubah Catatan Pengeluaran */}
       <ExpenseFormDialog
         expense={editingExpense}
         open={isEditDialogOpen}
@@ -617,6 +820,6 @@ export function ExpensesTable({ expenses, initialFilter }: ExpensesTableProps) {
           if (!open) setEditingExpense(null)
         }}
       />
-    </>
+    </div>
   )
 }

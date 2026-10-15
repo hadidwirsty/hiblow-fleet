@@ -21,6 +21,7 @@ export const createExpenseSchema = z.object({
     message: "Pilih kategori pengeluaran yang valid",
   }),
   description: z.string().min(1, "Deskripsi pengeluaran wajib diisi"),
+  quantity: z.string().optional().nullable(),
   amount: z
     .string()
     .min(1, "Nominal harus diisi")

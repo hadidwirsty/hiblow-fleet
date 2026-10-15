@@ -18,6 +18,7 @@ export const expenses = pgTable("expenses", {
   expenseDate: date("expense_date").notNull(),
   category: varchar("category", { length: 50 }).notNull(), // Servis, Onderdil, GPS, DP/Cicilan, BBM, Admin Bank
   description: text("description").notNull(),
+  quantity: varchar("quantity", { length: 50 }),
   amount: numeric("amount", { precision: 14, scale: 2 }).notNull(),
   adminFee: numeric("admin_fee", { precision: 10, scale: 2 })
     .default("0.00")

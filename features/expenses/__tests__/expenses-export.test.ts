@@ -14,6 +14,7 @@ describe("expenses.export", () => {
       expenseDate: "2025-09-03",
       category: "Servis",
       description: "Ganti oli mesin Meditran & filter",
+      quantity: "1 paket",
       amount: "1850000.00",
       adminFee: "6500.00",
       location: "Tuban",
@@ -31,6 +32,7 @@ describe("expenses.export", () => {
     expect(data.headers).toContain("Armada")
     expect(data.headers).toContain("Kategori")
     expect(data.headers).toContain("Uraian / Keterangan")
+    expect(data.headers).toContain("Satuan / Jumlah")
     expect(data.headers).toContain("Nominal Beban (Rp)")
     expect(data.headers).toContain("Biaya Admin (Rp)")
     expect(data.headers).toContain("Total Biaya (Rp)")
@@ -42,11 +44,12 @@ describe("expenses.export", () => {
     expect(row[2]).toBe("W 8187 UA")
     expect(row[3]).toBe("Servis")
     expect(row[4]).toBe("Ganti oli mesin Meditran & filter")
-    expect(row[5]).toBe("Tuban")
-    expect(row[6]).toBe("Bengkel Berkah")
-    expect(row[7]).toBe(1850000)
-    expect(row[8]).toBe(6500)
-    expect(row[9]).toBe(1856500) // amount + adminFee
+    expect(row[5]).toBe("1 paket")
+    expect(row[6]).toBe("Tuban")
+    expect(row[7]).toBe("Bengkel Berkah")
+    expect(row[8]).toBe(1850000)
+    expect(row[9]).toBe(6500)
+    expect(row[10]).toBe(1856500) // amount + adminFee
   })
 
   it("should generate descriptive filenames based on active filter", () => {

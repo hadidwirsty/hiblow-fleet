@@ -14,11 +14,12 @@ import {
 import {
   formatExpensesForExport,
   getExpensesExportFilename,
-  type ExpenseExportFilter,
 } from "@/features/expenses/expenses.export"
 import { buildCsvString } from "@/lib/export/csv-builder"
 import { triggerBlobDownload, triggerTextDownload } from "@/lib/export/download"
 import { buildExcelWorkbookBlob } from "@/lib/export/excel-builder"
+
+import type { ExpenseExportFilter } from "@/features/expenses/expenses.export"
 import type { ExpenseRecord } from "@/features/expenses/expenses-table"
 
 interface ExpensesExportButtonProps {
@@ -80,7 +81,7 @@ export function ExpensesExportButton({
             className="h-8 gap-1.5 px-2.5 text-xs shadow-xs"
           >
             <RiDownloadLine className="size-3.5 text-muted-foreground" />
-            <span>Export Kas</span>
+            <span>Ekspor Pengeluaran</span>
           </Button>
         }
       />
@@ -90,14 +91,14 @@ export function ExpensesExportButton({
           className="flex cursor-pointer items-center gap-2 text-xs"
         >
           <RiFileExcelLine className="size-4 text-emerald-600 dark:text-emerald-400" />
-          <span>Download Excel (.xlsx)</span>
+          <span>Unduh Excel (.xlsx)</span>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={handleExportCsv}
           className="flex cursor-pointer items-center gap-2 text-xs"
         >
           <RiFileLine className="size-4 text-sky-600 dark:text-sky-400" />
-          <span>Download CSV (.csv)</span>
+          <span>Unduh CSV (.csv)</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

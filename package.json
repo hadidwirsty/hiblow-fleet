@@ -27,6 +27,7 @@
     "db:inject-sbi-tuban": "tsx --env-file=.env.local scripts/db/inject-sbi-tuban.ts",
     "db:inject-indocement-grobogan": "tsx --env-file=.env.local scripts/db/inject-indocement-grobogan.ts",
     "db:inject-trips": "tsx --env-file=.env.local scripts/db/inject-trips.ts",
+    "db:inject-expenses": "tsx --env-file=.env.local scripts/db/inject-expenses.ts",
     "verify:deployment": "tsx scripts/verify-deployment.ts"
   },
   "dependencies": {

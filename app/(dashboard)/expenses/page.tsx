@@ -1,17 +1,11 @@
 import type { Metadata } from "next"
-import { RiCalendarLine } from "@remixicon/react"
+import { RiReceiptLine } from "@remixicon/react"
 
 import { Badge } from "@/components/ui/badge"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import { prepareCategoryChartData } from "@/domain/expense-category"
 import { ExpenseFormDialog } from "@/features/expenses/expense-form-dialog"
 import { ExpensesCategoryChart } from "@/features/expenses/expenses-category-chart"
+import { ExpensesExportButton } from "@/features/expenses/expenses-export-button"
 import {
   getExpensesCategoryBreakdown,
   getExpensesSummary,
@@ -34,10 +28,12 @@ interface ExpensesPageProps {
 }
 
 export const metadata: Metadata = {
-  title: "Pengeluaran Truk",
+  title: "Pengeluaran Armada",
   description:
     "Buku catatan beban operasional, servis bengkel, onderdil, BBM, dan biaya perbankan armada HW Trans",
 }
+
+export const dynamic = "force-dynamic"
 
 export default async function ExpensesPage({
   searchParams,
@@ -74,60 +70,71 @@ export default async function ExpensesPage({
   const chartData = prepareCategoryChartData(breakdown, summary.totalExpenses)
 
   return (
-    <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-      {/* Page Title & Action Controls Bar */}
+    <div className="flex w-full min-w-0 flex-col gap-4 py-4 md:gap-6 md:py-6">
+      {/* Page Header (Standar 1:1 /rates & /trips) */}
       <div className="flex flex-col gap-4 px-4 sm:flex-row sm:items-center sm:justify-between lg:px-6">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
+            <div className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <RiReceiptLine className="size-4" />
+            </div>
             <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
-              Pengeluaran Truk
+              Pengeluaran Armada
             </h1>
-            <span className="hidden items-center gap-1 rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground sm:inline-flex">
-              <RiCalendarLine className="size-3" />
-              Buku Kas
-            </span>
             <Badge variant="outline" className="text-xs font-normal">
-              {expensesData.length} Transaksi
+              {summary.totalCount.toLocaleString("id-ID")} Transaksi
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground">
             Buku catatan beban operasional, servis bengkel, onderdil, BBM, dan
-            biaya perbankan armada
+            biaya perbankan armada HW Trans
           </p>
         </div>
 
-        {/* Modal Dialog Form Tambah Pengeluaran Baru */}
-        <div className="flex w-full items-center gap-2.5 sm:w-auto">
+        {/* Action Controls Group: Ekspor & Tambah Pengeluaran */}
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-2.5">
           <ExpenseFormDialog />
+          <ExpensesExportButton expenses={expensesData} filter={filter} />
         </div>
       </div>
 
-      {/* KPI Summary Cards */}
-      <ExpensesSummary summary={summary} />
+      {/* Main Content Area */}
+      <div className="w-full min-w-0 space-y-6 px-4 lg:px-6">
+        {/* KPI Metric Cards */}
+        <ExpensesSummary summary={summary} />
 
-      {/* Category Breakdown Chart */}
-      <div className="px-4 lg:px-6">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">
+        {/* Grafik Komposisi Biaya per Kategori */}
+        <div className="rounded-2xl border border-border/80 bg-card/75 p-4 shadow-xs backdrop-blur-xs sm:p-5">
+          <div className="mb-3 space-y-0.5">
+            <h2 className="text-base font-semibold tracking-tight text-foreground">
               Komposisi Biaya per Kategori
-            </CardTitle>
-            <CardDescription className="text-xs">
-              Proporsi pengeluaran berdasarkan jenis biaya operasional armada
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ExpensesCategoryChart
-              data={chartData}
-              totalExpenses={summary.totalExpenses}
-            />
-          </CardContent>
-        </Card>
-      </div>
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              Proporsi pengeluaran berdasarkan jenis beban operasional armada
+            </p>
+          </div>
+          <ExpensesCategoryChart
+            data={chartData}
+            totalExpenses={summary.totalExpenses}
+          />
+        </div>
 
-      {/* Interactive Expenses Table */}
-      <div className="px-4 lg:px-6">
-        <ExpensesTable expenses={expensesData} initialFilter={filter} />
+        {/* Expenses Data Table Section */}
+        <div className="w-full min-w-0 space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-semibold tracking-tight text-foreground">
+                Daftar Catatan Pengeluaran
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                Gunakan pencarian untuk menyaring nomor nota, uraian barang,
+                toko, atau lokasi
+              </p>
+            </div>
+          </div>
+
+          <ExpensesTable expenses={expensesData} initialFilter={filter} />
+        </div>
       </div>
     </div>
   )
