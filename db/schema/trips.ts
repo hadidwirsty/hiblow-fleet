@@ -79,6 +79,11 @@ export const trips = pgTable("trips", {
 
   // Net Profit
   profit: numeric("profit", { precision: 14, scale: 2 }).notNull(),
+
+  // Bukti Potong Pajak PPh 1% (SI Tuban, SI Rembang, SBI Tuban)
+  taxWithholdingNumber: varchar("tax_withholding_number", { length: 100 }),
+  taxWithholdingDate: date("tax_withholding_date"),
+
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
