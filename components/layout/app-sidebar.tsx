@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation"
 import {
   RiDashboardLine,
   RiHandCoinLine,
+  RiPercentLine,
   RiQuestionLine,
   RiReceiptLine,
   RiTable2,
@@ -54,6 +55,11 @@ const data = {
       title: "Bagi Hasil Pemodal",
       url: "/profit-sharing",
       icon: <RiHandCoinLine className="size-4" />,
+    },
+    {
+      title: "Perpajakan & Pembukuan",
+      url: "/taxes",
+      icon: <RiPercentLine className="size-4" />,
     },
     {
       title: "Referensi Tarif Pabrik",

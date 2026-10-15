@@ -22,6 +22,7 @@ const ROUTE_NAMES: Record<string, string> = {
   "profit-sharing": "Bagi Hasil Pemodal",
   rates: "Referensi Tarif Pabrik",
   trucks: "Pemantauan Armada",
+  taxes: "Perpajakan & Pembukuan",
 }
 
 export function SiteHeader() {

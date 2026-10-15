@@ -30,6 +30,8 @@ import {
   getTopRoutes,
   getTruckBreakdown,
 } from "@/features/dashboard/dashboard.queries"
+import { DashboardTaxWidget } from "@/features/dashboard/dashboard-tax-widget"
+import { getTaxAccountingData } from "@/features/taxes/taxes.queries"
 import { MaintenanceRemindersWidget } from "@/features/maintenance/maintenance-reminders-widget"
 import { getActiveReminders } from "@/features/maintenance/maintenance.queries"
 
@@ -60,15 +62,23 @@ export default async function DashboardPage({
     ? parseInt(resolvedParams.year, 10)
     : now.getFullYear()
 
-  const [kpis, truckBreakdown, chartData, recentTrips, topRoutes, reminders] =
-    await Promise.all([
-      getDashboardKPIs(month, year),
-      getTruckBreakdown(month, year),
-      getDailyTripChart(month, year),
-      getRecentTrips(10),
-      getTopRoutes(month, year, 10),
-      getActiveReminders(),
-    ])
+  const [
+    kpis,
+    truckBreakdown,
+    chartData,
+    recentTrips,
+    topRoutes,
+    reminders,
+    taxData,
+  ] = await Promise.all([
+    getDashboardKPIs(month, year),
+    getTruckBreakdown(month, year),
+    getDailyTripChart(month, year),
+    getRecentTrips(10),
+    getTopRoutes(month, year, 10),
+    getActiveReminders(),
+    getTaxAccountingData({ year }),
+  ])
 
   const routeChartData = prepareRouteChartData(topRoutes)
 
@@ -114,6 +124,11 @@ export default async function DashboardPage({
 
       {/* 4 Metric Cards */}
       <DashboardKpiCards kpis={kpis} truckBreakdown={truckBreakdown} />
+
+      {/* Widget Estimasi Pajak Tahunan */}
+      <div className="px-4 lg:px-6">
+        <DashboardTaxWidget calculations={taxData.calculations} year={year} />
+      </div>
 
       {/* Interactive Performance Chart */}
       <div className="px-4 lg:px-6">
