@@ -16,7 +16,7 @@
   - Unit 2: `H8133OF` (Hino 500 Tronton Hi-Blow)
   - Skala armada bersifat tetap 2 unit (tidak memerlukan fitur penambahan/penghapusan unit truk dinamis).
 - **Multi-Role & Persona Pengguna:**
-  - **Admin (Pengelola Armada - Muhammad Hafidz Wirandryo & Muhammad Hadid Wiransetyo):** Akses penuh ke seluruh modul (`/dashboard`, `/trips`, `/expenses`, `/rates`, `/profit-sharing`), formulir tambah/edit/hapus data, manajemen status fee pihak ketiga, pelacakan pengingat servis, dan wizard tutup buku periode bagi hasil.
+  - **Admin (Pengelola Armada - Muhammad Hafidz Wirandryo & Muhammad Hadid Wiransetyo):** Akses penuh ke seluruh modul (`/dashboard`, `/trips`, `/expenses`, `/rates`, `/profit-sharing`, `/taxes`), formulir tambah/edit/hapus data, manajemen status fee pihak ketiga, pelacakan pengingat servis, wizard tutup buku periode bagi hasil, dan simulasi komparasi pembukuan fiskal perpajakan.
   - **Partner (Pemodal/Investor - Hj. Alfiah Dwi Ayu Wirandari):** Tampilan personalisasi dividen pada modul `/profit-sharing` (menampilkan ringkasan modal, persentase kepemilikan, riwayat dividen yang didapat per siklus tutup buku berstatus `finalized`, dan bersifat *read-only* tanpa tombol mutasi data).
 - **Integritas Formula (Excel Ground Truth):** Logika kalkulasi matematis (omset, sangu, laba trip, dan bagi hasil) mengacu 100% pada formula historis spreadsheet acuan (`docs/references/PERHITUNGAN HIBLOW HW Trans.xlsx` dan ekstraksi CSV di `docs/csv/`) dan tidak boleh diubah secara sepihak.
 
@@ -134,6 +134,7 @@ hiblow-fleet/
 │   │   ├── sangu.ts                    # Kalkulasi sangu supir (pembulatan kelipatan Rp 1.000)
 │   │   ├── trip-profit.ts              # Kalkulasi laba bersih surat jalan & potongan khusus
 │   │   ├── profit-sharing.ts           # Kalkulasi laba tutup buku & dividen pemodal
+│   │   ├── tax-accounting.ts           # Kalkulasi 3 skema pajak komparatif & pembukuan fiskal
 │   │   └── index.ts
 │   ├── __tests__/                      # Co-located pure domain logic tests (4 files)
 │   │   ├── expense-category.test.ts    # Test transformasi breakdown pengeluaran
@@ -150,18 +151,20 @@ hiblow-fleet/
 │   │   ├── login-form.tsx
 │   │   └── login-welcome-dialog.tsx
 │   ├── dashboard/
-│   │   ├── __tests__/                  # dashboard-queries.test.ts
+│   │   ├── __tests__/                  # dashboard-queries.test.ts, dashboard-tax-widget.test.ts
 │   │   ├── dashboard-kpi-cards.tsx     # 4 KPI cards ringkasan dasbor
+│   │   ├── dashboard-tax-widget.tsx    # Widget sorotan estimasi posisi pajak tahunan & rekomendasi
 │   │   ├── dashboard-trip-chart.tsx    # Grafik area interaktif ritase harian 2 armada
 │   │   ├── dashboard-route-chart.tsx   # Grafik horizontal bar top rute
 │   │   └── dashboard.queries.ts
 │   ├── trips/
 │   │   ├── __tests__/                  # trips-queries.test.ts, trips-schema.test.ts,
 │   │   │                               # trips-export.test.ts, trips-fee-actions.test.ts,
-│   │   │                               # trip-mobile-card.test.ts, trip-form-calculations.test.ts
+│   │   │                               # trip-mobile-card.test.ts, trip-form-calculations.test.ts,
+│   │   │                               # trip-detail-sheet.test.ts, trips-withholding-actions.test.ts
 │   │   ├── trips.actions.ts, trips.queries.ts, trips.schema.ts, trips.export.ts
 │   │   ├── trips-export-button.tsx, trips-table.tsx, trips-summary.tsx
-│   │   ├── trip-form-dialog.tsx, trip-destination-combobox.tsx, trip-fee-status-dialog.tsx, trip-mobile-card.tsx
+│   │   ├── trip-form-dialog.tsx, trip-destination-combobox.tsx, trip-fee-status-dialog.tsx, trip-mobile-card.tsx, trip-detail-sheet.tsx
 │   ├── expenses/
 │   │   ├── __tests__/                  # expenses-actions.test.ts, expenses-queries.test.ts,
 │   │   │                               # expenses-schema.test.ts, expenses-export.test.ts,
@@ -179,10 +182,16 @@ hiblow-fleet/
 │   │   │                               # profit-sharing-schema.test.ts, profit-sharing-export.test.ts
 │   │   ├── profit-sharing.actions.ts, profit-sharing.queries.ts, profit-sharing.schema.ts, profit-sharing.export.ts
 │   │   ├── partner-profit-sharing-view.tsx, period-card.tsx, period-detail-sheet.tsx, period-wizard-dialog.tsx, profit-sharing-empty-state.tsx
-│   └── maintenance/
-│       ├── __tests__/                  # maintenance-actions.test.ts
-│       ├── maintenance.actions.ts, maintenance.queries.ts, maintenance.schema.ts
-│       └── maintenance-reminders-widget.tsx
+│   ├── maintenance/
+│   │   ├── __tests__/                  # maintenance-actions.test.ts
+│   │   ├── maintenance.actions.ts, maintenance.queries.ts, maintenance.schema.ts
+│   │   └── maintenance-reminders-widget.tsx
+│   └── taxes/
+│       ├── __tests__/                  # taxes-queries.test.ts, taxes-export.test.ts, taxes-page.test.ts,
+│       │                               # tax-comparison-cards.test.ts, tax-accounting-table.test.ts, tax-yoy-chart.test.ts
+│       ├── taxes.queries.ts, taxes.export.ts, taxes-view.tsx
+│       └── tax-comparison-cards.tsx, tax-withholding-card.tsx, tax-accounting-table.tsx,
+│           tax-yoy-chart.tsx, taxes-filter-bar.tsx
 ├── hooks/                              # Custom React Hooks (use-mobile.ts)
 ├── lib/                                # Shared Utilities & Server Helper
 │   ├── deployment/
@@ -303,6 +312,39 @@ Sumber acuan absolut: Workbook Excel `docs/references/PERHITUNGAN HIBLOW HW Tran
   - `due_soon`: Jatuh tempo dalam $\le 30$ hari ke depan.
   - `ok`: Masih lebih dari 30 hari ke depan.
 
+### 4.6 Modul Perpajakan & Pembukuan Usaha Transportasi (`/taxes`)
+- **Tujuan:** Pelaporan pembukuan fiskal usaha transportasi dan simulasi 3 skema komparasi pajak penghasilan resmi PT HW Trans.
+- **Formula Finansial Pembukuan:**
+  - Omset Bruto = $\sum \text{trips.omset}$
+  - Koreksi Penurunan Omset (12.5%) = $\operatorname{ROUND}(\text{Omset Bruto} \times 0.125, 2)$
+  - Omset Usaha Bersih (Neto) = $\text{Omset Bruto} - \text{Koreksi Penurunan Omset}$
+  - Beban Langsung Ritase = $\text{Sangu Supir} + \text{Insentif Supir} + \text{Fee DO Pihak Ketiga} + \text{Potongan Pabrik}$
+  - Beban Operasional Truk (OPEX) = $\sum (\text{expenses.amount} + \text{expenses.adminFee})$ *(mengecualikan kategori belanja modal 'DP/Cicilan')*
+  - Laba Usaha Riil Sebelum Pajak (EBT) = $\text{Omset Neto} - (\text{Beban Langsung} + \text{Beban OPEX})$
+- **Tiga Skema Komparasi Pajak:**
+  1. **Skema A: PPh Final UMKM 0.5% (PP 55/2022):**
+     - $\text{DPP} = \text{Omset Bruto}$
+     - $\text{Pajak Terutang} = \operatorname{ROUND}(\text{DPP} \times 0.005)$
+     - Kredit PPh 1%: Tidak berlaku. Setoran kas penuh.
+  2. **Skema B: Norma Penghitungan Penghasilan Neto (NPPN 29% + PPh 11%):**
+     - $\text{DPP Norma} = \operatorname{ROUND}(\text{Omset Bruto} \times 0.29)$
+     - $\text{Pajak Terutang Bruto} = \operatorname{ROUND}(\text{DPP Norma} \times 0.11)$
+     - $\text{Sisa Setoran Kas} = \max(0, \text{Pajak Bruto} - \text{Kredit PPh 1\%})$
+  3. **Skema C: Pembukuan Riil Usaha Transportasi (Laba Bersih + PPh 11%):**
+     - $\text{DPP Riil} = \max(0, \text{Laba Usaha Riil Sebelum Pajak})$
+     - $\text{Pajak Terutang Bruto} = \operatorname{ROUND}(\text{DPP Riil} \times 0.11)$
+     - $\text{Sisa Setoran Kas} = \max(0, \text{Pajak Bruto} - \text{Kredit PPh 1\%})$
+- **Pemanfaatan Kredit Pajak PPh 1% & Pencatatan Bukti Potong:**
+  - Akumulasi pemotongan PPh 1% langsung dari invoice pabrik semen non-Grobogan (SI Tuban, SI Rembang, SBI Tuban) sah sebagai pengurang setoran pajak pada Skema B dan Skema C.
+  - Form ritase (`trips`) mendukung pencatatan nomor (`taxWithholdingNumber`) dan tanggal (`taxWithholdingDate`) bukti potong secara kondisional (khusus rute non-Grobogan).
+  - Ekspor Excel Laporan Perpajakan mencantumkan rincian transaksi bupot per surat jalan pada Sheet 3.
+- **Rekomendasi Pintar (Smart Recommendation):**
+  - Menganalisis beban kas terendah dan menghitung penghematan kas riil bagi PT HW Trans.
+- **Widget Estimasi Pajak di Dasbor Utama (`/dashboard`):**
+  - Menampilkan sorotan posisi omset tahun berjalan, estimasi sisa setoran kas terhemat, badge rekomendasi skema, dan tautan langsung ke laporan fiskal `/taxes`.
+- **Grafik Tren Pembukuan Antar-Tahun (Year-over-Year) di `/taxes`:**
+  - Visualisasi multi-tahun (2024, 2025, 2026) menyandingkan omset bruto, beban riil, laba usaha, dan setoran kas pajak terhemat dilengkapi tabel komparatif ringkas.
+
 ---
 
 ## 5. Skema Database (Drizzle ORM)
@@ -311,7 +353,7 @@ Sumber acuan absolut: Workbook Excel `docs/references/PERHITUNGAN HIBLOW HW Tran
 |---|---|
 | `trucks` | Master armada: `id` (PK: `'W8187UA'`, `'H8133OF'`), `plate_number`, `brand_model`, `is_active`, `created_at`. |
 | `rate_references` | Master tarif rute: `id` (UUID), `origin_plant`, `client_name`, `city`, `destination`, `rate_per_ton`, `standard_tonnage`, `sangu_percentage`, `default_sangu`, `additional_tonnage_rate`, `has_special_deductions`, `is_active`. |
-| `trips` | Transaksi surat jalan ritase: `id` (UUID), `truck_id` (FK `trucks`), `order_number`, `order_date`, `unloading_date`, `destination_city`, `destination_name`, `rate_per_ton`, `unloaded_tonnage`, `omset`, `sangu`, `profit`, dll. |
+| `trips` | Transaksi surat jalan ritase: `id` (UUID), `truck_id` (FK `trucks`), `order_number`, `order_date`, `unloading_date`, `destination_city`, `destination_name`, `rate_per_ton`, `unloaded_tonnage`, `omset`, `sangu`, `profit`, `tax_withholding_number` (varchar 100), `tax_withholding_date` (date), dll. |
 | `expenses` | Pengeluaran truk: `id` (UUID), `truck_id` (FK `trucks`), `expense_date`, `category`, `description`, `amount`, `admin_fee`, `location`, `repair_notes`. |
 | `profit_sharing_periods` | Periode tutup buku: `id` (UUID), `title`, `start_date`, `end_date`, `total_income`, `total_expenses`, `gross_balance`, `manager_commission_rate`, `manager_commission_amount`, `distributable_profit`, `fleet_valuation`, `manager_profit`, `manager_take_home`, `status` (`'draft'` \| `'finalized'`). |
 | `profit_shares` | Rincian dividen pemodal per periode: `id` (UUID), `period_id` (FK `profit_sharing_periods`, on delete cascade), `partner_name`, `partner_user_id` (opsional relasi ke akun auth), `capital_share`, `share_percentage`, `payout_amount`, `notes`. |

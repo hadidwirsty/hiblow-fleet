@@ -25,6 +25,8 @@
     "db:inject-si-rembang": "tsx --env-file=.env.local scripts/db/inject-si-rembang.ts",
     "db:inject-si-tuban": "tsx --env-file=.env.local scripts/db/inject-si-tuban.ts",
     "db:inject-sbi-tuban": "tsx --env-file=.env.local scripts/db/inject-sbi-tuban.ts",
+    "db:inject-indocement-grobogan": "tsx --env-file=.env.local scripts/db/inject-indocement-grobogan.ts",
+    "db:inject-trips": "tsx --env-file=.env.local scripts/db/inject-trips.ts",
     "verify:deployment": "tsx scripts/verify-deployment.ts"
   },
   "dependencies": {
