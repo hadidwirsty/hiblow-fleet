@@ -1,7 +1,7 @@
 # Project Context: hiblow-fleet
 
 > **Authoritative Context Memory Document**  
-> Terakhir diperbarui via `/scaffold-onboard`: 2026-09-23  
+> Terakhir diperbarui: 2026-10-26  
 > Dokumen ini adalah *single source of truth* (sumber kebenaran tunggal) mengenai tech stack, arsitektur sistem, aturan domain bisnis & formula finansial, skema database, konvensi kode, serta workflow operasional proyek `hiblow-fleet`. Seluruh AI agent dan engineer wajib mematuhi standar yang terdokumentasi di sini.
 
 ---
@@ -53,7 +53,7 @@
   - **Data Table:** `@tanstack/react-table: ^9.2.4`
   - **Drag and Drop:** `@dnd-kit/core: ^6.3.1`, `@dnd-kit/sortable: ^10.0.0`, `@dnd-kit/modifiers: ^9.0.0`, `@dnd-kit/utilities: ^3.2.2`
 - **Spreadsheet / File Export:** `xlsx: ^0.18.5` + custom CSV builder & Excel builder (`lib/export/`)
-- **Testing Engine:** **Vitest 4.1.11** + `@vitest/coverage-v8: ^4.1.11` (Node environment, path alias `@/*` didukung, 100% pure domain & queries test parity — **39 file test suite, 176 passed tests**).
+- **Testing Engine:** **Vitest 4.1.11** + `@vitest/coverage-v8: ^4.1.11` (Node environment, path alias `@/*` didukung, 100% pure domain & queries test parity — **60 file test suite, 285 passed tests (100% pass)**).
 
 ---
 
@@ -76,8 +76,9 @@ hiblow-fleet/
 │   │   ├── dashboard/page.tsx          # KPI Cards, Chart ritase, Top rute, Pengingat servis
 │   │   ├── trips/page.tsx              # Daftar surat jalan & input order ritase
 │   │   ├── expenses/page.tsx           # Rekapitulasi pengeluaran & grafik kategori
-│   │   ├── rates/page.tsx              # Katalog 289 master tarif rute pabrik
-│   │   └── profit-sharing/page.tsx     # Rekap bagi hasil (Admin wizard & Partner view)
+│   │   ├── rates/page.tsx              # Katalog 296 master tarif rute pabrik
+│   │   ├── profit-sharing/page.tsx     # Rekap bagi hasil (Admin wizard & Partner view)
+│   │   └── taxes/page.tsx              # Rekonsiliasi pajak PPh 1,2% & withholding tax
 │   ├── api/
 │   │   └── auth/[...all]/route.ts      # Better Auth handler endpoint
 │   ├── globals.css                     # Tailwind v4 theme & token CSS
@@ -413,12 +414,12 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
   ```
 - **Seeding & Sinkronisasi Data (Terpusat di `scripts/db/`):**
   ```bash
-  pnpm db:seed           # Seed unit truk W8187UA/H8133OF & 289 referensi tarif (dengan originPlant & defaultSangu)
-  pnpm run db:seed-users # Seed user awal: hafidz@hiblow.fleet, hadid@hiblow.fleet, alfiah@hiblow.fleet
-  pnpm run db:import-history # Impor riwayat transaksi Excel ke database
-  pnpm run db:sync-csv   # Sinkronisasi CSV data docs/csv ke database
-  pnpm run db:clear-rates # Pengosongan master tarif
-  pnpm run db:clear-all   # Pengosongan seluruh transaksi operasional
+  pnpm db:seed               # Seed unit truk W8187UA/H8133OF & 296 referensi tarif kanonikal (db/data/rates.json)
+  pnpm run db:seed-users     # Seed user awal: hafidz@hiblow.fleet, hadid@hiblow.fleet, alfiah@hiblow.fleet
+  pnpm run db:inject-trips   # Injeksi 234 ritase operasional ke tabel trips
+  pnpm run db:inject-expenses# Injeksi 1.103 pengeluaran operasional & aset ke tabel expenses
+  pnpm run db:clear-rates    # Pengosongan master tarif
+  pnpm run db:clear-all      # Pengosongan seluruh transaksi operasional
   ```
 - **Verifikasi Kesiapan Deployment & Build:**
   ```bash
@@ -445,4 +446,14 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 ### 7.3 Kualitas & Pengujian (Testability-First)
 - Seluruh kalkulasi matematika finansial (omset, sangu, profit, bagi hasil) **wajib berupa pure functions** di dalam `domain/calculators/` yang dapat diuji secara mandiri tanpa membutuhkan koneksi database atau runtime Next.js.
 - Database access wajib berada di layer `*.queries.ts` atau `*.actions.ts`.
-- Sebelum menyelesaikan tugas besar atau mengajukan branch, seluruh 39 test suite dan `pnpm typecheck` harus berstatus **PASSED / CLEAN**.
+- Sebelum menyelesaikan tugas besar atau mengajukan branch, seluruh 60 test suite (285 passed tests) dan `pnpm typecheck` harus berstatus **PASSED / CLEAN**.
+
+---
+
+## 8. Tata Kelola Privasi Data & Berkas Referensi Lokal
+
+Untuk menjaga kerahasiaan data operasional dan efisiensi repositori Git:
+- **Data Sensitif Terisolasi:** Berkas spreadsheet master (`docs/references/*.xlsx`), berkas CSV mentah (`docs/csv/*.csv`), salinan PDF (`docs/pdf/*.pdf`), dan berkas perencanaan historis (`docs/plans/`, `docs/specs/`) **hanya disimpan secara lokal di mesin pengembang** dan dikecualikan dari pelacakan Git melalui `.gitignore`.
+- **Master Data Kanonikal:** Acuan 296 tarif rute resmi yang aman dan bebas data rahasia disimpan dalam berkas terenkapsulasi [`db/data/rates.json`](file:///Users/hadidwirsty/Project/hiblow-fleet/db/data/rates.json) untuk kebutuhan seeding lingkungan pengembangan baru.
+- **Produksi Terintegrasi Penuh:** Seluruh data historis operasional (234 surat jalan ritase dan 1.103 nota pengeluaran) dikelola langsung di cloud database Neon PostgreSQL.
+

@@ -79,3 +79,16 @@ temp/
 .chrome_temp/
 db/data/backup-*.json
 docs/**/*.html
+
+# Local Reference Documents & Spreadsheets (Untracked)
+docs/references/
+docs/csv/
+docs/pdf/
+docs/plans/
+docs/specs/
+docs/01-scope-dan-non-goals.md
+docs/02-feature-list-prioritas.md
+docs/03-pertanyaan-validasi-data.md
+docs/04-konfirmasi-rumus-tarif-dan-sangu.md
+db/data/history.json
+
