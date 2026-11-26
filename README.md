@@ -1,5 +1,6 @@
 <div align="center">
-  <img src="public/images/logo-dark-new.png" alt="HW Trans Logo" width="180">
+
+![HW Trans Logo](./docs/assets/hw-trans-logo.png)
 
   <h1 align="center">hiblow-fleet</h1>
 
@@ -9,15 +10,14 @@
     Aplikasi web terpadu untuk pencatatan ritase, pengeluaran armada, master acuan tarif pabrik, akuntansi pajak PPh 1,2%, dan transparansi bagi hasil investor Hadya Wiran Trans (HW Trans).
   </p>
 
-  <p align="center">
-    <a href="https://nextjs.org"><img src="https://img.shields.io/badge/Next.js-16.2.6-black?style=for-the-badge&logo=next.js" alt="Next.js"></a>
-    <a href="https://react.dev"><img src="https://img.shields.io/badge/React-19.2.4-blue?style=for-the-badge&logo=react" alt="React"></a>
-    <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript" alt="TypeScript"></a>
-    <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=for-the-badge&logo=tailwind-css" alt="Tailwind CSS"></a>
-    <a href="https://orm.drizzle.team"><img src="https://img.shields.io/badge/Drizzle_ORM-0.45.2-C5F74F?style=for-the-badge&logo=drizzle" alt="Drizzle ORM"></a>
-    <a href="https://neon.tech"><img src="https://img.shields.io/badge/Neon_PostgreSQL-17-00E599?style=for-the-badge&logo=postgresql" alt="Neon Database"></a>
-    <a href="https://vitest.dev"><img src="https://img.shields.io/badge/Vitest-285_Tests_Passed-6E9F18?style=for-the-badge&logo=vitest" alt="Vitest Passed"></a>
-  </p>
+[![Next.js](https://img.shields.io/badge/Next.js-16.2.6-black?style=for-the-badge&logo=nextdotjs)](https://nextjs.org)
+[![React](https://img.shields.io/badge/React-19.2.4-blue?style=for-the-badge&logo=react)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com)
+[![Drizzle ORM](https://img.shields.io/badge/Drizzle_ORM-0.45.2-C5F74F?style=for-the-badge&logo=drizzle)](https://orm.drizzle.team)
+[![Neon Database](https://img.shields.io/badge/Neon_PostgreSQL-17-00E599?style=for-the-badge&logo=postgresql)](https://neon.tech)
+[![Vitest Passed](https://img.shields.io/badge/Vitest-285_Tests_Passed-6E9F18?style=for-the-badge&logo=vitest)](https://vitest.dev)
+
 </div>
 
 ---
